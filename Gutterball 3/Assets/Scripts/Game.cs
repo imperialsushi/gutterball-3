@@ -759,7 +759,7 @@ public class Game : MonoBehaviour
             else if (playerTurn == 2)
             {
                 gameManager.chooseBallIndex = gameManager.turnBalls3;
-                playerNameText.text = gameManager.bowler[gameManager.turnBalls3].playerName;
+                playerNameText.text = gameManager.bowler[gameManager.turnNameIndex3].playerName;
             }
             else if (playerTurn == 3)
             {
