@@ -3,8 +3,12 @@
   "WorkspaceRootPath": "C:\\Users\\Asus\\Documents\\GitHub\\gutterball-3\\Gutterball 3\\",
   "Documents": [
     {
-      "AbsoluteMoniker": "D:0:0:{2DA15658-79C1-254D-7639-1FB8498A1542}|Assembly-CSharp.csproj|c:\\users\\asus\\documents\\github\\gutterball-3\\gutterball 3\\assets\\scripts\\camerafollow.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{2DA15658-79C1-254D-7639-1FB8498A1542}|Assembly-CSharp.csproj|solutionrelative:assets\\scripts\\camerafollow.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+      "AbsoluteMoniker": "D:0:0:{2DA15658-79C1-254D-7639-1FB8498A1542}|Assembly-CSharp.csproj|c:\\users\\asus\\documents\\github\\gutterball-3\\gutterball 3\\assets\\scripts\\game.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{2DA15658-79C1-254D-7639-1FB8498A1542}|Assembly-CSharp.csproj|solutionrelative:assets\\scripts\\game.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{2DA15658-79C1-254D-7639-1FB8498A1542}|Assembly-CSharp.csproj|c:\\users\\asus\\documents\\github\\gutterball-3\\gutterball 3\\assets\\scripts\\scoremasterball3.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{2DA15658-79C1-254D-7639-1FB8498A1542}|Assembly-CSharp.csproj|solutionrelative:assets\\scripts\\scoremasterball3.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     }
   ],
   "DocumentGroupContainers": [
@@ -14,19 +18,32 @@
       "DocumentGroups": [
         {
           "DockedWidth": 200,
-          "SelectedChildIndex": 0,
+          "SelectedChildIndex": 1,
           "Children": [
             {
               "$type": "Document",
-              "DocumentIndex": 0,
-              "Title": "CameraFollow.cs",
-              "DocumentMoniker": "C:\\Users\\Asus\\Documents\\GitHub\\gutterball-3\\Gutterball 3\\Assets\\Scripts\\CameraFollow.cs",
-              "RelativeDocumentMoniker": "Assets\\Scripts\\CameraFollow.cs",
-              "ToolTip": "C:\\Users\\Asus\\Documents\\GitHub\\gutterball-3\\Gutterball 3\\Assets\\Scripts\\CameraFollow.cs",
-              "RelativeToolTip": "Assets\\Scripts\\CameraFollow.cs",
-              "ViewState": "AgIAAGMAAAAAAAAAAAAmwGsAAAAJAAAAAAAAAA==",
+              "DocumentIndex": 1,
+              "Title": "ScoreMasterBall3.cs",
+              "DocumentMoniker": "C:\\Users\\Asus\\Documents\\GitHub\\gutterball-3\\Gutterball 3\\Assets\\Scripts\\ScoreMasterBall3.cs",
+              "RelativeDocumentMoniker": "Assets\\Scripts\\ScoreMasterBall3.cs",
+              "ToolTip": "C:\\Users\\Asus\\Documents\\GitHub\\gutterball-3\\Gutterball 3\\Assets\\Scripts\\ScoreMasterBall3.cs",
+              "RelativeToolTip": "Assets\\Scripts\\ScoreMasterBall3.cs",
+              "ViewState": "AgIAABgAAAAAAAAAAAAowAAAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-01-29T04:40:29.259Z",
+              "WhenOpened": "2025-01-29T19:56:17.479Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 0,
+              "Title": "Game.cs",
+              "DocumentMoniker": "C:\\Users\\Asus\\Documents\\GitHub\\gutterball-3\\Gutterball 3\\Assets\\Scripts\\Game.cs",
+              "RelativeDocumentMoniker": "Assets\\Scripts\\Game.cs",
+              "ToolTip": "C:\\Users\\Asus\\Documents\\GitHub\\gutterball-3\\Gutterball 3\\Assets\\Scripts\\Game.cs",
+              "RelativeToolTip": "Assets\\Scripts\\Game.cs",
+              "ViewState": "AgIAAKwFAAAAAAAAAAAwwLYFAAA9AAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-01-29T19:55:12.553Z",
               "EditorCaption": ""
             }
           ]
