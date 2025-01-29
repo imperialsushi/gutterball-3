@@ -30,9 +30,9 @@ public static class ScoreMasterBall3
         {
             if (frames.Count == 10) { break; }              // Prevents 11th frame score
 
-            if (rolls[i - 1] + rolls[i] + rolls[i + 1] < 10)
+            if (rolls[i - 1] + rolls[i + 1] < 10)
             {               // Normal "OPEN" frame
-                frames.Add(rolls[i - 1] + rolls[i] + rolls[i + 1]);
+                frames.Add(rolls[i - 1] + rolls[i + 1]);
             }
 
             if (rolls.Count - i <= 1) { break; }                // Ensure at least 1 look-ahead available
@@ -40,16 +40,11 @@ public static class ScoreMasterBall3
             if (rolls[i - 1] == 10)
             {
                 i--;                                        // STRIKE frame has just one bowl
-                frames.Add(20 + rolls[i + 1]);
+                frames.Add(10 + rolls[i + 1] + rolls[i + 2]);
             }
             else if (rolls[i - 1] + rolls[i] == 10)
             {       // SPARE bonus
-                i--;
-                frames.Add(20);
-            }
-            else if (rolls[i - 1] + rolls[i] + rolls[i + 1] == 10)
-            {
-                frames.Add(10);
+                frames.Add(10 + rolls[i + 1]);
             }
         }
         return frames;

@@ -113,6 +113,7 @@ public class Ball : MonoBehaviour
         if (collision.gameObject.tag == "Lane" && type == BallType.ThrowBall)
         {
             rollAudio.Play();
+            gutterAudio.Stop();
             isGutter = false;
             game.isPin = false;
             roll.enabled = true;

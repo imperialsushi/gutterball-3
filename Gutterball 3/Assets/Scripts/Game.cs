@@ -63,7 +63,6 @@ public class Game : MonoBehaviour
     public AnimationScenes animations;
     public enum Crowds { NoCrowd, CheerBig, CheerMed, CrowdOk, CrowdHohum, CrowdCrap, Laugh, Oooh, Firework }
     public Crowds crowdType;
-    public enum AllVoices { Strike, Spare, Gutterball, Double, Turkey, Split, Split710, SplitPick, Most, Few, One, Miss, EndBad, EndOk, EndGood, EndGreat, Perfect }
     public ScoreDisplay[] scoreDisplay;
     public ScoreDisplayBall3[] scoreDisplay3;
     public GameObject[] scoreCards = new GameObject[3];
@@ -206,7 +205,6 @@ public class Game : MonoBehaviour
     private GameObject[] sounds;
     private bool isIntro = true;
     private GameManager gameManager;
-    private AllVoices allVoices;
     private Commentator commentator;
     private Ball ball;
     private Pin pin1;
@@ -223,8 +221,6 @@ public class Game : MonoBehaviour
     private Coroutine b;
     private ActionReplay[] replays;
     private bool is710;
-    private bool isCommentator = true;
-    private float commentatorTime = 0;
     private int commentatorIndex = 0;
     private bool isEndGame;
     private int introAnimIndex;
@@ -236,7 +232,6 @@ public class Game : MonoBehaviour
     private int rainIndex = 0;
     private bool isAnim = false;
     private int chargeBallIndex;
-    private float openingTime;
     private bool isResetPins = false;
     private int pinCounts;
     public delegate void OnHighscoreListChanged(List<ScoreBowler> list);
@@ -578,11 +573,7 @@ public class Game : MonoBehaviour
         winBallRender4.material = gameManager.chooseBalls[gameManager.turnBalls4].ballMat;
         winBallRenderCPU.material = gameManager.chooseBalls[gameManager.compuObj[gameManager.turnBallsCPU].cpuIndex].ballMat;
         AlleyRegister();
-        if (GameManager.isOpening)
-        {
-            openingTime += Time.deltaTime;
-        }
-        if (GameManager.isOpening && openingTime >= 14 || GameManager.isOpening && !opening.isPlaying)
+        if (GameManager.isOpening && opening.time >= 14)
         {
             music.Play();
             GameManager.isOpening = false;
@@ -1159,22 +1150,19 @@ public class Game : MonoBehaviour
         {
             rainIndex = 0;
         }
-        if (commentatorAudio.isPlaying == isCommentator && commentatorIndex == 1 && allVoices < AllVoices.Perfect)
+        if (!commentatorAudio.isPlaying && commentatorIndex == 1)
         {
+            commentatorAudio.clip = Resources.Load<AudioClip>("Sound/silence_sm");
+            commentatorAudio.Play();
             commentatorIndex = 2;
         }
-        if (commentatorIndex == 2 && allVoices < AllVoices.Perfect)
-        {
-            commentatorTime += Time.unscaledDeltaTime;
-        }
-        if (commentatorTime >= 0.5f && commentatorIndex == 2)
+        if (!commentatorAudio.isPlaying && commentatorIndex == 2)
         {
             commentator.SecondVoice(commentatorAudio);
             commentatorAudio.Play();
-            commentatorTime = 0;
             commentatorIndex = 3;
         }
-        if (commentatorAudio.isPlaying == isCommentator && commentatorIndex == 3 || commentatorAudio.isPlaying == isCommentator && allVoices == AllVoices.Perfect)
+        if (!commentatorAudio.isPlaying && commentatorIndex == 3)
         {
             if (crowdType == Crowds.CheerBig)
             {
@@ -1209,8 +1197,6 @@ public class Game : MonoBehaviour
                 winCrowd.Play();
                 fireworksMulti.Play();
             }
-            isCommentator = true;
-            commentatorTime = 0;
             commentatorIndex = 0;
         }
         pinCounter.UpdateStandingCountAndSettle();
@@ -1253,7 +1239,7 @@ public class Game : MonoBehaviour
         float nextIndex;
         if (isCurrentReplay)
         {
-            nextIndex = currentReplayIndex + 1;
+            nextIndex = currentReplayIndex + 0.75f;
 
             for (int i = 0; i < replays.Length; i++)
             {
@@ -1474,7 +1460,7 @@ public class Game : MonoBehaviour
                 replays[i].SetTransform(0);
             }
             cameraFollow.Replay(replayIndex);
-            yield return new WaitForSeconds(replayTime);
+            yield return new WaitForSeconds(replayTime * 1.5f);
             replayText.SetActive(false);
             for (int i = 0; i < replays.Length; i++)
             {
@@ -3384,10 +3370,6 @@ public class Game : MonoBehaviour
                 if (pinCounts == 5 && PinCounter.pinCount > 0 && GameManager.type == GameManager.GameState.Replay || pinCounts == 6 && PinCounter.pinCount > 0 && GameManager.type == GameManager.GameState.Replay || pinCounts == 7 && PinCounter.pinCount > 0 && GameManager.type == GameManager.GameState.Replay || pinCounts == 8 && PinCounter.pinCount > 0 && GameManager.type == GameManager.GameState.Replay || pinCounts == 9 && PinCounter.pinCount > 0 && GameManager.type == GameManager.GameState.Replay)
                 {
                     VoiceMost();
-                    if (GameManager.isVoice && GameManager.type != GameManager.GameState.Menu)
-                    {
-                        isCommentator = false;
-                    }
                     crowdType = Crowds.NoCrowd;
                 }
             }
@@ -3428,11 +3410,6 @@ public class Game : MonoBehaviour
             if (pinCounts == 5 && PinCounter.pinCount > 0 && GameManager.type == GameManager.GameState.Replay || pinCounts == 6 && PinCounter.pinCount > 0 && GameManager.type == GameManager.GameState.Replay || pinCounts == 7 && PinCounter.pinCount > 0 && GameManager.type == GameManager.GameState.Replay || pinCounts == 8 && PinCounter.pinCount > 0 && GameManager.type == GameManager.GameState.Replay || pinCounts == 9 && PinCounter.pinCount > 0 && GameManager.type == GameManager.GameState.Replay || pinCounts == 10 && PinCounter.pinCount > 0 && GameManager.type == GameManager.GameState.Replay)
             {
                 VoiceMost();
-                if (GameManager.isVoice && GameManager.type != GameManager.GameState.Menu)
-                {
-                    isCommentator = false;
-                    crowdAudio.Stop();
-                }
                 if (pinCounts == 5 || pinCounts == 6)
                 {
                     if (GameManager.isVoice || crowdType > Crowds.NoCrowd)
@@ -3458,15 +3435,12 @@ public class Game : MonoBehaviour
 
     public void VoiceStrike()
     {
-        allVoices = AllVoices.Strike;
         if (GameManager.isVoice && GameManager.type != GameManager.GameState.Menu && maxBalls != 1)
         {
             commentator.Strike(commentatorAudio);
             crowdAudio.Stop();
-            commentatorTime = 0;
             commentatorIndex = 1;
             commentatorAudio.Play();
-            isCommentator = false;
         }
         if (GameManager.isVoice || crowdType > Crowds.NoCrowd)
         {
@@ -3476,15 +3450,12 @@ public class Game : MonoBehaviour
 
     public void VoiceSpare()
     {
-        allVoices = AllVoices.Spare;
         if (GameManager.isVoice && GameManager.type != GameManager.GameState.Menu && maxBalls != 1)
         {
             commentator.Spare(commentatorAudio);
             crowdAudio.Stop();
-            commentatorTime = 0;
             commentatorIndex = 1;
             commentatorAudio.Play();
-            isCommentator = false;
         }
         if (GameManager.isVoice || crowdType > Crowds.NoCrowd)
         {
@@ -3494,15 +3465,12 @@ public class Game : MonoBehaviour
 
     public void VoiceGutterball()
     {
-        allVoices = AllVoices.Gutterball;
         if (GameManager.isVoice && GameManager.type != GameManager.GameState.Menu && maxBalls != 1)
         {
             commentator.Gutterball(commentatorAudio);
             crowdAudio.Stop();
-            commentatorTime = 0;
             commentatorIndex = 1;
             commentatorAudio.Play();
-            isCommentator = false;
         }
         if (GameManager.isVoice || crowdType > Crowds.NoCrowd)
         {
@@ -3512,15 +3480,12 @@ public class Game : MonoBehaviour
 
     public void VoiceDouble()
     {
-        allVoices = AllVoices.Double;
         if (GameManager.isVoice && GameManager.type != GameManager.GameState.Menu && maxBalls != 1)
         {
             commentator.Double(commentatorAudio);
             crowdAudio.Stop();
-            commentatorTime = 0;
             commentatorIndex = 1;
             commentatorAudio.Play();
-            isCommentator = false;
         }
         if (GameManager.isVoice || crowdType > Crowds.NoCrowd)
         {
@@ -3530,15 +3495,12 @@ public class Game : MonoBehaviour
 
     public void VoiceTurkey()
     {
-        allVoices = AllVoices.Turkey;
         if (GameManager.isVoice && GameManager.type != GameManager.GameState.Menu && maxBalls != 1)
         {
             commentator.Turkey(commentatorAudio);
             crowdAudio.Stop();
-            commentatorTime = 0;
             commentatorIndex = 1;
             commentatorAudio.Play();
-            isCommentator = false;
         }
         if (GameManager.isVoice || crowdType > Crowds.NoCrowd)
         {
@@ -3548,15 +3510,12 @@ public class Game : MonoBehaviour
 
     public void VoiceSplit()
     {
-        allVoices = AllVoices.Split;
         if (GameManager.isVoice && GameManager.type != GameManager.GameState.Menu && maxBalls != 1)
         {
             commentator.Split(commentatorAudio);
             crowdAudio.Stop();
-            commentatorTime = 0;
             commentatorIndex = 1;
             commentatorAudio.Play();
-            isCommentator = false;
         }
         if (GameManager.isVoice || crowdType > Crowds.NoCrowd)
         {
@@ -3566,15 +3525,12 @@ public class Game : MonoBehaviour
 
     public void VoiceSplit710()
     {
-        allVoices = AllVoices.Split710;
         if (GameManager.isVoice && GameManager.type != GameManager.GameState.Menu && maxBalls != 1)
         {
             commentator.Split710(commentatorAudio);
             crowdAudio.Stop();
-            commentatorTime = 0;
             commentatorIndex = 1;
             commentatorAudio.Play();
-            isCommentator = false;
         }
         if (GameManager.isVoice || crowdType > Crowds.NoCrowd)
         {
@@ -3584,15 +3540,12 @@ public class Game : MonoBehaviour
 
     public void VoiceSplitPick()
     {
-        allVoices = AllVoices.SplitPick;
         if (GameManager.isVoice && GameManager.type != GameManager.GameState.Menu && maxBalls != 1)
         {
             commentator.SplitPick(commentatorAudio);
             crowdAudio.Stop();
-            commentatorTime = 0;
             commentatorIndex = 1;
             commentatorAudio.Play();
-            isCommentator = false;
         }
         if (GameManager.isVoice || crowdType > Crowds.NoCrowd)
         {
@@ -3602,11 +3555,9 @@ public class Game : MonoBehaviour
 
     public void VoiceMost()
     {
-        allVoices = AllVoices.Most;
         if (GameManager.isVoice && GameManager.type != GameManager.GameState.Menu && maxBalls != 1)
         {
             commentator.Most(commentatorAudio);
-            commentatorTime = 0;
             commentatorIndex = 1;
             commentatorAudio.Play();
         }
@@ -3614,15 +3565,12 @@ public class Game : MonoBehaviour
 
     public void VoiceFew()
     {
-        allVoices = AllVoices.Few;
         if (GameManager.isVoice && GameManager.type != GameManager.GameState.Menu && maxBalls != 1)
         {
             commentator.Few(commentatorAudio);
             crowdAudio.Stop();
-            commentatorTime = 0;
             commentatorIndex = 1;
             commentatorAudio.Play();
-            isCommentator = false;
         }
         if (GameManager.isVoice || crowdType > Crowds.NoCrowd)
         {
@@ -3632,15 +3580,12 @@ public class Game : MonoBehaviour
 
     public void VoiceOne()
     {
-        allVoices = AllVoices.One;
         if (GameManager.isVoice && GameManager.type != GameManager.GameState.Menu && maxBalls != 1)
         {
             commentator.One(commentatorAudio);
             crowdAudio.Stop();
-            commentatorTime = 0;
             commentatorIndex = 1;
             commentatorAudio.Play();
-            isCommentator = false;
         }
         if (GameManager.isVoice || crowdType > Crowds.NoCrowd)
         {
@@ -3650,15 +3595,12 @@ public class Game : MonoBehaviour
 
     public void VoiceMiss()
     {
-        allVoices = AllVoices.Miss;
         if (GameManager.isVoice && GameManager.type != GameManager.GameState.Menu && maxBalls != 1)
         {
             commentator.Miss(commentatorAudio);
             crowdAudio.Stop();
-            commentatorTime = 0;
             commentatorIndex = 1;
             commentatorAudio.Play();
-            isCommentator = false;
         }
         if (GameManager.isVoice || crowdType > Crowds.NoCrowd)
         {
@@ -3668,14 +3610,11 @@ public class Game : MonoBehaviour
 
     public void VoiceEndBad()
     {
-        allVoices = AllVoices.EndBad;
         if (GameManager.isVoice && GameManager.type != GameManager.GameState.Menu && maxBalls != 1)
         {
             commentator.EndBad(commentatorAudio);
-            commentatorTime = 0;
             commentatorIndex = 1;
             commentatorAudio.Play();
-            isCommentator = false;
         }
         if (GameManager.isVoice || crowdType > Crowds.NoCrowd)
         {
@@ -3685,14 +3624,11 @@ public class Game : MonoBehaviour
 
     public void VoiceEndOk()
     {
-        allVoices = AllVoices.EndOk;
         if (GameManager.isVoice && GameManager.type != GameManager.GameState.Menu && maxBalls != 1)
         {
             commentator.EndOk(commentatorAudio);
-            commentatorTime = 0;
             commentatorIndex = 1;
             commentatorAudio.Play();
-            isCommentator = false;
         }
         if (GameManager.isVoice || crowdType > Crowds.NoCrowd)
         {
@@ -3702,14 +3638,11 @@ public class Game : MonoBehaviour
 
     public void VoiceEndGood()
     {
-        allVoices = AllVoices.EndGood;
         if (GameManager.isVoice && GameManager.type != GameManager.GameState.Menu && maxBalls != 1)
         {
             commentator.EndGood(commentatorAudio);
-            commentatorTime = 0;
             commentatorIndex = 1;
             commentatorAudio.Play();
-            isCommentator = false;
         }
         if (GameManager.isVoice || crowdType > Crowds.NoCrowd)
         {
@@ -3719,14 +3652,11 @@ public class Game : MonoBehaviour
 
     public void VoiceEndGreat()
     {
-        allVoices = AllVoices.EndGreat;
         if (GameManager.isVoice && GameManager.type != GameManager.GameState.Menu && maxBalls != 1)
         {
             commentator.EndGreat(commentatorAudio);
-            commentatorTime = 0;
             commentatorIndex = 1;
             commentatorAudio.Play();
-            isCommentator = false;
         }
         if (GameManager.isVoice || crowdType > Crowds.NoCrowd)
         {
@@ -3736,18 +3666,16 @@ public class Game : MonoBehaviour
 
     public void PerfectGame()
     {
-        allVoices = AllVoices.Perfect;
         if (GameManager.isVoice && GameManager.type != GameManager.GameState.Menu && maxBalls != 1)
         {
             commentatorAudio.clip = Resources.Load<AudioClip>("Sound/crowd-perfect");
             commentatorAudio.Play();
-            isCommentator = false;
+            commentatorIndex = 3;
         }
         else
         {
             crowdAudio.Stop();
             commentatorAudio.Stop();
-            isCommentator = true;
         }
         if (GameManager.isVoice || crowdType > Crowds.NoCrowd)
         {
@@ -3790,9 +3718,7 @@ public class Game : MonoBehaviour
         commentator.commentators2[(int)GameManager.voices2].EndGood.voiceIndex = Random.Range(0, commentator.commentators2[(int)GameManager.voices2].EndGood.voices.Length);
         commentator.commentators2[(int)GameManager.voices2].EndGreat.voiceIndex = Random.Range(0, commentator.commentators2[(int)GameManager.voices2].EndGreat.voices.Length);
         commentatorIndex = 0;
-        commentatorTime = 0;
         commentatorAudio.Stop();
-        isCommentator = true;
     }
 
     public void CrowdStop()
@@ -3879,7 +3805,6 @@ public class Game : MonoBehaviour
             crowdAudio.Stop();
             commentatorIndex = 3;
             commentatorAudio.Play();
-            isCommentator = false;
         }
         crowdType = Crowds.Laugh;
     }
@@ -3993,12 +3918,9 @@ public class Game : MonoBehaviour
             {
                 ballObject.SetActive(false);
             }
-            cameraFollow.type = CameraFollow.CameraType.ReactCam;
+            cameraFollow.EndCam();
             GameManager.type = GameManager.GameState.EndGame;
             CrowdStop();
-            cameraFollow.transform.rotation = Quaternion.Euler(-GameObject.FindObjectOfType<PinSetter>().winRot.x, 180 - GameObject.FindObjectOfType<PinSetter>().winRot.y, 0);
-            Vector3 desiredPosition = new Vector3(-GameObject.FindObjectOfType<PinSetter>().winPos.x, GameObject.FindObjectOfType<PinSetter>().winPos.y, GameObject.FindObjectOfType<PinSetter>().winPos.z);
-            cameraFollow.transform.position = desiredPosition;
             if (maxBalls == 1)
             {
                 winGameBalls[17].SetActive(true);
@@ -5288,10 +5210,8 @@ public class Game : MonoBehaviour
             OpeningStop();
             commentator.PlayGutterball1(commentatorAudio);
             crowdAudio.Stop();
-            commentatorTime = 0;
             commentatorIndex = 0;
             commentatorAudio.Play();
-            isCommentator = true;
         }
     }
 
@@ -5307,10 +5227,8 @@ public class Game : MonoBehaviour
             OpeningStop();
             commentator.PlayGutterball1(commentatorAudio);
             crowdAudio.Stop();
-            commentatorTime = 0;
             commentatorIndex = 0;
             commentatorAudio.Play();
-            isCommentator = true;
         }
     }
 
@@ -5326,10 +5244,8 @@ public class Game : MonoBehaviour
             OpeningStop();
             commentator.PlayGutterball2(commentatorAudio);
             crowdAudio.Stop();
-            commentatorTime = 0;
             commentatorIndex = 0;
             commentatorAudio.Play();
-            isCommentator = true;
         }
     }
 
@@ -5345,10 +5261,8 @@ public class Game : MonoBehaviour
             OpeningStop();
             commentator.PlayGutterball2(commentatorAudio);
             crowdAudio.Stop();
-            commentatorTime = 0;
             commentatorIndex = 0;
             commentatorAudio.Play();
-            isCommentator = true;
         }
     }
 

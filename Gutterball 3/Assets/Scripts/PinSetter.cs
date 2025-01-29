@@ -12,7 +12,7 @@ public class PinSetter : MonoBehaviour
     public Vector3 pos;
     public Vector3 ballPos;
     public float rot;
-    public Transform[] replays;
+    public CamReplay[] replays;
     public Transform[] reacts;
     public Vector3 winPos;
     public Vector3 winRot;
