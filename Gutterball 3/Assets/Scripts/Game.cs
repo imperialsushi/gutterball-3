@@ -1460,7 +1460,7 @@ public class Game : MonoBehaviour
                 replays[i].SetTransform(0);
             }
             cameraFollow.Replay(replayIndex);
-            yield return new WaitForSeconds(replayTime * 1.5f);
+            yield return new WaitForSeconds(replayTime * 1.25f);
             replayText.SetActive(false);
             for (int i = 0; i < replays.Length; i++)
             {
