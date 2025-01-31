@@ -5781,6 +5781,11 @@ public class Game : MonoBehaviour
         }
     }
 
+    public void WebURL()
+    {
+        Application.OpenURL("www.skunkstudios.com");
+    }
+
     public void QuitGame()
     {
         Application.Quit();
