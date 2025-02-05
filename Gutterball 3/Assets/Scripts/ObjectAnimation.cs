@@ -192,7 +192,6 @@ public class ObjectAnimation : MonoBehaviour
         if (objectTarget != null)
         {
             objectTarget.position = position;
-            objectTarget.rotation = Quaternion.Euler(rotation.x, 180 + rotation.y, rotation.z);
         }
         if (camTarget != null)
         {
