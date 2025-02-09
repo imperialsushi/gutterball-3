@@ -1,6 +1,6 @@
 OSXUniversal
 PlayerPath?
-C:/Users/Asus/Documents/GitHub/Build/Gutterball 3.app
+C:/Users/Asus/Documents/GitHub/Builds/Gutterball 3.app
 SceneListBegin?
 Assets/Scenes/Splash.unity
 Assets/Scenes/Main.unity
