@@ -5781,6 +5781,11 @@ public class Game : MonoBehaviour
         }
     }
 
+    public void PlaySong()
+    {
+        Application.OpenURL("archive.org/download/Jxqryv9-068/Jxqryv9-068.mp4");
+    }
+
     public void WebURL()
     {
         Application.OpenURL("www.skunkstudios.com");

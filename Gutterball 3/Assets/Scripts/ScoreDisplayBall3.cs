@@ -53,7 +53,7 @@ public class ScoreDisplayBall3 : MonoBehaviour
         {
             int box = output.Length + 1;                            // Score box 1 to 30 
 
-            if (rolls[i] == 0 || box % 3 == 0 && rolls[i - 1] + rolls[i] + rolls[i + 1] == 10)
+            if (rolls[i] == 0 || box % 3 == 0 && rolls[i + 1] == 10)
             {                                   // Always enter 0 as -
                 output += "-";
             }
