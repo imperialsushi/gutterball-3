@@ -11,6 +11,8 @@ Perfect powerups
 
 Stunning 3D Graphics
 
+
+
 Requirements:
 
 Windows 7/8/8.1/10/11
@@ -20,6 +22,7 @@ Windows 7/8/8.1/10/11
 512MB RAM
 
 DirectX 11.0
+
 
 
 MacOS X 10.7
