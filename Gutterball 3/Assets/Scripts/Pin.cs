@@ -23,6 +23,11 @@ public class Pin : MonoBehaviour
     void Start ()
 	{
         pinStartPos = transform.position;
+        transform.position = pinStartPos;
+        transform.rotation = Quaternion.identity;
+        GetComponent<Rigidbody>().velocity = Vector3.zero;
+        GetComponent<Rigidbody>().angularVelocity = Vector3.zero;
+        GetComponent<Rigidbody>().Sleep();
         ball = GameObject.FindObjectOfType<Ball>();
         isSplash = GameObject.FindObjectOfType<PinSetter>().isSplash;
         if (GameManager.pinMode != GameManager.PinMode.Spare)
@@ -52,7 +57,7 @@ public class Pin : MonoBehaviour
         if (collision.gameObject.tag == "Ball" && !GameObject.FindObjectOfType<PinSetter>().isGravity || collision.gameObject.tag == "Pin" && !GameObject.FindObjectOfType<PinSetter>().isGravity)
         {
             GetComponent<Rigidbody>().useGravity = false;
-            GetComponent<ConstantForce>().force = new Vector3(0, -30, -300);
+            GetComponent<ConstantForce>().force = new Vector3(0, -15, -150);
         }
     }
 
@@ -61,7 +66,7 @@ public class Pin : MonoBehaviour
         if (other.CompareTag("Fall") && !GameObject.FindObjectOfType<PinSetter>().isGravity)
         {
             GetComponent<Rigidbody>().useGravity = false;
-            GetComponent<ConstantForce>().force = new Vector3(0, -30, -300);
+            GetComponent<ConstantForce>().force = new Vector3(0, -15, -150);
         }
         Vector3 splashPosition = new Vector3(transform.position.x, other.transform.position.y, transform.position.z);
         if (other.CompareTag("Fall") && isSplash || other.CompareTag("Gutter") && isSplash || other.CompareTag("Water") && isSplash)
@@ -110,7 +115,7 @@ public class Pin : MonoBehaviour
 
     public void Raise()
     {
-        if (game.isScooper && game.throwBall < game.maxBalls)
+        if (game.throwBall < game.maxBalls)
         {
             GetComponent<Rigidbody>().isKinematic = pinRaise;
         }
@@ -119,7 +124,7 @@ public class Pin : MonoBehaviour
 
     public void Stop()
     {
-        if (game.isScooper && pinRaise)
+        if (pinRaise)
         {
             transform.position = new Vector3(pinStartPos.x, transform.position.y, pinStartPos.z);
             transform.rotation = Quaternion.identity;
@@ -147,6 +152,7 @@ public class Pin : MonoBehaviour
             transform.rotation = Quaternion.identity;
             GetComponent<Rigidbody>().velocity = Vector3.zero;
             GetComponent<Rigidbody>().angularVelocity = Vector3.zero;
+            GetComponent<Rigidbody>().Sleep();
         }
         type = PinType.PinGravity;
     }
@@ -158,23 +164,14 @@ public class Pin : MonoBehaviour
         GetComponent<Rigidbody>().isKinematic = false;
         isHitOne = false;
         isSplash = GameObject.FindObjectOfType<PinSetter>().isSplash;
-        if (game.isScooper)
-        {
-            gameObject.SetActive(pinRaise);
-            if (pinRaise)
-            {
-                transform.position = pinStartPos;
-                transform.rotation = Quaternion.identity;
-                GetComponent<Rigidbody>().velocity = Vector3.zero;
-                GetComponent<Rigidbody>().angularVelocity = Vector3.zero;
-            }
-        }
-        if (!game.isScooper && game.throwBall == game.maxBalls)
+        gameObject.SetActive(pinRaise);
+        if (pinRaise)
         {
             transform.position = pinStartPos;
             transform.rotation = Quaternion.identity;
             GetComponent<Rigidbody>().velocity = Vector3.zero;
             GetComponent<Rigidbody>().angularVelocity = Vector3.zero;
+            GetComponent<Rigidbody>().Sleep();
         }
     }
 
@@ -190,6 +187,7 @@ public class Pin : MonoBehaviour
         transform.rotation = Quaternion.identity;
         GetComponent<Rigidbody>().velocity = Vector3.zero;
         GetComponent<Rigidbody>().angularVelocity = Vector3.zero;
+        GetComponent<Rigidbody>().Sleep();
         pinLight.material = GameObject.FindObjectOfType<PinSetter>().pinOn;
     }
 
@@ -206,6 +204,7 @@ public class Pin : MonoBehaviour
         transform.rotation = Quaternion.identity;
         GetComponent<Rigidbody>().velocity = Vector3.zero;
         GetComponent<Rigidbody>().angularVelocity = Vector3.zero;
+        GetComponent<Rigidbody>().Sleep();
         if (isPinFall != 0)
         {
             gameObject.SetActive(true);

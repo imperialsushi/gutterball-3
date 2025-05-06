@@ -12,7 +12,7 @@ public class VoiceText : MonoBehaviour
     // Update is called once per frame
     void Update ()
 	{
-        voice1Text.text = commentator.commentators1[(int)GameManager.voices1].commentators;
-        voice2Text.text = commentator.commentators2[(int)GameManager.voices2].commentators;
+        voice1Text.text = commentator.commentators1[(int)Game.voices1].commentators;
+        voice2Text.text = commentator.commentators2[(int)Game.voices2].commentators;
     }
 }

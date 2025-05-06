@@ -7,6 +7,7 @@ public class Splash : MonoBehaviour
 {
 	public GameObject splashScreen;
 	public GameObject activisionScreen;
+	public GameObject ronkatScreen;
 	public GameObject warningScreen;
 	public GameObject loadScreen;
 
@@ -24,15 +25,18 @@ public class Splash : MonoBehaviour
 
 	IEnumerator StartSplash()
 	{
-		yield return new WaitForSeconds(0.5f);
+		yield return new WaitForSeconds(1.5f);
         splashScreen.SetActive(true);
-        yield return new WaitForSeconds(10f);
+        yield return new WaitForSeconds(30f);
         splashScreen.SetActive(false);
         activisionScreen.SetActive(true);
-        yield return new WaitForSeconds(6f);
+        yield return new WaitForSeconds(18f);
         activisionScreen.SetActive(false);
+        ronkatScreen.SetActive(true);
+        yield return new WaitForSeconds(18f);
+        ronkatScreen.SetActive(false);
         warningScreen.SetActive(true);
-        yield return new WaitForSeconds(6f);
+        yield return new WaitForSeconds(18f);
         warningScreen.SetActive(false);
         loadScreen.SetActive(true);
 		SceneManager.LoadScene(1);

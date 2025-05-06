@@ -17,12 +17,12 @@ public class CamReplay : MonoBehaviour
         {
             GameObject.FindObjectOfType<CameraFollow>().transform.position = Vector3.Lerp(transform.position, endPoint[randomReplay].position, time);
             GameObject.FindObjectOfType<CameraFollow>().transform.rotation = Quaternion.Lerp(transform.rotation, endPoint[randomReplay].rotation, time);
-            time += Time.deltaTime * 1;
+            time += Time.deltaTime * 0.5f;
             yield return null;
         }
 
         GameObject.FindObjectOfType<CameraFollow>().transform.position = endPoint[randomReplay].position;
         GameObject.FindObjectOfType<CameraFollow>().transform.rotation = endPoint[randomReplay].rotation;
-        GameObject.FindObjectOfType<CameraFollow>().type = CameraFollow.CameraType.Replay2;
+        GameObject.FindObjectOfType<Game>().camType = Game.CameraType.Replay2;
     }
 }

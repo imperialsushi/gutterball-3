@@ -50,14 +50,13 @@ public class TVSign : MonoBehaviour
 
     public void FrontScreenUI()
     {
-        game.InfoCam();
         if (gameManager.urlInfoScreen.Count == 0)
         {
-            infoIndex = Random.Range(0, 3);
+            infoIndex = Random.Range(0, 2);
         }
         else if (gameManager.urlInfoScreen.Count > 0)
         {
-            infoIndex = Random.Range(0, 4);
+            infoIndex = Random.Range(0, 3);
         }
         if (infoIndex == 0)
         {
@@ -68,10 +67,6 @@ public class TVSign : MonoBehaviour
             frontScreen.texture = game.firstPersonCam;
         }
         else if (infoIndex == 2)
-        {
-            frontScreen.texture = game.infoScreenCam;
-        }
-        else if (infoIndex == 3)
         {
             StartCoroutine(DownloadImage(gameManager.urlInfoScreen[Random.Range(0, gameManager.urlInfoScreen.Count)], frontScreen));
         }

@@ -7,43 +7,40 @@ public class AnimationScript : MonoBehaviour
     public float time;
     public ObjectAnimation[] objects;
 
-	void Start ()
+	void Awake ()
 	{
-        if (objects.Length == 0)
-        {
-            objects = GetComponentsInChildren<ObjectAnimation>();
-        }
+        objects = GetComponentsInChildren<ObjectAnimation>();
     }
 
     public void IdleAnimation()
     {
-        for (int i = 0; i < objects.Length; i++)
+        foreach (ObjectAnimation objectAnim in objects)
         {
-            objects[i].PlayIdle();
+            objectAnim.PlayIdle();
         }
     }
 
     public void PlayAnimation()
     {
-        for (int i = 0; i < objects.Length; i++)
+        foreach (ObjectAnimation objectAnim in objects)
         {
-            objects[i].PlayObject();
+            objectAnim.PlayObject();
         }
     }
 
     public void SkipAnimation()
     {
-        for (int i = 0; i < objects.Length; i++)
+        foreach (ObjectAnimation objectAnim in objects)
         {
-            objects[i].SkipObject();
+            objectAnim.SkipObject();
         }
     }
 
     public void StopAnimation()
     {
-        for (int i = 0; i < objects.Length; i++)
+        foreach (ObjectAnimation objectAnim in objects)
         {
-            objects[i].StopObject();
+            objectAnim.StopObject();
         }
     }
 }

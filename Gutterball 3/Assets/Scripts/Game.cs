@@ -1,5 +1,6 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
@@ -21,6 +22,20 @@ public class PinSplit
 
 public class Game : MonoBehaviour
 {
+    public enum BallPowerUps { Off, Bomb, Hyper, Lightning }
+    public BallPowerUps powerUps;
+    public enum BallType { MoveX, ThrowBall, SpinBall, FallBall }
+    public BallType ballType;
+    public enum CameraType { Intro, MoveX, DropBall, FollowBall, LookBall, Replay, Replay2, Anim, ReturnBall, MoveCam, ReactCam }
+    public CameraType camType;
+    public static GameManager.Alley alleyLockType;
+    public enum Players { OnePlayer, TwoPlayer, ThreePlayer, FourPlayer, Computer }
+    public static Players allPlayers;
+    public enum GameState { Menu, Intro, Game, Replay, EndGame }
+    public static GameState type;
+    public enum Commentators { Baxter, Maria, Natasha, Jensen, Master }
+    public static Commentators voices1;
+    public static Commentators voices2;
     private List<int> rolls1 = new List<int>();
     private List<int> rolls2 = new List<int>();
     private List<int> rolls3 = new List<int>();
@@ -49,6 +64,10 @@ public class Game : MonoBehaviour
     private int frames2 = 1;
     private int frames3 = 1;
     private int frames4 = 1;
+    private int allStrikes1 = 1;
+    private int allStrikes2 = 1;
+    private int allStrikes3 = 1;
+    private int allStrikes4 = 1;
     private int turns = 0;
     private int nextTurn = 0;
     private int playerTurn = 0;
@@ -64,10 +83,8 @@ public class Game : MonoBehaviour
     public enum Crowds { NoCrowd, CheerBig, CheerMed, CrowdOk, CrowdHohum, CrowdCrap, Laugh, Oooh, Firework }
     public Crowds crowdType;
     public ScoreDisplay[] scoreDisplay;
-    public ScoreDisplayBall3[] scoreDisplay3;
-    public GameObject[] scoreCards = new GameObject[3];
+    public GameObject[] scoreCards = new GameObject[2];
     public GameObject[] playersBallTwo = new GameObject[4];
-    public GameObject[] playersBallThree = new GameObject[4];
     public GameObject[] winGameBalls = new GameObject[18];
     public Text[] winGameName1;
     public Text[] winGameName2;
@@ -82,13 +99,9 @@ public class Game : MonoBehaviour
     public Text[] winGamePrize2;
     public Text[] winGamePrize3;
     public Text[] winGamePrize4;
-    public GameObject[] normalPin;
-    public GameObject[] duckPin;
-    public GameObject[] candlePin;
     public int pinsCounter;
     public int maxBalls = 2;
     public int throwBall = 0;
-    public bool isScooper = true;
     public int gutterAnimation = 0;
     public bool isPin = false;
     public PinCounter pinCounter;
@@ -128,8 +141,6 @@ public class Game : MonoBehaviour
     public GameObject menuCam;
     public GameObject gameCam;
     public GameObject scoreCardCam;
-    public Transform infoCam;
-    public RenderTexture infoScreenCam;
     public RenderTexture firstPersonCam;
     public Animation thunderAnimation;
     public GameObject menuUI;
@@ -158,11 +169,11 @@ public class Game : MonoBehaviour
     public TextMesh playerName4;
     public GameObject playerName;
     public Text scoreTextBall2;
-    public Text scoreTextBall3;
     public Text ballsText;
     public Text stagesText;
     public Text stagesWinText;
     public GameObject chooseBallUI;
+    public GameObject powerUpUI;
     public Image selectAlleysUI;
     public GameObject[] trueObjects;
     public GameObject[] falseObjects;
@@ -200,6 +211,18 @@ public class Game : MonoBehaviour
     public AudioClip bowling6;
     public AudioClip bowling10;
     public GameObject fireworks;
+    public GameObject[] falseScoreCardsUI;
+    public GameObject gutterHintUI;
+    public Text moneyText;
+    public Text bombBallText;
+    public Text hyperBallText;
+    public Text lightningBallText;
+    public Text bombShopText;
+    public Text hyperShopText;
+    public Text lightningShopText;
+    public Button bombBallButton;
+    public Button hyperBallButton;
+    public Button lightningBallButton;
 
     private AudioSource music;
     private GameObject[] sounds;
@@ -223,9 +246,13 @@ public class Game : MonoBehaviour
     private bool is710;
     private int commentatorIndex = 0;
     private bool isEndGame;
+    private int strikeAnimIndex;
+    private int spareAnimIndex;
     private int introAnimIndex;
     private int gbAnimIndex;
     private int gbAnimIndex2X;
+    private int doubleAnimIndex;
+    private int turkeyAnimIndex;
     private int replayIndex;
     private int reactIndex;
     private float replayTime = 0;
@@ -234,6 +261,8 @@ public class Game : MonoBehaviour
     private int chargeBallIndex;
     private bool isResetPins = false;
     private int pinCounts;
+    private int hintCount;
+    private int addCash = 0;
     public delegate void OnHighscoreListChanged(List<ScoreBowler> list);
     public static event OnHighscoreListChanged onHighscoreListChanged;
 
@@ -348,53 +377,11 @@ public class Game : MonoBehaviour
                 maxBalls = 2;
                 scoreCards[1].SetActive(true);
                 playerName.SetActive(true);
-                ball.transform.localScale = new Vector3(32, 32, 32);
-                ball.rollAudio.pitch = 1f;
-                ball.pinAudio.pitch = 1f;
-                foreach (GameObject pins in normalPin)
-                {
-                    pins.SetActive(true);
-                }
-                isScooper = true;
                 break;
             case GameManager.PinMode.Spare:
                 maxBalls = 1;
                 scoreCards[0].SetActive(true);
                 playerName.SetActive(false);
-                ball.transform.localScale = new Vector3(32, 32, 32);
-                ball.rollAudio.pitch = 1f;
-                ball.pinAudio.pitch = 1f;
-                foreach (GameObject pins in normalPin)
-                {
-                    pins.SetActive(true);
-                }
-                isScooper = true;
-                break;
-            case GameManager.PinMode.Duckpin:
-                maxBalls = 3;
-                scoreCards[2].SetActive(true);
-                playerName.SetActive(true);
-                ball.transform.localScale = new Vector3(24, 24, 24);
-                ball.rollAudio.pitch = 1.1f;
-                ball.pinAudio.pitch = 1f;
-                foreach (GameObject pins in duckPin)
-                {
-                    pins.SetActive(true);
-                }
-                isScooper = true;
-                break;
-            case GameManager.PinMode.Candlepin:
-                maxBalls = 3;
-                scoreCards[2].SetActive(true);
-                playerName.SetActive(true);
-                ball.transform.localScale = new Vector3(24, 24, 24);
-                ball.rollAudio.pitch = 1.1f;
-                ball.pinAudio.pitch = 1.1f;
-                foreach (GameObject pins in candlePin)
-                {
-                    pins.SetActive(true);
-                }
-                isScooper = false;
                 break;
         }
         crowd = GameObject.FindObjectOfType<Crowd>();
@@ -432,27 +419,27 @@ public class Game : MonoBehaviour
         {
             menuAlleyUI.SetActive(true);
         }
-        unlockedAlley.GetComponent<Text>().text = gameManager.nameAlleys[(int)GameManager.alleyLockType] + " Alley";
-        unlockedBallBeat.GetComponent<Text>().text = gameManager.chooseBalls[gameManager.compuObj[gameManager.turnBallsCPU].cpuIndex].ballName + " Ball";
-        unlockedBallEarn.GetComponent<Text>().text = gameManager.chooseBalls[gameManager.unlockBallEarn].ballName + " Ball";
-        unlockedBallScore.GetComponent<Text>().text = gameManager.chooseBalls[gameManager.unlockBallScore].ballName + " Ball";
-        unlockedBallSpare.GetComponent<Text>().text = gameManager.chooseBalls[gameManager.unlockBallSpare].ballName + " Ball";
-        InfoCam();
+        unlockedAlley.GetComponent<Text>().text = gameManager.nameAlleys[(int)alleyLockType] + " Alley";
+        unlockedBallBeat.GetComponent<Text>().text = gameManager.chooseBalls[gameManager.compuObj[GameManager.turnBallsCPU].cpuIndex].ballName + " Ball";
+        unlockedBallEarn.GetComponent<Text>().text = gameManager.chooseBalls[GameManager.unlockBallEarn].ballName + " Ball";
+        unlockedBallScore.GetComponent<Text>().text = gameManager.chooseBalls[GameManager.unlockBallScore].ballName + " Ball";
+        unlockedBallSpare.GetComponent<Text>().text = gameManager.chooseBalls[GameManager.unlockBallSpare].ballName + " Ball";
         introAnimIndex = Random.Range(0, GameObject.FindObjectOfType<PinSetter>().introAnimations.Length);
         scoreCardCam.transform.position = new Vector3(GameObject.FindObjectOfType<PinSetter>().scordCardPos.x, GameObject.FindObjectOfType<PinSetter>().scordCardPos.y, GameObject.FindObjectOfType<PinSetter>().scordCardPos.z);
         scoreCardCam.transform.rotation = Quaternion.Euler(GameObject.FindObjectOfType<PinSetter>().rot * GameObject.FindObjectOfType<PinSetter>().rotScoreCard, 180, 0);
-        AlleyTheme(GameObject.FindObjectOfType<PinSetter>().alleySong);
-        if (GameManager.isOpening && GameManager.type == GameManager.GameState.Menu)
+        if (GameManager.isOpening && type == GameState.Menu)
         {
+            music.clip = Resources.Load<AudioClip>("Music/menu");
             ChargeAlleys();
             StartChargeBalls();
             opening.Play();
         }
-        if (!music.isPlaying && !GameManager.isOpening && GameManager.type == GameManager.GameState.Menu)
+        if (!music.isPlaying && !GameManager.isOpening && type == GameState.Menu)
         {
+            music.clip = Resources.Load<AudioClip>("Music/menu");
             music.Play();
         }
-        if (GameManager.type == GameManager.GameState.Menu)
+        if (type == GameState.Menu)
         {
             menuUI.SetActive(true);
             gameCam.SetActive(false);
@@ -462,13 +449,15 @@ public class Game : MonoBehaviour
         }
         else
         {
-            GameManager.type = GameManager.GameState.Intro;
+            AlleyTheme(GameObject.FindObjectOfType<PinSetter>().alleySong);
+            type = GameState.Intro;
             gameUI.SetActive(true);
             menuCam.SetActive(false);
             chooseBallUI.SetActive(false);
+            powerUpUI.SetActive(false);
             ball.Reset();
             music.Play();
-            cameraFollow.type = CameraFollow.CameraType.Anim;
+            camType = CameraType.Anim;
             if (GameManager.isVoice && GameManager.pinMode != GameManager.PinMode.Spare)
             {
                 commentator.Intro(commentatorAudio);
@@ -478,37 +467,61 @@ public class Game : MonoBehaviour
             StartCoroutine(IntroTime());
             if (GameManager.pinMode == GameManager.PinMode.Spare)
             {
+                if (GameManager.startBall <= 0)
+                {
+                    GameManager.startBall = 1;
+                }
                 playerName1.text = "3";
                 playerName2.text = "2";
                 playerName3.text = "1";
                 playerName4.text = "Go!";
             }
-            if (GameManager.allPlayers == GameManager.Players.OnePlayer && GameManager.pinMode != GameManager.PinMode.Spare)
+            if (allPlayers == Players.OnePlayer && GameManager.pinMode != GameManager.PinMode.Spare)
             {
-                playerName1.text = gameManager.bowler[gameManager.turnNameIndex1].playerName;
+                if (GameManager.startBall <= 0)
+                {
+                    GameManager.startBall = 1;
+                }
+                playerName1.text = gameManager.bowler[GameManager.turnNameIndex1].playerName;
             }
-            else if (GameManager.allPlayers == GameManager.Players.TwoPlayer && GameManager.pinMode != GameManager.PinMode.Spare)
+            else if (allPlayers == Players.TwoPlayer && GameManager.pinMode != GameManager.PinMode.Spare)
             {
-                playerName1.text = gameManager.bowler[gameManager.turnNameIndex1].playerName;
-                playerName2.text = gameManager.bowler[gameManager.turnNameIndex2].playerName;
+                if (GameManager.startBall <= 0 || GameManager.startBall <= 1)
+                {
+                    GameManager.startBall = 2;
+                }
+                playerName1.text = gameManager.bowler[GameManager.turnNameIndex1].playerName;
+                playerName2.text = gameManager.bowler[GameManager.turnNameIndex2].playerName;
             }
-            else if (GameManager.allPlayers == GameManager.Players.ThreePlayer && GameManager.pinMode != GameManager.PinMode.Spare)
+            else if (allPlayers == Players.ThreePlayer && GameManager.pinMode != GameManager.PinMode.Spare)
             {
-                playerName1.text = gameManager.bowler[gameManager.turnNameIndex1].playerName;
-                playerName2.text = gameManager.bowler[gameManager.turnNameIndex2].playerName;
-                playerName3.text = gameManager.bowler[gameManager.turnNameIndex3].playerName;
+                if (GameManager.startBall <= 0 || GameManager.startBall <= 1 || GameManager.startBall <= 2)
+                {
+                    GameManager.startBall = 3;
+                }
+                playerName1.text = gameManager.bowler[GameManager.turnNameIndex1].playerName;
+                playerName2.text = gameManager.bowler[GameManager.turnNameIndex2].playerName;
+                playerName3.text = gameManager.bowler[GameManager.turnNameIndex3].playerName;
             }
-            else if (GameManager.allPlayers == GameManager.Players.FourPlayer && GameManager.pinMode != GameManager.PinMode.Spare)
+            else if (allPlayers == Players.FourPlayer && GameManager.pinMode != GameManager.PinMode.Spare)
             {
-                playerName1.text = gameManager.bowler[gameManager.turnNameIndex1].playerName;
-                playerName2.text = gameManager.bowler[gameManager.turnNameIndex2].playerName;
-                playerName3.text = gameManager.bowler[gameManager.turnNameIndex3].playerName;
-                playerName4.text = gameManager.bowler[gameManager.turnNameIndex4].playerName;
+                if (GameManager.startBall <= 0 || GameManager.startBall <= 1 || GameManager.startBall <= 2 || GameManager.startBall <= 3)
+                {
+                    GameManager.startBall = 4;
+                }
+                playerName1.text = gameManager.bowler[GameManager.turnNameIndex1].playerName;
+                playerName2.text = gameManager.bowler[GameManager.turnNameIndex2].playerName;
+                playerName3.text = gameManager.bowler[GameManager.turnNameIndex3].playerName;
+                playerName4.text = gameManager.bowler[GameManager.turnNameIndex4].playerName;
             }
-            else if (GameManager.allPlayers == GameManager.Players.Computer && GameManager.pinMode != GameManager.PinMode.Spare)
+            else if (allPlayers == Players.Computer && GameManager.pinMode != GameManager.PinMode.Spare)
             {
-                playerName1.text = gameManager.bowler[gameManager.turnNameIndex1].playerName;
-                playerName2.text = gameManager.chooseBalls[gameManager.compuObj[gameManager.turnBallsCPU].cpuIndex].CPUName;
+                if (GameManager.startBall <= 0)
+                {
+                    GameManager.startBall = 1;
+                }
+                playerName1.text = gameManager.bowler[GameManager.turnNameIndex1].playerName;
+                playerName2.text = gameManager.chooseBalls[gameManager.compuObj[GameManager.turnBallsCPU].cpuIndex].CPUName;
             }
         }
     }
@@ -516,6 +529,38 @@ public class Game : MonoBehaviour
     // Update is called once per frame
     void Update ()
 	{
+        PlayerPrefs.SetInt("SaveMoney", GameManager.moneys);
+        PlayerPrefs.SetInt("SaveBomb", GameManager.bombBalls);
+        PlayerPrefs.SetInt("SaveHyper", GameManager.hyperBalls);
+        PlayerPrefs.SetInt("SaveLightning", GameManager.lightningBalls);
+        moneyText.text = "$" + GameManager.moneys;
+        bombBallText.text = bombShopText.text = GameManager.bombBalls + "x";
+        hyperBallText.text = hyperShopText.text = GameManager.hyperBalls + "x";
+        lightningBallText.text = lightningShopText.text = GameManager.lightningBalls + "x";
+        if (GameManager.bombBalls <= 0)
+        {
+            bombBallButton.interactable = false;
+        }
+        else
+        {
+            bombBallButton.interactable = true;
+        }
+        if (GameManager.hyperBalls <= 0)
+        {
+            hyperBallButton.interactable = false;
+        }
+        else
+        {
+            hyperBallButton.interactable = true;
+        }
+        if (GameManager.lightningBalls <= 0)
+        {
+            lightningBallButton.interactable = false;
+        }
+        else
+        {
+            lightningBallButton.interactable = true;
+        }
         if (gameManager.bowler.Count == 0)
         {
             bowlerButton[0].interactable = false;
@@ -567,11 +612,11 @@ public class Game : MonoBehaviour
         }
         stagesText.text = "stage: " + stage;
         stagesWinText.text = "stages cleared: " + stage;
-        winBallRender1.material = gameManager.chooseBalls[gameManager.turnBalls1].ballMat;
-        winBallRender2.material = gameManager.chooseBalls[gameManager.turnBalls2].ballMat;
-        winBallRender3.material = gameManager.chooseBalls[gameManager.turnBalls3].ballMat;
-        winBallRender4.material = gameManager.chooseBalls[gameManager.turnBalls4].ballMat;
-        winBallRenderCPU.material = gameManager.chooseBalls[gameManager.compuObj[gameManager.turnBallsCPU].cpuIndex].ballMat;
+        winBallRender1.material = gameManager.chooseBalls[GameManager.turnBalls1].ballMat;
+        winBallRender2.material = gameManager.chooseBalls[GameManager.turnBalls2].ballMat;
+        winBallRender3.material = gameManager.chooseBalls[GameManager.turnBalls3].ballMat;
+        winBallRender4.material = gameManager.chooseBalls[GameManager.turnBalls4].ballMat;
+        winBallRenderCPU.material = gameManager.chooseBalls[gameManager.compuObj[GameManager.turnBallsCPU].cpuIndex].ballMat;
         AlleyRegister();
         if (GameManager.isOpening && opening.time >= 14)
         {
@@ -582,11 +627,11 @@ public class Game : MonoBehaviour
         music.mute = !GameManager.isMusic;
         foreach (GameObject sound in sounds)
         {
-            if (GameManager.type != GameManager.GameState.Menu)
+            if (type != GameState.Menu)
             {
                 sound.GetComponent<AudioSource>().mute = !GameManager.isSound;
             }
-            else if (GameManager.type == GameManager.GameState.Menu)
+            else if (type == GameState.Menu)
             {
                 sound.GetComponent<AudioSource>().mute = true;
             }
@@ -595,57 +640,57 @@ public class Game : MonoBehaviour
         {
             foreach (Text winName1 in winGameName1)
             {
-                winName1.text = gameManager.bowler[gameManager.turnNameIndex1].playerName;
+                winName1.text = gameManager.bowler[GameManager.turnNameIndex1].playerName;
             }
         }
         else if (gameManager.bowler.Count == 2)
         {
             foreach (Text winName1 in winGameName1)
             {
-                winName1.text = gameManager.bowler[gameManager.turnNameIndex1].playerName;
+                winName1.text = gameManager.bowler[GameManager.turnNameIndex1].playerName;
             }
             foreach (Text winName2 in winGameName2)
             {
-                winName2.text = gameManager.bowler[gameManager.turnNameIndex2].playerName;
+                winName2.text = gameManager.bowler[GameManager.turnNameIndex2].playerName;
             }
         }
         else if (gameManager.bowler.Count == 3)
         {
             foreach (Text winName1 in winGameName1)
             {
-                winName1.text = gameManager.bowler[gameManager.turnNameIndex1].playerName;
+                winName1.text = gameManager.bowler[GameManager.turnNameIndex1].playerName;
             }
             foreach (Text winName2 in winGameName2)
             {
-                winName2.text = gameManager.bowler[gameManager.turnNameIndex2].playerName;
+                winName2.text = gameManager.bowler[GameManager.turnNameIndex2].playerName;
             }
             foreach (Text winName3 in winGameName3)
             {
-                winName3.text = gameManager.bowler[gameManager.turnNameIndex3].playerName;
+                winName3.text = gameManager.bowler[GameManager.turnNameIndex3].playerName;
             }
         }
         else if (gameManager.bowler.Count >= 4)
         {
             foreach (Text winName1 in winGameName1)
             {
-                winName1.text = gameManager.bowler[gameManager.turnNameIndex1].playerName;
+                winName1.text = gameManager.bowler[GameManager.turnNameIndex1].playerName;
             }
             foreach (Text winName2 in winGameName2)
             {
-                winName2.text = gameManager.bowler[gameManager.turnNameIndex2].playerName;
+                winName2.text = gameManager.bowler[GameManager.turnNameIndex2].playerName;
             }
             foreach (Text winName3 in winGameName3)
             {
-                winName3.text = gameManager.bowler[gameManager.turnNameIndex3].playerName;
+                winName3.text = gameManager.bowler[GameManager.turnNameIndex3].playerName;
             }
             foreach (Text winName4 in winGameName4)
             {
-                winName4.text = gameManager.bowler[gameManager.turnNameIndex4].playerName;
+                winName4.text = gameManager.bowler[GameManager.turnNameIndex4].playerName;
             }
         }
         foreach (Text winNameCPU in winGameNameCPU)
         {
-            winNameCPU.text = gameManager.chooseBalls[gameManager.compuObj[gameManager.turnBallsCPU].cpuIndex].CPUName;
+            winNameCPU.text = gameManager.chooseBalls[gameManager.compuObj[GameManager.turnBallsCPU].cpuIndex].CPUName;
         }
         foreach (Text winScore1 in winGameScore1)
         {
@@ -663,22 +708,23 @@ public class Game : MonoBehaviour
         {
             winScore4.text = "score: " + score4;
         }
-        qualityText.text = QualitySettings.names[gameManager.qualityIndex];
-        resolutionText.text = GameManager.resolutions[gameManager.resolutionIndex].width + " x " + GameManager.resolutions[gameManager.resolutionIndex].height;
+        qualityText.text = QualitySettings.names[GameManager.qualityIndex];
+        resolutionText.text = GameManager.resolutions[GameManager.resolutionIndex].width + " x " + GameManager.resolutions[GameManager.resolutionIndex].height;
         alleyText.text = gameManager.nameAlleys[PlayerPrefs.GetInt("ChooseAlleys")];
         selectAlleysUI.sprite = gameManager.spriteAlleys[PlayerPrefs.GetInt("ChooseAlleys")];
-        if (Input.GetMouseButtonDown(0) && GameManager.type == GameManager.GameState.Intro && isIntro)
+        if (Input.GetMouseButtonDown(0) && type == GameState.Intro && isIntro)
         {
             StopCoroutine(IntroTime());
             if (isIntro)
             {
                 chooseBallUI.SetActive(true);
+                powerUpUI.SetActive(true);
                 for (int i = 0; i < GameObject.FindObjectOfType<PinSetter>().introAnimations.Length; i++)
                 {
                     GameObject.FindObjectOfType<PinSetter>().introAnimations[i].SkipAnimation();
                 }
-                GameManager.type = GameManager.GameState.Game;
-                cameraFollow.type = CameraFollow.CameraType.MoveX;
+                type = GameState.Game;
+                camType = CameraType.MoveX;
                 ball.ResetCam();
                 isIntro = false;
             }
@@ -718,53 +764,49 @@ public class Game : MonoBehaviour
         if (turns == 0)
         {
             scoreTextBall2.text = "score:" + score1;
-            scoreTextBall3.text = "score:" + score1;
         }
         else if (turns == 1)
         {
             scoreTextBall2.text = "score:" + score2;
-            scoreTextBall3.text = "score:" + score2;
         }
         else if (turns == 2)
         {
             scoreTextBall2.text = "score:" + score3;
-            scoreTextBall3.text = "score:" + score3;
         }
         else if (turns == 3)
         {
             scoreTextBall2.text = "score:" + score4;
-            scoreTextBall3.text = "score:" + score4;
         }
-        if (GameManager.type != GameManager.GameState.Menu)
+        if (type != GameState.Menu)
         {
             if (playerTurn == 0)
             {
-                gameManager.chooseBallIndex = gameManager.turnBalls1;
-                playerNameText.text = gameManager.bowler[gameManager.turnNameIndex1].playerName;
+                GameManager.chooseBallIndex = GameManager.turnBalls1;
+                playerNameText.text = gameManager.bowler[GameManager.turnNameIndex1].playerName;
             }
             else if (playerTurn == 1)
             {
-                gameManager.chooseBallIndex = gameManager.turnBalls2;
-                playerNameText.text = gameManager.bowler[gameManager.turnNameIndex2].playerName;
+                GameManager.chooseBallIndex = GameManager.turnBalls2;
+                playerNameText.text = gameManager.bowler[GameManager.turnNameIndex2].playerName;
             }
             else if (playerTurn == 2)
             {
-                gameManager.chooseBallIndex = gameManager.turnBalls3;
-                playerNameText.text = gameManager.bowler[gameManager.turnNameIndex3].playerName;
+                GameManager.chooseBallIndex = GameManager.turnBalls3;
+                playerNameText.text = gameManager.bowler[GameManager.turnNameIndex3].playerName;
             }
             else if (playerTurn == 3)
             {
-                gameManager.chooseBallIndex = gameManager.turnBalls4;
-                playerNameText.text = gameManager.bowler[gameManager.turnNameIndex4].playerName;
+                GameManager.chooseBallIndex = GameManager.turnBalls4;
+                playerNameText.text = gameManager.bowler[GameManager.turnNameIndex4].playerName;
             }
             else if (playerTurn == 4)
             {
-                gameManager.chooseBallIndex = gameManager.compuObj[gameManager.turnBallsCPU].cpuIndex;
-                playerNameText.text = gameManager.chooseBalls[gameManager.compuObj[gameManager.turnBallsCPU].cpuIndex].CPUName;
+                GameManager.chooseBallIndex = gameManager.compuObj[GameManager.turnBallsCPU].cpuIndex;
+                playerNameText.text = gameManager.chooseBalls[gameManager.compuObj[GameManager.turnBallsCPU].cpuIndex].CPUName;
             }
-            if (gameManager.chooseBallIndex < gameManager.chooseBalls.Length)
+            if (GameManager.chooseBallIndex < gameManager.chooseBalls.Length)
             {
-                ball.ChargeBall(gameManager.chooseBalls[gameManager.chooseBallIndex].ballMat, gameManager.chooseBalls[gameManager.chooseBallIndex].lbs, gameManager.chooseBalls[gameManager.chooseBallIndex].speed, gameManager.chooseBalls[gameManager.chooseBallIndex].spin);
+                ball.ChargeBall(gameManager.chooseBalls[GameManager.chooseBallIndex].ballMat, gameManager.chooseBalls[GameManager.chooseBallIndex].lbs, gameManager.chooseBalls[GameManager.chooseBallIndex].speed, gameManager.chooseBalls[GameManager.chooseBallIndex].spin);
             }
         }
         for (int i = 0; i < regCount; i++)
@@ -781,14 +823,14 @@ public class Game : MonoBehaviour
                 }
                 if (gameManager.bowler.Count >= 1)
                 {
-                    bowlerText.text = gameManager.bowler[gameManager.turnNameIndex1].playerName;
+                    bowlerText.text = gameManager.bowler[GameManager.turnNameIndex1].playerName;
                 }
-                if (gameManager.chooseBalls[gameManager.turnBalls1].isLock != 1)
+                if (gameManager.chooseBalls[GameManager.turnBalls1].isLock != 1)
                 {
                     ballLocked.SetActive(false);
                     ballNeed.SetActive(false);
                     ballUnlock.SetActive(false);
-                    if (gameManager.chooseBalls[gameManager.turnBalls1].lockType != ChooseBall.LockType.None && gameManager.chooseBalls[gameManager.turnBalls1].lockType != ChooseBall.LockType.Custom)
+                    if (gameManager.chooseBalls[GameManager.turnBalls1].lockType != ChooseBall.LockType.None && gameManager.chooseBalls[GameManager.turnBalls1].lockType != ChooseBall.LockType.Custom)
                     {
                         ballUnlocked.SetActive(true);
                     }
@@ -796,7 +838,7 @@ public class Game : MonoBehaviour
                     {
                         ballUnlocked.SetActive(false);
                     }
-                    if (gameManager.chooseBalls[gameManager.turnBalls1].lockType != ChooseBall.LockType.Custom)
+                    if (gameManager.chooseBalls[GameManager.turnBalls1].lockType != ChooseBall.LockType.Custom)
                     {
                         customBallButton.SetActive(false);
                     }
@@ -804,7 +846,7 @@ public class Game : MonoBehaviour
                     {
                         customBallButton.SetActive(true);
                     }
-                    ballRender.material = gameManager.chooseBalls[gameManager.turnBalls1].ballMat;
+                    ballRender.material = gameManager.chooseBalls[GameManager.turnBalls1].ballMat;
                     SetAlwaysBowl(true);
                 }
                 else
@@ -817,30 +859,30 @@ public class Game : MonoBehaviour
                     ballRender.material = gameManager.lockBallMat;
                     SetAlwaysBowl(false);
                 }
-                if (gameManager.chooseBalls[gameManager.turnBalls1].lockType == ChooseBall.LockType.Score)
+                if (gameManager.chooseBalls[GameManager.turnBalls1].lockType == ChooseBall.LockType.Score)
                 {
-                    ballUnlock.GetComponent<Text>().text = "Get a score of " + gameManager.chooseBalls[gameManager.turnBalls1].totalLock;
+                    ballUnlock.GetComponent<Text>().text = "Score " + gameManager.chooseBalls[GameManager.turnBalls1].totalLock + " to unlock";
                 }
-                else if (gameManager.chooseBalls[gameManager.turnBalls1].lockType == ChooseBall.LockType.Spare)
+                else if (gameManager.chooseBalls[GameManager.turnBalls1].lockType == ChooseBall.LockType.Spare)
                 {
-                    ballUnlock.GetComponent<Text>().text = "Get a spare of " + gameManager.chooseBalls[gameManager.turnBalls1].totalLock;
+                    ballUnlock.GetComponent<Text>().text = "Spare " + gameManager.chooseBalls[GameManager.turnBalls1].totalLock + " to unlock";
                 }
-                else if (gameManager.chooseBalls[gameManager.turnBalls1].lockType == ChooseBall.LockType.Beat)
+                else if (gameManager.chooseBalls[GameManager.turnBalls1].lockType == ChooseBall.LockType.Beat)
                 {
-                    ballUnlock.GetComponent<Text>().text = "Beat " + gameManager.chooseBalls[gameManager.turnBalls1].CPUName;
+                    ballUnlock.GetComponent<Text>().text = "Beat " + gameManager.chooseBalls[GameManager.turnBalls1].CPUName + " to use";
                 }
-                else if (gameManager.chooseBalls[gameManager.turnBalls1].lockType == ChooseBall.LockType.Earn)
+                else if (gameManager.chooseBalls[GameManager.turnBalls1].lockType == ChooseBall.LockType.Earn)
                 {
-                    ballUnlock.GetComponent<Text>().text = "Get $" + gameManager.chooseBalls[gameManager.turnBalls1].totalLock * 0.001f + ",000 Earnings";
+                    ballUnlock.GetComponent<Text>().text = "Earn $" + gameManager.chooseBalls[GameManager.turnBalls1].totalLock * 0.001f + ",000 to unlock";
                 }
-                if (gameManager.turnBalls1 >= 5 && GameManager.unlockRegister == 1)
+                if (GameManager.turnBalls1 >= 5 && GameManager.unlockRegister == 1)
                 {
                     ballRender.material = gameManager.lockBallMat;
                 }
-                ballNameText.text = gameManager.chooseBalls[gameManager.turnBalls1].ballName;
-                ballNameMenuText.text = gameManager.chooseBalls[gameManager.turnBalls1].ballName;
-                ballDataText.text = gameManager.chooseBalls[gameManager.turnBalls1].lbs + "lbs.  speed:" + gameManager.chooseBalls[gameManager.turnBalls1].speed + "  spin:" + gameManager.chooseBalls[gameManager.turnBalls1].spin;
-                ballDataMenuText.text = gameManager.chooseBalls[gameManager.turnBalls1].lbs + "lbs.  speed:" + gameManager.chooseBalls[gameManager.turnBalls1].speed + "  spin:" + gameManager.chooseBalls[gameManager.turnBalls1].spin;
+                ballNameText.text = gameManager.chooseBalls[GameManager.turnBalls1].ballName;
+                ballNameMenuText.text = gameManager.chooseBalls[GameManager.turnBalls1].ballName;
+                ballDataText.text = gameManager.chooseBalls[GameManager.turnBalls1].lbs + "lbs.  speed:" + gameManager.chooseBalls[GameManager.turnBalls1].speed + "  spin:" + gameManager.chooseBalls[GameManager.turnBalls1].spin;
+                ballDataMenuText.text = gameManager.chooseBalls[GameManager.turnBalls1].lbs + "lbs.  speed:" + gameManager.chooseBalls[GameManager.turnBalls1].speed + "  spin:" + gameManager.chooseBalls[GameManager.turnBalls1].spin;
             }
             else if (playerTurn == 1)
             {
@@ -854,14 +896,14 @@ public class Game : MonoBehaviour
                 }
                 if (gameManager.bowler.Count >= 2)
                 {
-                    bowlerText.text = gameManager.bowler[gameManager.turnNameIndex2].playerName;
+                    bowlerText.text = gameManager.bowler[GameManager.turnNameIndex2].playerName;
                 }
-                if (gameManager.chooseBalls[gameManager.turnBalls2].isLock != 1)
+                if (gameManager.chooseBalls[GameManager.turnBalls2].isLock != 1)
                 {
                     ballLocked.SetActive(false);
                     ballNeed.SetActive(false);
                     ballUnlock.SetActive(false);
-                    if (gameManager.chooseBalls[gameManager.turnBalls2].lockType != ChooseBall.LockType.None && gameManager.chooseBalls[gameManager.turnBalls2].lockType != ChooseBall.LockType.Custom)
+                    if (gameManager.chooseBalls[GameManager.turnBalls2].lockType != ChooseBall.LockType.None && gameManager.chooseBalls[GameManager.turnBalls2].lockType != ChooseBall.LockType.Custom)
                     {
                         ballUnlocked.SetActive(true);
                     }
@@ -869,7 +911,7 @@ public class Game : MonoBehaviour
                     {
                         ballUnlocked.SetActive(false);
                     }
-                    if (gameManager.chooseBalls[gameManager.turnBalls2].lockType != ChooseBall.LockType.Custom)
+                    if (gameManager.chooseBalls[GameManager.turnBalls2].lockType != ChooseBall.LockType.Custom)
                     {
                         customBallButton.SetActive(false);
                     }
@@ -877,7 +919,7 @@ public class Game : MonoBehaviour
                     {
                         customBallButton.SetActive(true);
                     }
-                    ballRender.material = gameManager.chooseBalls[gameManager.turnBalls2].ballMat;
+                    ballRender.material = gameManager.chooseBalls[GameManager.turnBalls2].ballMat;
                     SetAlwaysBowl(true);
                 }
                 else
@@ -890,30 +932,30 @@ public class Game : MonoBehaviour
                     ballRender.material = gameManager.lockBallMat;
                     SetAlwaysBowl(false);
                 }
-                if (gameManager.chooseBalls[gameManager.turnBalls2].lockType == ChooseBall.LockType.Score)
+                if (gameManager.chooseBalls[GameManager.turnBalls2].lockType == ChooseBall.LockType.Score)
                 {
-                    ballUnlock.GetComponent<Text>().text = "Get a score of " + gameManager.chooseBalls[gameManager.turnBalls2].totalLock;
+                    ballUnlock.GetComponent<Text>().text = "Score " + gameManager.chooseBalls[GameManager.turnBalls2].totalLock + " to unlock";
                 }
-                else if (gameManager.chooseBalls[gameManager.turnBalls2].lockType == ChooseBall.LockType.Spare)
+                else if (gameManager.chooseBalls[GameManager.turnBalls2].lockType == ChooseBall.LockType.Spare)
                 {
-                    ballUnlock.GetComponent<Text>().text = "Get a spare of " + gameManager.chooseBalls[gameManager.turnBalls2].totalLock;
+                    ballUnlock.GetComponent<Text>().text = "Spare " + gameManager.chooseBalls[GameManager.turnBalls2].totalLock + " to unlock";
                 }
-                else if (gameManager.chooseBalls[gameManager.turnBalls2].lockType == ChooseBall.LockType.Beat)
+                else if (gameManager.chooseBalls[GameManager.turnBalls2].lockType == ChooseBall.LockType.Beat)
                 {
-                    ballUnlock.GetComponent<Text>().text = "Beat " + gameManager.chooseBalls[gameManager.turnBalls2].CPUName;
+                    ballUnlock.GetComponent<Text>().text = "Beat " + gameManager.chooseBalls[GameManager.turnBalls2].CPUName + " to use";
                 }
-                else if (gameManager.chooseBalls[gameManager.turnBalls2].lockType == ChooseBall.LockType.Earn)
+                else if (gameManager.chooseBalls[GameManager.turnBalls2].lockType == ChooseBall.LockType.Earn)
                 {
-                    ballUnlock.GetComponent<Text>().text = "Get $" + gameManager.chooseBalls[gameManager.turnBalls2].totalLock * 0.001f + ",000 Earnings";
+                    ballUnlock.GetComponent<Text>().text = "Earn $" + gameManager.chooseBalls[GameManager.turnBalls2].totalLock * 0.001f + ",000 to unlock";
                 }
-                if (gameManager.turnBalls2 >= 5 && GameManager.unlockRegister == 1)
+                if (GameManager.turnBalls2 >= 5 && GameManager.unlockRegister == 1)
                 {
                     ballRender.material = gameManager.lockBallMat;
                 }
-                ballNameText.text = gameManager.chooseBalls[gameManager.turnBalls2].ballName;
-                ballNameMenuText.text = gameManager.chooseBalls[gameManager.turnBalls2].ballName;
-                ballDataText.text = gameManager.chooseBalls[gameManager.turnBalls2].lbs + "lbs.  speed:" + gameManager.chooseBalls[gameManager.turnBalls2].speed + "  spin:" + gameManager.chooseBalls[gameManager.turnBalls2].spin;
-                ballDataMenuText.text = gameManager.chooseBalls[gameManager.turnBalls2].lbs + "lbs.  speed:" + gameManager.chooseBalls[gameManager.turnBalls2].speed + "  spin:" + gameManager.chooseBalls[gameManager.turnBalls2].spin;
+                ballNameText.text = gameManager.chooseBalls[GameManager.turnBalls2].ballName;
+                ballNameMenuText.text = gameManager.chooseBalls[GameManager.turnBalls2].ballName;
+                ballDataText.text = gameManager.chooseBalls[GameManager.turnBalls2].lbs + "lbs.  speed:" + gameManager.chooseBalls[GameManager.turnBalls2].speed + "  spin:" + gameManager.chooseBalls[GameManager.turnBalls2].spin;
+                ballDataMenuText.text = gameManager.chooseBalls[GameManager.turnBalls2].lbs + "lbs.  speed:" + gameManager.chooseBalls[GameManager.turnBalls2].speed + "  spin:" + gameManager.chooseBalls[GameManager.turnBalls2].spin;
             }
             else if (playerTurn == 2)
             {
@@ -927,14 +969,14 @@ public class Game : MonoBehaviour
                 }
                 if (gameManager.bowler.Count >= 3)
                 {
-                    bowlerText.text = gameManager.bowler[gameManager.turnNameIndex3].playerName;
+                    bowlerText.text = gameManager.bowler[GameManager.turnNameIndex3].playerName;
                 }
-                if (gameManager.chooseBalls[gameManager.turnBalls3].isLock != 1)
+                if (gameManager.chooseBalls[GameManager.turnBalls3].isLock != 1)
                 {
                     ballLocked.SetActive(false);
                     ballNeed.SetActive(false);
                     ballUnlock.SetActive(false);
-                    if (gameManager.chooseBalls[gameManager.turnBalls3].lockType != ChooseBall.LockType.None && gameManager.chooseBalls[gameManager.turnBalls3].lockType != ChooseBall.LockType.Custom)
+                    if (gameManager.chooseBalls[GameManager.turnBalls3].lockType != ChooseBall.LockType.None && gameManager.chooseBalls[GameManager.turnBalls3].lockType != ChooseBall.LockType.Custom)
                     {
                         ballUnlocked.SetActive(true);
                     }
@@ -942,7 +984,7 @@ public class Game : MonoBehaviour
                     {
                         ballUnlocked.SetActive(false);
                     }
-                    if (gameManager.chooseBalls[gameManager.turnBalls3].lockType != ChooseBall.LockType.Custom)
+                    if (gameManager.chooseBalls[GameManager.turnBalls3].lockType != ChooseBall.LockType.Custom)
                     {
                         customBallButton.SetActive(false);
                     }
@@ -950,7 +992,7 @@ public class Game : MonoBehaviour
                     {
                         customBallButton.SetActive(true);
                     }
-                    ballRender.material = gameManager.chooseBalls[gameManager.turnBalls3].ballMat;
+                    ballRender.material = gameManager.chooseBalls[GameManager.turnBalls3].ballMat;
                     SetAlwaysBowl(true);
                 }
                 else
@@ -963,30 +1005,30 @@ public class Game : MonoBehaviour
                     ballRender.material = gameManager.lockBallMat;
                     SetAlwaysBowl(false);
                 }
-                if (gameManager.chooseBalls[gameManager.turnBalls3].lockType == ChooseBall.LockType.Score)
+                if (gameManager.chooseBalls[GameManager.turnBalls3].lockType == ChooseBall.LockType.Score)
                 {
-                    ballUnlock.GetComponent<Text>().text = "Get a score of " + gameManager.chooseBalls[gameManager.turnBalls3].totalLock;
+                    ballUnlock.GetComponent<Text>().text = "Score " + gameManager.chooseBalls[GameManager.turnBalls3].totalLock + " to unlock";
                 }
-                else if (gameManager.chooseBalls[gameManager.turnBalls3].lockType == ChooseBall.LockType.Spare)
+                else if (gameManager.chooseBalls[GameManager.turnBalls3].lockType == ChooseBall.LockType.Spare)
                 {
-                    ballUnlock.GetComponent<Text>().text = "Get a spare of " + gameManager.chooseBalls[gameManager.turnBalls3].totalLock;
+                    ballUnlock.GetComponent<Text>().text = "Spare " + gameManager.chooseBalls[GameManager.turnBalls3].totalLock + " to unlock";
                 }
-                else if (gameManager.chooseBalls[gameManager.turnBalls3].lockType == ChooseBall.LockType.Beat)
+                else if (gameManager.chooseBalls[GameManager.turnBalls3].lockType == ChooseBall.LockType.Beat)
                 {
-                    ballUnlock.GetComponent<Text>().text = "Beat " + gameManager.chooseBalls[gameManager.turnBalls3].CPUName;
+                    ballUnlock.GetComponent<Text>().text = "Beat " + gameManager.chooseBalls[GameManager.turnBalls3].CPUName + " to use";
                 }
-                else if (gameManager.chooseBalls[gameManager.turnBalls3].lockType == ChooseBall.LockType.Earn)
+                else if (gameManager.chooseBalls[GameManager.turnBalls3].lockType == ChooseBall.LockType.Earn)
                 {
-                    ballUnlock.GetComponent<Text>().text = "Get $" + gameManager.chooseBalls[gameManager.turnBalls3].totalLock * 0.001f + ",000 Earnings";
+                    ballUnlock.GetComponent<Text>().text = "Earn $" + gameManager.chooseBalls[GameManager.turnBalls3].totalLock * 0.001f + ",000 to unlock";
                 }
-                if (gameManager.turnBalls3 >= 5 && GameManager.unlockRegister == 1)
+                if (GameManager.turnBalls3 >= 5 && GameManager.unlockRegister == 1)
                 {
                     ballRender.material = gameManager.lockBallMat;
                 }
-                ballNameText.text = gameManager.chooseBalls[gameManager.turnBalls3].ballName;
-                ballNameMenuText.text = gameManager.chooseBalls[gameManager.turnBalls3].ballName;
-                ballDataText.text = gameManager.chooseBalls[gameManager.turnBalls3].lbs + "lbs.  speed:" + gameManager.chooseBalls[gameManager.turnBalls3].speed + "  spin:" + gameManager.chooseBalls[gameManager.turnBalls3].spin;
-                ballDataMenuText.text = gameManager.chooseBalls[gameManager.turnBalls3].lbs + "lbs.  speed:" + gameManager.chooseBalls[gameManager.turnBalls3].speed + "  spin:" + gameManager.chooseBalls[gameManager.turnBalls3].spin;
+                ballNameText.text = gameManager.chooseBalls[GameManager.turnBalls3].ballName;
+                ballNameMenuText.text = gameManager.chooseBalls[GameManager.turnBalls3].ballName;
+                ballDataText.text = gameManager.chooseBalls[GameManager.turnBalls3].lbs + "lbs.  speed:" + gameManager.chooseBalls[GameManager.turnBalls3].speed + "  spin:" + gameManager.chooseBalls[GameManager.turnBalls3].spin;
+                ballDataMenuText.text = gameManager.chooseBalls[GameManager.turnBalls3].lbs + "lbs.  speed:" + gameManager.chooseBalls[GameManager.turnBalls3].speed + "  spin:" + gameManager.chooseBalls[GameManager.turnBalls3].spin;
             }
             else if (playerTurn == 3)
             {
@@ -1000,14 +1042,14 @@ public class Game : MonoBehaviour
                 }
                 if (gameManager.bowler.Count >= 4)
                 {
-                    bowlerText.text = gameManager.bowler[gameManager.turnNameIndex4].playerName;
+                    bowlerText.text = gameManager.bowler[GameManager.turnNameIndex4].playerName;
                 }
-                if (gameManager.chooseBalls[gameManager.turnBalls4].isLock != 1)
+                if (gameManager.chooseBalls[GameManager.turnBalls4].isLock != 1)
                 {
                     ballLocked.SetActive(false);
                     ballNeed.SetActive(false);
                     ballUnlock.SetActive(false);
-                    if (gameManager.chooseBalls[gameManager.turnBalls4].lockType != ChooseBall.LockType.None && gameManager.chooseBalls[gameManager.turnBalls4].lockType != ChooseBall.LockType.Custom)
+                    if (gameManager.chooseBalls[GameManager.turnBalls4].lockType != ChooseBall.LockType.None && gameManager.chooseBalls[GameManager.turnBalls4].lockType != ChooseBall.LockType.Custom)
                     {
                         ballUnlocked.SetActive(true);
                     }
@@ -1015,7 +1057,7 @@ public class Game : MonoBehaviour
                     {
                         ballUnlocked.SetActive(false);
                     }
-                    if (gameManager.chooseBalls[gameManager.turnBalls4].lockType != ChooseBall.LockType.Custom)
+                    if (gameManager.chooseBalls[GameManager.turnBalls4].lockType != ChooseBall.LockType.Custom)
                     {
                         customBallButton.SetActive(false);
                     }
@@ -1023,7 +1065,7 @@ public class Game : MonoBehaviour
                     {
                         customBallButton.SetActive(true);
                     }
-                    ballRender.material = gameManager.chooseBalls[gameManager.turnBalls4].ballMat;
+                    ballRender.material = gameManager.chooseBalls[GameManager.turnBalls4].ballMat;
                     SetAlwaysBowl(true);
                 }
                 else
@@ -1036,43 +1078,43 @@ public class Game : MonoBehaviour
                     ballRender.material = gameManager.lockBallMat;
                     SetAlwaysBowl(false);
                 }
-                if (gameManager.chooseBalls[gameManager.turnBalls4].lockType == ChooseBall.LockType.Score)
+                if (gameManager.chooseBalls[GameManager.turnBalls4].lockType == ChooseBall.LockType.Score)
                 {
-                    ballUnlock.GetComponent<Text>().text = "Get a score of " + gameManager.chooseBalls[gameManager.turnBalls4].totalLock;
+                    ballUnlock.GetComponent<Text>().text = "Score " + gameManager.chooseBalls[GameManager.turnBalls4].totalLock + " to unlock";
                 }
-                else if (gameManager.chooseBalls[gameManager.turnBalls4].lockType == ChooseBall.LockType.Spare)
+                else if (gameManager.chooseBalls[GameManager.turnBalls4].lockType == ChooseBall.LockType.Spare)
                 {
-                    ballUnlock.GetComponent<Text>().text = "Get a spare of " + gameManager.chooseBalls[gameManager.turnBalls4].totalLock;
+                    ballUnlock.GetComponent<Text>().text = "Spare " + gameManager.chooseBalls[GameManager.turnBalls4].totalLock + " to unlock";
                 }
-                else if (gameManager.chooseBalls[gameManager.turnBalls4].lockType == ChooseBall.LockType.Beat)
+                else if (gameManager.chooseBalls[GameManager.turnBalls4].lockType == ChooseBall.LockType.Beat)
                 {
-                    ballUnlock.GetComponent<Text>().text = "Beat " + gameManager.chooseBalls[gameManager.turnBalls4].CPUName;
+                    ballUnlock.GetComponent<Text>().text = "Beat " + gameManager.chooseBalls[GameManager.turnBalls4].CPUName + " to use";
                 }
-                else if (gameManager.chooseBalls[gameManager.turnBalls4].lockType == ChooseBall.LockType.Earn)
+                else if (gameManager.chooseBalls[GameManager.turnBalls4].lockType == ChooseBall.LockType.Earn)
                 {
-                    ballUnlock.GetComponent<Text>().text = "Get $" + gameManager.chooseBalls[gameManager.turnBalls4].totalLock * 0.001f + ",000 Earnings";
+                    ballUnlock.GetComponent<Text>().text = "Earn $" + gameManager.chooseBalls[GameManager.turnBalls4].totalLock * 0.001f + ",000 to unlock";
                 }
-                if (gameManager.turnBalls4 >= 5 && GameManager.unlockRegister == 1)
+                if (GameManager.turnBalls4 >= 5 && GameManager.unlockRegister == 1)
                 {
                     ballRender.material = gameManager.lockBallMat;
                 }
-                ballNameText.text = gameManager.chooseBalls[gameManager.turnBalls4].ballName;
-                ballNameMenuText.text = gameManager.chooseBalls[gameManager.turnBalls4].ballName;
-                ballDataText.text = gameManager.chooseBalls[gameManager.turnBalls4].lbs + "lbs.  speed:" + gameManager.chooseBalls[gameManager.turnBalls4].speed + "  spin:" + gameManager.chooseBalls[gameManager.turnBalls4].spin;
-                ballDataMenuText.text = gameManager.chooseBalls[gameManager.turnBalls4].lbs + "lbs.  speed:" + gameManager.chooseBalls[gameManager.turnBalls4].speed + "  spin:" + gameManager.chooseBalls[gameManager.turnBalls4].spin;
+                ballNameText.text = gameManager.chooseBalls[GameManager.turnBalls4].ballName;
+                ballNameMenuText.text = gameManager.chooseBalls[GameManager.turnBalls4].ballName;
+                ballDataText.text = gameManager.chooseBalls[GameManager.turnBalls4].lbs + "lbs.  speed:" + gameManager.chooseBalls[GameManager.turnBalls4].speed + "  spin:" + gameManager.chooseBalls[GameManager.turnBalls4].spin;
+                ballDataMenuText.text = gameManager.chooseBalls[GameManager.turnBalls4].lbs + "lbs.  speed:" + gameManager.chooseBalls[GameManager.turnBalls4].speed + "  spin:" + gameManager.chooseBalls[GameManager.turnBalls4].spin;
             }
             else if (playerTurn == 4)
             {
                 arrowBowler.SetActive(false);
-                bowlerText.text = gameManager.chooseBalls[gameManager.compuObj[gameManager.turnBallsCPU].cpuIndex].CPUName;
+                bowlerText.text = gameManager.chooseBalls[gameManager.compuObj[GameManager.turnBallsCPU].cpuIndex].CPUName;
                 ballLocked.SetActive(false);
                 ballNeed.SetActive(false);
                 ballUnlock.SetActive(false);
                 ballUnlocked.SetActive(false);
-                if (GameManager.unlockRegister == 0 || gameManager.turnBallsCPU < 2 && GameManager.unlockRegister == 1)
+                if (GameManager.unlockRegister == 0 || GameManager.turnBallsCPU < 2 && GameManager.unlockRegister == 1)
                 {
-                    ballRender.material = gameManager.chooseBalls[gameManager.compuObj[gameManager.turnBallsCPU].cpuIndex].ballMat;
-                    if (gameManager.chooseBalls[gameManager.compuObj[gameManager.turnBallsCPU].cpuIndex].lockType != ChooseBall.LockType.Custom)
+                    ballRender.material = gameManager.chooseBalls[gameManager.compuObj[GameManager.turnBallsCPU].cpuIndex].ballMat;
+                    if (gameManager.chooseBalls[gameManager.compuObj[GameManager.turnBallsCPU].cpuIndex].lockType != ChooseBall.LockType.Custom)
                     {
                         customBallButton.SetActive(false);
                     }
@@ -1081,24 +1123,24 @@ public class Game : MonoBehaviour
                         customBallButton.SetActive(true);
                     }
                 }
-                if (gameManager.turnBallsCPU >= 2 && GameManager.unlockRegister == 1)
+                if (GameManager.turnBallsCPU >= 2 && GameManager.unlockRegister == 1)
                 {
                     customBallButton.SetActive(false);
                     ballRender.material = gameManager.lockBallMat;
                 }
                 SetAlwaysBowl(true);
-                ballNameText.text = gameManager.chooseBalls[gameManager.compuObj[gameManager.turnBallsCPU].cpuIndex].ballName;
-                ballNameMenuText.text = gameManager.chooseBalls[gameManager.compuObj[gameManager.turnBallsCPU].cpuIndex].ballName;
-                ballDataText.text = gameManager.chooseBalls[gameManager.compuObj[gameManager.turnBallsCPU].cpuIndex].lbs + "lbs.  speed:" + gameManager.chooseBalls[gameManager.compuObj[gameManager.turnBallsCPU].cpuIndex].speed + "  spin:" + gameManager.chooseBalls[gameManager.compuObj[gameManager.turnBallsCPU].cpuIndex].spin;
-                ballDataMenuText.text = gameManager.chooseBalls[gameManager.compuObj[gameManager.turnBallsCPU].cpuIndex].lbs + "lbs.  speed:" + gameManager.chooseBalls[gameManager.compuObj[gameManager.turnBallsCPU].cpuIndex].speed + "  spin:" + gameManager.chooseBalls[gameManager.compuObj[gameManager.turnBallsCPU].cpuIndex].spin;
+                ballNameText.text = gameManager.chooseBalls[gameManager.compuObj[GameManager.turnBallsCPU].cpuIndex].ballName;
+                ballNameMenuText.text = gameManager.chooseBalls[gameManager.compuObj[GameManager.turnBallsCPU].cpuIndex].ballName;
+                ballDataText.text = gameManager.chooseBalls[gameManager.compuObj[GameManager.turnBallsCPU].cpuIndex].lbs + "lbs.  speed:" + gameManager.chooseBalls[gameManager.compuObj[GameManager.turnBallsCPU].cpuIndex].speed + "  spin:" + gameManager.chooseBalls[gameManager.compuObj[GameManager.turnBallsCPU].cpuIndex].spin;
+                ballDataMenuText.text = gameManager.chooseBalls[gameManager.compuObj[GameManager.turnBallsCPU].cpuIndex].lbs + "lbs.  speed:" + gameManager.chooseBalls[gameManager.compuObj[GameManager.turnBallsCPU].cpuIndex].speed + "  spin:" + gameManager.chooseBalls[gameManager.compuObj[GameManager.turnBallsCPU].cpuIndex].spin;
             }
-            if (GameManager.unlockRegister == 0 || gameManager.turnBalls1 < 5 && GameManager.unlockRegister == 1 && playerTurn == 0 || gameManager.turnBalls2 < 5 && GameManager.unlockRegister == 1 && playerTurn == 1 || gameManager.turnBalls3 < 5 && GameManager.unlockRegister == 1 && playerTurn == 2 || gameManager.turnBalls4 < 5 && GameManager.unlockRegister == 1 && playerTurn == 3 || gameManager.turnBallsCPU < 2 && GameManager.unlockRegister == 1 && playerTurn == 4)
+            if (GameManager.unlockRegister == 0 || GameManager.turnBalls1 < 5 && GameManager.unlockRegister == 1 && playerTurn == 0 || GameManager.turnBalls2 < 5 && GameManager.unlockRegister == 1 && playerTurn == 1 || GameManager.turnBalls3 < 5 && GameManager.unlockRegister == 1 && playerTurn == 2 || GameManager.turnBalls4 < 5 && GameManager.unlockRegister == 1 && playerTurn == 3 || GameManager.turnBallsCPU < 2 && GameManager.unlockRegister == 1 && playerTurn == 4)
             {
                 ballRegistered.SetActive(false);
                 ballsRegisterButton[i].SetActive(false);
                 SetAlwaysBowlReg(true);
             }
-            else if (gameManager.turnBalls1 >= 5 && GameManager.unlockRegister == 1 && playerTurn == 0 || gameManager.turnBalls2 >= 5 && GameManager.unlockRegister == 1 && playerTurn == 1 || gameManager.turnBalls3 >= 5 && GameManager.unlockRegister == 1 && playerTurn == 2 || gameManager.turnBalls4 >= 5 && GameManager.unlockRegister == 1 && playerTurn == 3 || gameManager.turnBallsCPU >= 2 && GameManager.unlockRegister == 1 && playerTurn == 4)
+            else if (GameManager.turnBalls1 >= 5 && GameManager.unlockRegister == 1 && playerTurn == 0 || GameManager.turnBalls2 >= 5 && GameManager.unlockRegister == 1 && playerTurn == 1 || GameManager.turnBalls3 >= 5 && GameManager.unlockRegister == 1 && playerTurn == 2 || GameManager.turnBalls4 >= 5 && GameManager.unlockRegister == 1 && playerTurn == 3 || GameManager.turnBallsCPU >= 2 && GameManager.unlockRegister == 1 && playerTurn == 4)
             {
                 customBallButton.SetActive(false);
                 ballLocked.SetActive(false);
@@ -1200,28 +1242,7 @@ public class Game : MonoBehaviour
             commentatorIndex = 0;
         }
         pinCounter.UpdateStandingCountAndSettle();
-        if (throwBall < maxBalls)
-        {
-            if (pin1.IsStanding() == false || pin2.IsStanding() == false || pin3.IsStanding() == false || pin4.IsStanding() == false || pin5.IsStanding() == false || pin6.IsStanding() == false || pin7.IsStanding() == false || pin8.IsStanding() == false || pin9.IsStanding() == false || pin10.GetComponent<Pin>().IsStanding() == false)
-            {
-                isSplit = false;
-                is710 = false;
-            }
-        }
-        for (int i = 0; i < pinSplits.Length; i++)
-        {
-            if (pin1.IsStanding() == pinSplits[i].isPin1 && pin2.IsStanding() == pinSplits[i].isPin2 && pin3.IsStanding() == pinSplits[i].isPin3 && pin4.IsStanding() == pinSplits[i].isPin4 && pin5.IsStanding() == pinSplits[i].isPin5 && pin6.IsStanding() == pinSplits[i].isPin6 && pin7.IsStanding() == pinSplits[i].isPin7 && pin8.IsStanding() == pinSplits[i].isPin8 && pin9.IsStanding() == pinSplits[i].isPin9 && pin10.IsStanding() == pinSplits[i].isPin10 && throwBall < maxBalls)
-            {
-                isSplit = true;
-                is710 = false;
-            }
-        }
-        if (pin1.IsStanding() == false && pin2.IsStanding() == false && pin3.IsStanding() == false && pin4.IsStanding() == false && pin5.IsStanding() == false && pin6.IsStanding() == false && pin7.IsStanding() == true && pin8.IsStanding() == false && pin9.IsStanding() == false && pin10.IsStanding() == true && throwBall < maxBalls)
-        {
-            isSplit = true;
-            is710 = true;
-        }
-        if (replayTime < 5 && isReplayRecord)
+        if (replayTime < 10 && isReplayRecord)
         {
             replayTime += Time.deltaTime;
         }
@@ -1239,7 +1260,7 @@ public class Game : MonoBehaviour
         float nextIndex;
         if (isCurrentReplay)
         {
-            nextIndex = currentReplayIndex + 0.75f;
+            nextIndex = currentReplayIndex + 0.5f;
 
             for (int i = 0; i < replays.Length; i++)
             {
@@ -1270,12 +1291,13 @@ public class Game : MonoBehaviour
         if (isIntro)
         {
             chooseBallUI.SetActive(true);
+            powerUpUI.SetActive(true);
             for (int i = 0; i < GameObject.FindObjectOfType<PinSetter>().introAnimations.Length; i++)
             {
                 GameObject.FindObjectOfType<PinSetter>().introAnimations[i].StopAnimation();
             }
-            GameManager.type = GameManager.GameState.Game;
-            cameraFollow.type = CameraFollow.CameraType.MoveX;
+            type = GameState.Game;
+            camType = CameraType.MoveX;
             isIntro = false;
         }
     }
@@ -1286,9 +1308,9 @@ public class Game : MonoBehaviour
         {
             StopCoroutine(b);
         }
-        if (GameManager.type == GameManager.GameState.Replay)
+        if (type == GameState.Replay)
         {
-            GameManager.type = GameManager.GameState.Game;
+            type = GameState.Game;
         }
         yield return new WaitForSeconds(time);
         b = StartCoroutine(PinTimeB());
@@ -1300,9 +1322,32 @@ public class Game : MonoBehaviour
     {
         ball.rollAudio.Stop();
         ball.gutterAudio.Stop();
-        if (GameManager.type == GameManager.GameState.Game)
+        ball.pinAudio.Stop();
+        ball.electricAudio.Stop();
+        if (throwBall == 1)
         {
-            GameManager.type = GameManager.GameState.Replay;
+            if (pin1.IsStanding() == false || pin2.IsStanding() == false || pin3.IsStanding() == false || pin4.IsStanding() == false || pin5.IsStanding() == false || pin6.IsStanding() == false || pin7.IsStanding() == false || pin8.IsStanding() == false || pin9.IsStanding() == false || pin10.IsStanding() == false)
+            {
+                isSplit = false;
+                is710 = false;
+            }
+        }
+        for (int i = 0; i < pinSplits.Length; i++)
+        {
+            if (pin1.IsStanding() == pinSplits[i].isPin1 && pin2.IsStanding() == pinSplits[i].isPin2 && pin3.IsStanding() == pinSplits[i].isPin3 && pin4.IsStanding() == pinSplits[i].isPin4 && pin5.IsStanding() == pinSplits[i].isPin5 && pin6.IsStanding() == pinSplits[i].isPin6 && pin7.IsStanding() == pinSplits[i].isPin7 && pin8.IsStanding() == pinSplits[i].isPin8 && pin9.IsStanding() == pinSplits[i].isPin9 && pin10.IsStanding() == pinSplits[i].isPin10 && throwBall == 1)
+            {
+                isSplit = true;
+                is710 = false;
+            }
+        }
+        if (pin1.IsStanding() == false && pin2.IsStanding() == false && pin3.IsStanding() == false && pin4.IsStanding() == false && pin5.IsStanding() == false && pin6.IsStanding() == false && pin7.IsStanding() == true && pin8.IsStanding() == false && pin9.IsStanding() == false && pin10.IsStanding() == true && throwBall == 1)
+        {
+            isSplit = true;
+            is710 = true;
+        }
+        if (type == GameState.Game)
+        {
+            type = GameState.Replay;
         }
         GameObject.FindObjectOfType<PinSetter>().DownPins();
         pinCounter.PinsHaveSettled();
@@ -1313,7 +1358,7 @@ public class Game : MonoBehaviour
                 if (scoreDisplay[turns].strikes == ScoreDisplay.Strikes.Strike)
                 {
                     animations = AnimationScenes.Strike;
-                    if (GameManager.type == GameManager.GameState.Replay)
+                    if (type == GameState.Replay)
                     {
                         VoiceStrike();
                     }
@@ -1321,7 +1366,7 @@ public class Game : MonoBehaviour
                 if (scoreDisplay[turns].strikes == ScoreDisplay.Strikes.Double)
                 {
                     animations = AnimationScenes.Double;
-                    if (GameManager.type == GameManager.GameState.Replay)
+                    if (type == GameState.Replay)
                     {
                         VoiceDouble();
                     }
@@ -1330,7 +1375,7 @@ public class Game : MonoBehaviour
                 if (scoreDisplay[turns].strikes == ScoreDisplay.Strikes.Turkey)
                 {
                     animations = AnimationScenes.Turkey;
-                    if (GameManager.type == GameManager.GameState.Replay)
+                    if (type == GameState.Replay)
                     {
                         VoiceTurkey();
                     }
@@ -1341,72 +1386,31 @@ public class Game : MonoBehaviour
                     if (playerTurn == 0)
                     {
                         strikes1++;
+                        addCash += 10 * allStrikes1;
+                        allStrikes1++;
                     }
                     else if (playerTurn == 1 || playerTurn == 4)
                     {
                         strikes2++;
+                        if (!isComputer)
+                        {
+                            addCash += 10 * allStrikes2;
+                            allStrikes2++;
+                        }
                     }
                     else if (playerTurn == 2)
                     {
                         strikes3++;
+                        addCash += 10 * allStrikes3;
+                        allStrikes3++;
                     }
                     else if (playerTurn == 3)
                     {
                         strikes4++;
+                        addCash += 10 * allStrikes4;
+                        allStrikes4++;
                     }
                     scoreDisplay[turns].AllStrike();
-                }
-            }
-        }
-        else if (maxBalls == 3)
-        {
-            if (PinCounter.pinCount == 0 && throwBall == 1)
-            {
-                if (scoreDisplay3[turns].strikes == ScoreDisplayBall3.Strikes.Strike)
-                {
-                    animations = AnimationScenes.Strike;
-                    if (GameManager.type == GameManager.GameState.Replay)
-                    {
-                        VoiceStrike();
-                    }
-                }
-                if (scoreDisplay3[turns].strikes == ScoreDisplayBall3.Strikes.Double)
-                {
-                    animations = AnimationScenes.Double;
-                    if (GameManager.type == GameManager.GameState.Replay)
-                    {
-                        VoiceDouble();
-                    }
-                    RainCountdown();
-                }
-                if (scoreDisplay3[turns].strikes == ScoreDisplayBall3.Strikes.Turkey)
-                {
-                    animations = AnimationScenes.Turkey;
-                    if (GameManager.type == GameManager.GameState.Replay)
-                    {
-                        VoiceTurkey();
-                    }
-                    RainCountdown();
-                }
-                if (pinCounts == 10)
-                {
-                    if (playerTurn == 0)
-                    {
-                        strikes1++;
-                    }
-                    else if (playerTurn == 1 || playerTurn == 4)
-                    {
-                        strikes2++;
-                    }
-                    else if (playerTurn == 2)
-                    {
-                        strikes3++;
-                    }
-                    else if (playerTurn == 3)
-                    {
-                        strikes4++;
-                    }
-                    scoreDisplay3[turns].AllStrike();
                 }
             }
         }
@@ -1415,14 +1419,14 @@ public class Game : MonoBehaviour
             animations = AnimationScenes.Spare;
             if (isSplit)
             {
-                if (GameManager.type == GameManager.GameState.Replay)
+                if (type == GameState.Replay)
                 {
                     VoiceSplitPick();
                 }
             }
             else
             {
-                if (GameManager.type == GameManager.GameState.Replay)
+                if (type == GameState.Replay)
                 {
                     VoiceSpare();
                 }
@@ -1430,23 +1434,49 @@ public class Game : MonoBehaviour
             if (playerTurn == 0)
             {
                 spares1++;
+                addCash += 5 * allStrikes1;
             }
             else if (playerTurn == 1 || playerTurn == 4)
             {
                 spares2++;
+                if (!isComputer)
+                {
+                    addCash += 5 * allStrikes2;
+                }
             }
             else if (playerTurn == 2)
             {
                 spares3++;
+                addCash += 5 * allStrikes3;
             }
             else if (playerTurn == 3)
             {
                 spares4++;
+                addCash += 5 * allStrikes4;
             }
         }
-        if (gutterAnimation == 0 && isReplay || PinCounter.pinCount == 0)
+        if (throwBall == 2)
         {
-            if (GameManager.type == GameManager.GameState.Replay)
+            if (playerTurn == 0)
+            {
+                allStrikes1 = 1;
+            }
+            else if (playerTurn == 1 || playerTurn == 4)
+            {
+                allStrikes2 = 1;
+            }
+            else if (playerTurn == 2)
+            {
+                allStrikes3 = 1;
+            }
+            else if (playerTurn == 3)
+            {
+                allStrikes4 = 1;
+            }
+        }
+        if (gutterAnimation == 0 && isReplay)
+        {
+            if (type == GameState.Replay)
             {
                 replayText.SetActive(true);
             }
@@ -1460,7 +1490,7 @@ public class Game : MonoBehaviour
                 replays[i].SetTransform(0);
             }
             cameraFollow.Replay(replayIndex);
-            yield return new WaitForSeconds(replayTime * 1.3f);
+            yield return new WaitForSeconds(replayTime * 2.0f);
             replayText.SetActive(false);
             for (int i = 0; i < replays.Length; i++)
             {
@@ -1483,8 +1513,9 @@ public class Game : MonoBehaviour
         }
         else if (animations == AnimationScenes.Strike)
         {
+            strikeAnimIndex = Random.Range(0, GameObject.FindObjectOfType<PinSetter>().strikeAnimations.Length);
             isAnim = true;
-            cameraFollow.type = CameraFollow.CameraType.Anim;
+            camType = CameraType.Anim;
             for (int i = 0; i < GameObject.FindObjectOfType<PinSetter>().strikeAnimations.Length; i++)
             {
                 GameObject.FindObjectOfType<PinSetter>().strikeAnimations[i].SkipAnimation();
@@ -1509,12 +1540,13 @@ public class Game : MonoBehaviour
             {
                 GameObject.FindObjectOfType<PinSetter>().turkeyAnimations[i].SkipAnimation();
             }
-            GameObject.FindObjectOfType<PinSetter>().strikeAnimations[Random.Range(0, GameObject.FindObjectOfType<PinSetter>().strikeAnimations.Length)].PlayAnimation();
+            GameObject.FindObjectOfType<PinSetter>().strikeAnimations[strikeAnimIndex].PlayAnimation();
         }
         else if (animations == AnimationScenes.Spare)
         {
+            spareAnimIndex = Random.Range(0, GameObject.FindObjectOfType<PinSetter>().spareAnimations.Length);
             isAnim = true;
-            cameraFollow.type = CameraFollow.CameraType.Anim;
+            camType = CameraType.Anim;
             for (int i = 0; i < GameObject.FindObjectOfType<PinSetter>().strikeAnimations.Length; i++)
             {
                 GameObject.FindObjectOfType<PinSetter>().strikeAnimations[i].SkipAnimation();
@@ -1539,12 +1571,13 @@ public class Game : MonoBehaviour
             {
                 GameObject.FindObjectOfType<PinSetter>().turkeyAnimations[i].SkipAnimation();
             }
-            GameObject.FindObjectOfType<PinSetter>().spareAnimations[Random.Range(0, GameObject.FindObjectOfType<PinSetter>().spareAnimations.Length)].PlayAnimation();
+            GameObject.FindObjectOfType<PinSetter>().spareAnimations[spareAnimIndex].PlayAnimation();
         }
         else if (animations == AnimationScenes.Double)
         {
+            doubleAnimIndex = Random.Range(0, GameObject.FindObjectOfType<PinSetter>().doubleAnimations.Length);
             isAnim = true;
-            cameraFollow.type = CameraFollow.CameraType.Anim;
+            camType = CameraType.Anim;
             for (int i = 0; i < GameObject.FindObjectOfType<PinSetter>().strikeAnimations.Length; i++)
             {
                 GameObject.FindObjectOfType<PinSetter>().strikeAnimations[i].SkipAnimation();
@@ -1569,12 +1602,13 @@ public class Game : MonoBehaviour
             {
                 GameObject.FindObjectOfType<PinSetter>().turkeyAnimations[i].SkipAnimation();
             }
-            GameObject.FindObjectOfType<PinSetter>().doubleAnimations[Random.Range(0, GameObject.FindObjectOfType<PinSetter>().doubleAnimations.Length)].PlayAnimation();
+            GameObject.FindObjectOfType<PinSetter>().doubleAnimations[doubleAnimIndex].PlayAnimation();
         }
         else if (animations == AnimationScenes.Turkey)
         {
+            turkeyAnimIndex = Random.Range(0, GameObject.FindObjectOfType<PinSetter>().turkeyAnimations.Length);
             isAnim = true;
-            cameraFollow.type = CameraFollow.CameraType.Anim;
+            camType = CameraType.Anim;
             for (int i = 0; i < GameObject.FindObjectOfType<PinSetter>().strikeAnimations.Length; i++)
             {
                 GameObject.FindObjectOfType<PinSetter>().strikeAnimations[i].SkipAnimation();
@@ -1599,14 +1633,14 @@ public class Game : MonoBehaviour
             {
                 GameObject.FindObjectOfType<PinSetter>().turkeyAnimations[i].SkipAnimation();
             }
-            GameObject.FindObjectOfType<PinSetter>().turkeyAnimations[Random.Range(0, GameObject.FindObjectOfType<PinSetter>().turkeyAnimations.Length)].PlayAnimation();
+            GameObject.FindObjectOfType<PinSetter>().turkeyAnimations[turkeyAnimIndex].PlayAnimation();
         }
         else if (gutterAnimation == 1)
         {
             gbAnimIndex = Random.Range(0, GameObject.FindObjectOfType<PinSetter>().gutterballAnimations.Length);
             isReplay = true;
             isAnim = true;
-            cameraFollow.type = CameraFollow.CameraType.Anim;
+            camType = CameraType.Anim;
             for (int i = 0; i < GameObject.FindObjectOfType<PinSetter>().strikeAnimations.Length; i++)
             {
                 GameObject.FindObjectOfType<PinSetter>().strikeAnimations[i].SkipAnimation();
@@ -1638,7 +1672,7 @@ public class Game : MonoBehaviour
             gbAnimIndex2X = Random.Range(0, GameObject.FindObjectOfType<PinSetter>().gutterballAnimationTwoTimes.Length);
             isReplay = true;
             isAnim = true;
-            cameraFollow.type = CameraFollow.CameraType.Anim;
+            camType = CameraType.Anim;
             for (int i = 0; i < GameObject.FindObjectOfType<PinSetter>().strikeAnimations.Length; i++)
             {
                 GameObject.FindObjectOfType<PinSetter>().strikeAnimations[i].SkipAnimation();
@@ -1665,11 +1699,9 @@ public class Game : MonoBehaviour
             }
             GameObject.FindObjectOfType<PinSetter>().gutterballAnimationTwoTimes[gbAnimIndex2X].PlayAnimation();
         }
-        if (isScooper || !isScooper && PinCounter.pinCount == 0 || !isScooper && throwBall == maxBalls)
-        {
-            GameObject.FindObjectOfType<PinSetter>().ScooperPins();
-        }
-        if (!isScooper && throwBall < maxBalls)
+        powerUps = BallPowerUps.Off;
+        GameObject.FindObjectOfType<PinSetter>().ScooperPins();
+        if (throwBall < maxBalls)
         {
             GameObject.FindObjectOfType<PinSetter>().DownPins();
             foreach (Pin pin in GameObject.FindObjectsOfType<Pin>())
@@ -1687,13 +1719,13 @@ public class Game : MonoBehaviour
                 {
                     cameraFollow.transform.position = new Vector3(GameObject.FindObjectOfType<PinSetter>().returnPoint.position.x + 100, GameObject.FindObjectOfType<PinSetter>().returnPoint.position.y + 100, GameObject.FindObjectOfType<PinSetter>().returnPoint.position.z + 400);
                     cameraFollow.transform.rotation = Quaternion.LookRotation(ball.transform.position - cameraFollow.transform.position);
-                    cameraFollow.type = CameraFollow.CameraType.ReturnBall;
+                    camType = CameraType.ReturnBall;
                 }
                 ball.BallReturn();
             }
             if (GameObject.FindObjectOfType<PinSetter>().returnPoint != null)
             {
-                yield return new WaitForSeconds(5);
+                yield return new WaitForSeconds(15);
             }
         } 
         else if(gutterAnimation == 2)
@@ -1706,32 +1738,45 @@ public class Game : MonoBehaviour
                 {
                     cameraFollow.transform.position = new Vector3(GameObject.FindObjectOfType<PinSetter>().returnPoint.position.x + 100, GameObject.FindObjectOfType<PinSetter>().returnPoint.position.y + 100, GameObject.FindObjectOfType<PinSetter>().returnPoint.position.z + 400);
                     cameraFollow.transform.rotation = Quaternion.LookRotation(ball.transform.position - cameraFollow.transform.position);
-                    cameraFollow.type = CameraFollow.CameraType.ReturnBall;
+                    camType = CameraType.ReturnBall;
                 }
                 ball.BallReturn();
             }
             if (GameObject.FindObjectOfType<PinSetter>().returnPoint != null)
             {
-                yield return new WaitForSeconds(5);
+                yield return new WaitForSeconds(15);
             }
         }
         else if (gutterAnimation == 0)
         {
-            yield return new WaitForSeconds(1);
+            yield return new WaitForSeconds(3);
             if (!isReplay || gutterAnimation != 0)
             {
                 ball.BallReturn();
             }
-            yield return new WaitForSeconds(4);
+            if (animations == AnimationScenes.Off)
+            {
+                yield return new WaitForSeconds(12);
+            }
+            else if (animations == AnimationScenes.Strike)
+            {
+                yield return new WaitForSeconds(FindObjectOfType<PinSetter>().strikeAnimations[strikeAnimIndex].time);
+            }
+            else if (animations == AnimationScenes.Spare)
+            {
+                yield return new WaitForSeconds(FindObjectOfType<PinSetter>().spareAnimations[spareAnimIndex].time);
+            }
+            else if (animations == AnimationScenes.Double)
+            {
+                yield return new WaitForSeconds(FindObjectOfType<PinSetter>().doubleAnimations[doubleAnimIndex].time);
+            }
+            else if (animations == AnimationScenes.Turkey)
+            {
+                yield return new WaitForSeconds(FindObjectOfType<PinSetter>().turkeyAnimations[turkeyAnimIndex].time);
+            }
         }
         SkipReplay();
         isReplayRecord = false;
-    }
-
-    public void InfoCam()
-    {
-        infoCam.position = GameObject.FindObjectOfType<PinSetter>().reacts[reactIndex].position;
-        infoCam.rotation = GameObject.FindObjectOfType<PinSetter>().reacts[reactIndex].rotation;
     }
 
     public void AlleyTheme(string theme)
@@ -1741,7 +1786,7 @@ public class Game : MonoBehaviour
 
     public void Bowl(int pinFall)
     {
-        if (maxBalls == 1 && GameManager.type == GameManager.GameState.Replay)
+        if (maxBalls == 1 && type == GameState.Replay)
         {
             if (PinCounter.pinCount != 0)
             {
@@ -1759,9 +1804,9 @@ public class Game : MonoBehaviour
                 isEndGame = true;
             }
         }
-        else if (maxBalls == 2 && GameManager.type == GameManager.GameState.Replay)
+        else if (maxBalls == 2 && type == GameState.Replay)
         {
-            if (GameManager.allPlayers == GameManager.Players.OnePlayer)
+            if (allPlayers == Players.OnePlayer)
             {
                 try
                 {
@@ -1771,7 +1816,7 @@ public class Game : MonoBehaviour
                 catch
                 {
                     isEndGame = true;
-                    Debug.LogWarning("Something went wrong in Bowl()");
+                    UnityEngine.Debug.LogWarning("Something went wrong in Bowl()");
                 }
 
                 try
@@ -1783,10 +1828,10 @@ public class Game : MonoBehaviour
                 }
                 catch
                 {
-                    Debug.LogWarning("FillRollCard failed");
+                    UnityEngine.Debug.LogWarning("FillRollCard failed");
                 }
             }
-            else if (GameManager.allPlayers == GameManager.Players.TwoPlayer)
+            else if (allPlayers == Players.TwoPlayer)
             {
                 if (nextTurn == 0)
                 {
@@ -1832,7 +1877,7 @@ public class Game : MonoBehaviour
                         nextTurn = 1;
                         ballTurn = 0;
                         isResetPins = true;
-                        Debug.LogWarning("Something went wrong in Bowl()");
+                        UnityEngine.Debug.LogWarning("Something went wrong in Bowl()");
                     }
 
                     try
@@ -1844,7 +1889,7 @@ public class Game : MonoBehaviour
                     }
                     catch
                     {
-                        Debug.LogWarning("FillRollCard failed");
+                        UnityEngine.Debug.LogWarning("FillRollCard failed");
                     }
                 }
                 else
@@ -1889,7 +1934,7 @@ public class Game : MonoBehaviour
                     catch
                     {
                         isEndGame = true;
-                        Debug.LogWarning("Something went wrong in Bowl()");
+                        UnityEngine.Debug.LogWarning("Something went wrong in Bowl()");
                     }
 
                     try
@@ -1900,11 +1945,11 @@ public class Game : MonoBehaviour
                     }
                     catch
                     {
-                        Debug.LogWarning("FillRollCard failed");
+                        UnityEngine.Debug.LogWarning("FillRollCard failed");
                     }
                 }
             }
-            else if (GameManager.allPlayers == GameManager.Players.ThreePlayer)
+            else if (allPlayers == Players.ThreePlayer)
             {
                 if (nextTurn == 0)
                 {
@@ -1950,7 +1995,7 @@ public class Game : MonoBehaviour
                         nextTurn = 1;
                         ballTurn = 0;
                         isResetPins = true;
-                        Debug.LogWarning("Something went wrong in Bowl()");
+                        UnityEngine.Debug.LogWarning("Something went wrong in Bowl()");
                     }
 
                     try
@@ -1962,7 +2007,7 @@ public class Game : MonoBehaviour
                     }
                     catch
                     {
-                        Debug.LogWarning("FillRollCard failed");
+                        UnityEngine.Debug.LogWarning("FillRollCard failed");
                     }
                 }
                 else if (nextTurn == 1)
@@ -2009,7 +2054,7 @@ public class Game : MonoBehaviour
                         nextTurn = 2;
                         ballTurn = 0;
                         isResetPins = true;
-                        Debug.LogWarning("Something went wrong in Bowl()");
+                        UnityEngine.Debug.LogWarning("Something went wrong in Bowl()");
                     }
 
                     try
@@ -2020,7 +2065,7 @@ public class Game : MonoBehaviour
                     }
                     catch
                     {
-                        Debug.LogWarning("FillRollCard failed");
+                        UnityEngine.Debug.LogWarning("FillRollCard failed");
                     }
                 }
                 else
@@ -2065,7 +2110,7 @@ public class Game : MonoBehaviour
                     catch
                     {
                         isEndGame = true;
-                        Debug.LogWarning("Something went wrong in Bowl()");
+                        UnityEngine.Debug.LogWarning("Something went wrong in Bowl()");
                     }
 
                     try
@@ -2076,11 +2121,11 @@ public class Game : MonoBehaviour
                     }
                     catch
                     {
-                        Debug.LogWarning("FillRollCard failed");
+                        UnityEngine.Debug.LogWarning("FillRollCard failed");
                     }
                 }
             }
-            else if (GameManager.allPlayers == GameManager.Players.FourPlayer)
+            else if (allPlayers == Players.FourPlayer)
             {
                 if (nextTurn == 0)
                 {
@@ -2126,7 +2171,7 @@ public class Game : MonoBehaviour
                         nextTurn = 1;
                         ballTurn = 0;
                         isResetPins = true;
-                        Debug.LogWarning("Something went wrong in Bowl()");
+                        UnityEngine.Debug.LogWarning("Something went wrong in Bowl()");
                     }
 
                     try
@@ -2138,7 +2183,7 @@ public class Game : MonoBehaviour
                     }
                     catch
                     {
-                        Debug.LogWarning("FillRollCard failed");
+                        UnityEngine.Debug.LogWarning("FillRollCard failed");
                     }
                 }
                 else if (nextTurn == 1)
@@ -2185,7 +2230,7 @@ public class Game : MonoBehaviour
                         nextTurn = 2;
                         ballTurn = 0;
                         isResetPins = true;
-                        Debug.LogWarning("Something went wrong in Bowl()");
+                        UnityEngine.Debug.LogWarning("Something went wrong in Bowl()");
                     }
 
                     try
@@ -2196,7 +2241,7 @@ public class Game : MonoBehaviour
                     }
                     catch
                     {
-                        Debug.LogWarning("FillRollCard failed");
+                        UnityEngine.Debug.LogWarning("FillRollCard failed");
                     }
                 }
                 else if (nextTurn == 2)
@@ -2243,7 +2288,7 @@ public class Game : MonoBehaviour
                         nextTurn = 3;
                         ballTurn = 0;
                         isResetPins = true;
-                        Debug.LogWarning("Something went wrong in Bowl()");
+                        UnityEngine.Debug.LogWarning("Something went wrong in Bowl()");
                     }
 
                     try
@@ -2254,7 +2299,7 @@ public class Game : MonoBehaviour
                     }
                     catch
                     {
-                        Debug.LogWarning("FillRollCard failed");
+                        UnityEngine.Debug.LogWarning("FillRollCard failed");
                     }
                 }
                 else
@@ -2299,7 +2344,7 @@ public class Game : MonoBehaviour
                     catch
                     {
                         isEndGame = true;
-                        Debug.LogWarning("Something went wrong in Bowl()");
+                        UnityEngine.Debug.LogWarning("Something went wrong in Bowl()");
                     }
 
                     try
@@ -2310,11 +2355,11 @@ public class Game : MonoBehaviour
                     }
                     catch
                     {
-                        Debug.LogWarning("FillRollCard failed");
+                        UnityEngine.Debug.LogWarning("FillRollCard failed");
                     }
                 }
             }
-            else if (GameManager.allPlayers == GameManager.Players.Computer)
+            else if (allPlayers == Players.Computer)
             {
                 if (nextTurn == 0)
                 {
@@ -2360,7 +2405,7 @@ public class Game : MonoBehaviour
                         nextTurn = 4;
                         ballTurn = 0;
                         isResetPins = true;
-                        Debug.LogWarning("Something went wrong in Bowl()");
+                        UnityEngine.Debug.LogWarning("Something went wrong in Bowl()");
                     }
 
                     try
@@ -2372,7 +2417,7 @@ public class Game : MonoBehaviour
                     }
                     catch
                     {
-                        Debug.LogWarning("FillRollCard failed");
+                        UnityEngine.Debug.LogWarning("FillRollCard failed");
                     }
                 }
                 else
@@ -2417,7 +2462,7 @@ public class Game : MonoBehaviour
                     catch
                     {
                         isEndGame = true;
-                        Debug.LogWarning("Something went wrong in Bowl()");
+                        UnityEngine.Debug.LogWarning("Something went wrong in Bowl()");
                     }
 
                     try
@@ -2428,900 +2473,41 @@ public class Game : MonoBehaviour
                     }
                     catch
                     {
-                        Debug.LogWarning("FillRollCard failed");
+                        UnityEngine.Debug.LogWarning("FillRollCard failed");
                     }
                 }
             }
         }
-        if (maxBalls == 3 && GameManager.type == GameManager.GameState.Replay)
+        if (pinFall == 0 && !isComputer)
         {
-            if (GameManager.allPlayers == GameManager.Players.OnePlayer)
+            hintCount++;
+            if (hintCount == 2 || hintCount == 3 || hintCount == 5)
             {
-                try
+                gutterHintUI.SetActive(true);
+                foreach (GameObject scoreCardUI in falseScoreCardsUI)
                 {
-                    rolls1.Add(pinFall);
-                    GameObject.FindObjectOfType<PinSetter>().PerformAction3(ActionMasterOldBall3.NextAction(rolls1));
-                }
-                catch
-                {
-                    isEndGame = true;
-                    Debug.LogWarning("Something went wrong in Bowl()");
-                }
-
-                try
-                {
-                    scoreDisplay3[0].FillRolls(rolls1);
-                    scoreDisplay3[0].FillFrames(ScoreMasterBall3.ScoreCumulative(rolls1));
-                    scores1 = ScoreMasterBall3.ScoreCumulative(rolls1);
-
-                }
-                catch
-                {
-                    Debug.LogWarning("FillRollCard failed");
+                    scoreCardUI.SetActive(false);
                 }
             }
-            else if (GameManager.allPlayers == GameManager.Players.TwoPlayer)
+            else if (hintCount == 6)
             {
-                if (nextTurn == 0)
-                {
-                    if (ballTurn == 0)
-                    {
-                        if (pinFall == 10)
-                        {
-                            if (frames1 != 10)
-                            {
-                                nextTurn = 1;
-                                ballTurn = 0;
-                                frames1++;
-                            }
-                            else
-                            {
-                                nextTurn = 0;
-                                ballTurn = 1;
-                            }
-                        }
-                        else
-                        {
-                            ballTurn = 1;
-                        }
-                    }
-                    else if (ballTurn == 1)
-                    {
-                        if (pinFall == PinCounter.pinCount)
-                        {
-                            if (frames1 != 10)
-                            {
-                                nextTurn = 1;
-                                ballTurn = 0;
-                                frames1++;
-                            }
-                            else
-                            {
-                                nextTurn = 0;
-                                ballTurn = 2;
-                            }
-                        }
-                        else
-                        {
-                            ballTurn = 2;
-                        }
-                    }
-                    else
-                    {
-                        if (frames1 != 10)
-                        {
-                            nextTurn = 1;
-                            ballTurn = 0;
-                            frames1++;
-                        }
-                    }
-                    try
-                    {
-                        rolls1.Add(pinFall);
-                        GameObject.FindObjectOfType<PinSetter>().PerformAction3(ActionMasterOldBall3.NextAction(rolls1));
-                    }
-                    catch
-                    {
-                        nextTurn = 1;
-                        ballTurn = 0;
-                        isResetPins = true;
-                        Debug.LogWarning("Something went wrong in Bowl()");
-                    }
-
-                    try
-                    {
-                        scoreDisplay3[0].FillRolls(rolls1);
-                        scoreDisplay3[0].FillFrames(ScoreMasterBall3.ScoreCumulative(rolls1));
-                        scores1 = ScoreMasterBall3.ScoreCumulative(rolls1);
-
-                    }
-                    catch
-                    {
-                        Debug.LogWarning("FillRollCard failed");
-                    }
-                }
-                else
-                {
-                    if (ballTurn == 0)
-                    {
-                        if (pinFall == 10)
-                        {
-                            if (frames2 != 10)
-                            {
-                                nextTurn = 0;
-                                ballTurn = 0;
-                                frames2++;
-                            }
-                            else
-                            {
-                                nextTurn = 1;
-                                ballTurn = 1;
-                            }
-                        }
-                        else
-                        {
-                            ballTurn = 1;
-                        }
-                    }
-                    else if (ballTurn == 1)
-                    {
-                        if (pinFall == PinCounter.pinCount)
-                        {
-                            if (frames2 != 10)
-                            {
-                                nextTurn = 0;
-                                ballTurn = 0;
-                                frames2++;
-                            }
-                            else
-                            {
-                                nextTurn = 1;
-                                ballTurn = 2;
-                            }
-                        }
-                        else
-                        {
-                            ballTurn = 2;
-                        }
-                    }
-                    else
-                    {
-                        if (frames2 != 10)
-                        {
-                            nextTurn = 0;
-                            ballTurn = 0;
-                            frames2++;
-                        }
-                    }
-                    try
-                    {
-                        rolls2.Add(pinFall);
-                        GameObject.FindObjectOfType<PinSetter>().PerformAction3(ActionMasterOldBall3.NextAction(rolls2));
-                    }
-                    catch
-                    {
-                        isEndGame = true;
-                        Debug.LogWarning("Something went wrong in Bowl()");
-                    }
-
-                    try
-                    {
-                        scoreDisplay3[1].FillRolls(rolls2);
-                        scoreDisplay3[1].FillFrames(ScoreMasterBall3.ScoreCumulative(rolls2));
-                        scores2 = ScoreMasterBall3.ScoreCumulative(rolls2);
-                    }
-                    catch
-                    {
-                        Debug.LogWarning("FillRollCard failed");
-                    }
-                }
+                hintCount = 4;
             }
-            else if (GameManager.allPlayers == GameManager.Players.ThreePlayer)
-            {
-                if (nextTurn == 0)
-                {
-                    if (ballTurn == 0)
-                    {
-                        if (pinFall == 10)
-                        {
-                            if (frames1 != 10)
-                            {
-                                nextTurn = 1;
-                                ballTurn = 0;
-                                frames1++;
-                            }
-                            else
-                            {
-                                nextTurn = 0;
-                                ballTurn = 1;
-                            }
-                        }
-                        else
-                        {
-                            ballTurn = 1;
-                        }
-                    }
-                    else if (ballTurn == 1)
-                    {
-                        if (pinFall == PinCounter.pinCount)
-                        {
-                            if (frames1 != 10)
-                            {
-                                nextTurn = 1;
-                                ballTurn = 0;
-                                frames1++;
-                            }
-                            else
-                            {
-                                nextTurn = 0;
-                                ballTurn = 2;
-                            }
-                        }
-                        else
-                        {
-                            ballTurn = 2;
-                        }
-                    }
-                    else
-                    {
-                        if (frames1 != 10)
-                        {
-                            nextTurn = 1;
-                            ballTurn = 0;
-                            frames1++;
-                        }
-                    }
-                    try
-                    {
-                        rolls1.Add(pinFall);
-                        GameObject.FindObjectOfType<PinSetter>().PerformAction3(ActionMasterOldBall3.NextAction(rolls1));
-                    }
-                    catch
-                    {
-                        nextTurn = 1;
-                        ballTurn = 0;
-                        isResetPins = true;
-                        Debug.LogWarning("Something went wrong in Bowl()");
-                    }
-
-                    try
-                    {
-                        scoreDisplay3[0].FillRolls(rolls1);
-                        scoreDisplay3[0].FillFrames(ScoreMasterBall3.ScoreCumulative(rolls1));
-                        scores1 = ScoreMasterBall3.ScoreCumulative(rolls1);
-
-                    }
-                    catch
-                    {
-                        Debug.LogWarning("FillRollCard failed");
-                    }
-                }
-                else if (nextTurn == 1)
-                {
-                    if (ballTurn == 0)
-                    {
-                        if (pinFall == 10)
-                        {
-                            if (frames2 != 10)
-                            {
-                                nextTurn = 2;
-                                ballTurn = 0;
-                                frames2++;
-                            }
-                            else
-                            {
-                                nextTurn = 1;
-                                ballTurn = 2;
-                            }
-                        }
-                        else
-                        {
-                            ballTurn = 1;
-                        }
-                    }
-                    else if (ballTurn == 1)
-                    {
-                        if (pinFall == PinCounter.pinCount)
-                        {
-                            if (frames2 != 10)
-                            {
-                                nextTurn = 2;
-                                ballTurn = 0;
-                                frames2++;
-                            }
-                            else
-                            {
-                                nextTurn = 1;
-                                ballTurn = 2;
-                            }
-                        }
-                        else
-                        {
-                            ballTurn = 2;
-                        }
-                    }
-                    else
-                    {
-                        if (frames2 != 10)
-                        {
-                            nextTurn = 2;
-                            ballTurn = 0;
-                            frames2++;
-                        }
-                    }
-                    try
-                    {
-                        rolls2.Add(pinFall);
-                        GameObject.FindObjectOfType<PinSetter>().PerformAction3(ActionMasterOldBall3.NextAction(rolls2));
-                    }
-                    catch
-                    {
-                        nextTurn = 2;
-                        ballTurn = 0;
-                        isResetPins = true;
-                        Debug.LogWarning("Something went wrong in Bowl()");
-                    }
-
-                    try
-                    {
-                        scoreDisplay3[1].FillRolls(rolls2);
-                        scoreDisplay3[1].FillFrames(ScoreMasterBall3.ScoreCumulative(rolls2));
-                        scores2 = ScoreMasterBall3.ScoreCumulative(rolls2);
-                    }
-                    catch
-                    {
-                        Debug.LogWarning("FillRollCard failed");
-                    }
-                }
-                else
-                {
-                    if (ballTurn == 0)
-                    {
-                        if (pinFall == 10)
-                        {
-                            if (frames3 != 10)
-                            {
-                                nextTurn = 0;
-                                ballTurn = 0;
-                                frames3++;
-                            }
-                            else
-                            {
-                                nextTurn = 2;
-                                ballTurn = 1;
-                            }
-                        }
-                        else
-                        {
-                            ballTurn = 1;
-                        }
-                    }
-                    else if (ballTurn == 1)
-                    {
-                        if (pinFall == PinCounter.pinCount)
-                        {
-                            if (frames3 != 10)
-                            {
-                                nextTurn = 0;
-                                ballTurn = 0;
-                                frames3++;
-                            }
-                            else
-                            {
-                                nextTurn = 2;
-                                ballTurn = 2;
-                            }
-                        }
-                        else
-                        {
-                            ballTurn = 2;
-                        }
-                    }
-                    else
-                    {
-                        if (frames3 != 10)
-                        {
-                            nextTurn = 0;
-                            ballTurn = 0;
-                            frames3++;
-                        }
-                    }
-                    try
-                    {
-                        rolls3.Add(pinFall);
-                        GameObject.FindObjectOfType<PinSetter>().PerformAction3(ActionMasterOldBall3.NextAction(rolls3));
-                    }
-                    catch
-                    {
-                        isEndGame = true;
-                        Debug.LogWarning("Something went wrong in Bowl()");
-                    }
-
-                    try
-                    {
-                        scoreDisplay3[2].FillRolls(rolls3);
-                        scoreDisplay3[2].FillFrames(ScoreMasterBall3.ScoreCumulative(rolls3));
-                        scores3 = ScoreMasterBall3.ScoreCumulative(rolls3);
-                    }
-                    catch
-                    {
-                        Debug.LogWarning("FillRollCard failed");
-                    }
-                }
-            }
-            else if (GameManager.allPlayers == GameManager.Players.FourPlayer)
-            {
-                if (nextTurn == 0)
-                {
-                    if (ballTurn == 0)
-                    {
-                        if (pinFall == 10)
-                        {
-                            if (frames1 != 10)
-                            {
-                                nextTurn = 1;
-                                ballTurn = 0;
-                                frames1++;
-                            }
-                            else
-                            {
-                                nextTurn = 0;
-                                ballTurn = 1;
-                            }
-                        }
-                        else
-                        {
-                            ballTurn = 1;
-                        }
-                    }
-                    else if (ballTurn == 1)
-                    {
-                        if (pinFall == PinCounter.pinCount)
-                        {
-                            if (frames1 != 10)
-                            {
-                                nextTurn = 1;
-                                ballTurn = 0;
-                                frames1++;
-                            }
-                            else
-                            {
-                                nextTurn = 0;
-                                ballTurn = 2;
-                            }
-                        }
-                        else
-                        {
-                            ballTurn = 2;
-                        }
-                    }
-                    else
-                    {
-                        if (frames1 != 10)
-                        {
-                            nextTurn = 1;
-                            ballTurn = 0;
-                            frames1++;
-                        }
-                    }
-                    try
-                    {
-                        rolls1.Add(pinFall);
-                        GameObject.FindObjectOfType<PinSetter>().PerformAction3(ActionMasterOldBall3.NextAction(rolls1));
-                    }
-                    catch
-                    {
-                        nextTurn = 1;
-                        ballTurn = 0;
-                        isResetPins = true;
-                        Debug.LogWarning("Something went wrong in Bowl()");
-                    }
-
-                    try
-                    {
-                        scoreDisplay3[0].FillRolls(rolls1);
-                        scoreDisplay3[0].FillFrames(ScoreMasterBall3.ScoreCumulative(rolls1));
-                        scores1 = ScoreMasterBall3.ScoreCumulative(rolls1);
-
-                    }
-                    catch
-                    {
-                        Debug.LogWarning("FillRollCard failed");
-                    }
-                }
-                else if (nextTurn == 1)
-                {
-                    if (ballTurn == 0)
-                    {
-                        if (pinFall == 10)
-                        {
-                            if (frames2 != 10)
-                            {
-                                nextTurn = 2;
-                                ballTurn = 0;
-                                frames2++;
-                            }
-                            else
-                            {
-                                nextTurn = 1;
-                                ballTurn = 1;
-                            }
-                        }
-                        else
-                        {
-                            ballTurn = 1;
-                        }
-                    }
-                    else if (ballTurn == 1)
-                    {
-                        if (pinFall == PinCounter.pinCount)
-                        {
-                            if (frames2 != 10)
-                            {
-                                nextTurn = 2;
-                                ballTurn = 0;
-                                frames2++;
-                            }
-                            else
-                            {
-                                nextTurn = 1;
-                                ballTurn = 2;
-                            }
-                        }
-                        else
-                        {
-                            ballTurn = 2;
-                        }
-                    }
-                    else
-                    {
-                        if (frames2 != 10)
-                        {
-                            nextTurn = 2;
-                            ballTurn = 0;
-                            frames2++;
-                        }
-                    }
-                    try
-                    {
-                        rolls2.Add(pinFall);
-                        GameObject.FindObjectOfType<PinSetter>().PerformAction3(ActionMasterOldBall3.NextAction(rolls2));
-                    }
-                    catch
-                    {
-                        nextTurn = 2;
-                        ballTurn = 0;
-                        isResetPins = true;
-                        Debug.LogWarning("Something went wrong in Bowl()");
-                    }
-
-                    try
-                    {
-                        scoreDisplay3[1].FillRolls(rolls2);
-                        scoreDisplay3[1].FillFrames(ScoreMasterBall3.ScoreCumulative(rolls2));
-                        scores2 = ScoreMasterBall3.ScoreCumulative(rolls2);
-                    }
-                    catch
-                    {
-                        Debug.LogWarning("FillRollCard failed");
-                    }
-                }
-                else if (nextTurn == 2)
-                {
-                    if (ballTurn == 0)
-                    {
-                        if (pinFall == 10)
-                        {
-                            if (frames3 != 10)
-                            {
-                                nextTurn = 3;
-                                ballTurn = 0;
-                                frames3++;
-                            }
-                            else
-                            {
-                                nextTurn = 2;
-                                ballTurn = 1;
-                            }
-                        }
-                        else
-                        {
-                            ballTurn = 1;
-                        }
-                    }
-                    else if (ballTurn == 1)
-                    {
-                        if (pinFall == PinCounter.pinCount)
-                        {
-                            if (frames3 != 10)
-                            {
-                                nextTurn = 3;
-                                ballTurn = 0;
-                                frames3++;
-                            }
-                            else
-                            {
-                                nextTurn = 2;
-                                ballTurn = 2;
-                            }
-                        }
-                        else
-                        {
-                            ballTurn = 2;
-                        }
-                    }
-                    else
-                    {
-                        if (frames3 != 10)
-                        {
-                            nextTurn = 3;
-                            ballTurn = 0;
-                            frames3++;
-                        }
-                    }
-                    try
-                    {
-                        rolls3.Add(pinFall);
-                        GameObject.FindObjectOfType<PinSetter>().PerformAction3(ActionMasterOldBall3.NextAction(rolls3));
-                    }
-                    catch
-                    {
-                        nextTurn = 3;
-                        ballTurn = 0;
-                        isResetPins = true;
-                        Debug.LogWarning("Something went wrong in Bowl()");
-                    }
-
-                    try
-                    {
-                        scoreDisplay3[2].FillRolls(rolls3);
-                        scoreDisplay3[2].FillFrames(ScoreMasterBall3.ScoreCumulative(rolls3));
-                        scores3 = ScoreMasterBall3.ScoreCumulative(rolls3);
-                    }
-                    catch
-                    {
-                        Debug.LogWarning("FillRollCard failed");
-                    }
-                }
-                else
-                {
-                    if (ballTurn == 0)
-                    {
-                        if (pinFall == 10)
-                        {
-                            if (frames4 != 10)
-                            {
-                                nextTurn = 0;
-                                ballTurn = 0;
-                                frames4++;
-                            }
-                            else
-                            {
-                                nextTurn = 3;
-                                ballTurn = 1;
-                            }
-                        }
-                        else
-                        {
-                            ballTurn = 1;
-                        }
-                    }
-                    else if (ballTurn == 1)
-                    {
-                        if (pinFall == PinCounter.pinCount)
-                        {
-                            if (frames4 != 10)
-                            {
-                                nextTurn = 0;
-                                ballTurn = 0;
-                                frames4++;
-                            }
-                            else
-                            {
-                                nextTurn = 3;
-                                ballTurn = 2;
-                            }
-                        }
-                        else
-                        {
-                            ballTurn = 2;
-                        }
-                    }
-                    else
-                    {
-                        if (frames4 != 10)
-                        {
-                            nextTurn = 0;
-                            ballTurn = 0;
-                            frames4++;
-                        }
-                    }
-                    try
-                    {
-                        rolls4.Add(pinFall);
-                        GameObject.FindObjectOfType<PinSetter>().PerformAction3(ActionMasterOldBall3.NextAction(rolls4));
-                    }
-                    catch
-                    {
-                        isEndGame = true;
-                        Debug.LogWarning("Something went wrong in Bowl()");
-                    }
-
-                    try
-                    {
-                        scoreDisplay3[3].FillRolls(rolls4);
-                        scoreDisplay3[3].FillFrames(ScoreMasterBall3.ScoreCumulative(rolls4));
-                        scores4 = ScoreMasterBall3.ScoreCumulative(rolls4);
-                    }
-                    catch
-                    {
-                        Debug.LogWarning("FillRollCard failed");
-                    }
-                }
-            }
-            else if (GameManager.allPlayers == GameManager.Players.Computer)
-            {
-                if (nextTurn == 0)
-                {
-                    if (ballTurn == 0)
-                    {
-                        if (pinFall == 10)
-                        {
-                            if (frames1 != 10)
-                            {
-                                nextTurn = 4;
-                                frames1++;
-                            }
-                            else
-                            {
-                                nextTurn = 0;
-                                ballTurn = 1;
-                            }
-                        }
-                        else
-                        {
-                            ballTurn = 1;
-                        }
-                    }
-                    else if (ballTurn == 1)
-                    {
-                        if (pinFall == PinCounter.pinCount)
-                        {
-                            if (frames1 != 10)
-                            {
-                                nextTurn = 4;
-                                ballTurn = 0;
-                                frames1++;
-                            }
-                            else
-                            {
-                                nextTurn = 0;
-                                ballTurn = 2;
-                            }
-                        }
-                        else
-                        {
-                            ballTurn = 2;
-                        }
-                    }
-                    else
-                    {
-                        if (frames1 != 10)
-                        {
-                            nextTurn = 4;
-                            ballTurn = 0;
-                            frames1++;
-                        }
-                    }
-                    try
-                    {
-                        rolls1.Add(pinFall);
-                        GameObject.FindObjectOfType<PinSetter>().PerformAction3(ActionMasterOldBall3.NextAction(rolls1));
-                    }
-                    catch
-                    {
-                        throwBall = maxBalls;
-                        Debug.LogWarning("Something went wrong in Bowl()");
-                    }
-
-                    try
-                    {
-                        scoreDisplay3[0].FillRolls(rolls1);
-                        scoreDisplay3[0].FillFrames(ScoreMasterBall3.ScoreCumulative(rolls1));
-                        scores1 = ScoreMasterBall3.ScoreCumulative(rolls1);
-
-                    }
-                    catch
-                    {
-                        Debug.LogWarning("FillRollCard failed");
-                    }
-                }
-                else
-                {
-                    if (ballTurn == 0)
-                    {
-                        if (pinFall == 10)
-                        {
-                            if (frames2 != 10)
-                            {
-                                nextTurn = 0;
-                                frames2++;
-                            }
-                            else
-                            {
-                                nextTurn = 4;
-                                ballTurn = 1;
-                            }
-                        }
-                        else
-                        {
-                            ballTurn = 1;
-                        }
-                    }
-                    else if (ballTurn == 1)
-                    {
-                        if (pinFall == PinCounter.pinCount)
-                        {
-                            if (frames2 != 10)
-                            {
-                                nextTurn = 0;
-                                ballTurn = 0;
-                                frames2++;
-                            }
-                            else
-                            {
-                                nextTurn = 4;
-                                ballTurn = 2;
-                            }
-                        }
-                        else
-                        {
-                            ballTurn = 2;
-                        }
-                    }
-                    else
-                    {
-                        if (frames2 != 10)
-                        {
-                            nextTurn = 0;
-                            ballTurn = 0;
-                            frames2++;
-                        }
-                    }
-                    try
-                    {
-                        rolls2.Add(pinFall);
-                        GameObject.FindObjectOfType<PinSetter>().PerformAction3(ActionMasterOldBall3.NextAction(rolls2));
-                    }
-                    catch
-                    {
-                        isEndGame = true;
-                        Debug.LogWarning("Something went wrong in Bowl()");
-                    }
-
-                    try
-                    {
-                        scoreDisplay3[1].FillRolls(rolls2);
-                        scoreDisplay3[1].FillFrames(ScoreMasterBall3.ScoreCumulative(rolls2));
-                        scores2 = ScoreMasterBall3.ScoreCumulative(rolls2);
-                    }
-                    catch
-                    {
-                        Debug.LogWarning("FillRollCard failed");
-                    }
-                }
-            }
+        }
+        else if (pinFall != 0)
+        {
+            hintCount = 0;
         }
         pinCounts = pinFall;
-        if (throwBall < maxBalls)
+        if (throwBall == 1)
         {
             if (isSplit)
             {
-                if (is710 && GameManager.type == GameManager.GameState.Replay)
+                if (is710 && type == GameState.Replay)
                 {
                     VoiceSplit710();
                 }
-                else if (!is710 && GameManager.type == GameManager.GameState.Replay)
+                else if (!is710 && type == GameState.Replay)
                 {
                     VoiceSplit();
                 }
@@ -3336,7 +2522,7 @@ public class Game : MonoBehaviour
                 {
                     CrowdOk();
                 }
-                if (pinCounts == 0 && PinCounter.pinCount > 0 && GameManager.type == GameManager.GameState.Replay)
+                if (pinCounts == 0 && PinCounter.pinCount > 0 && type == GameState.Replay)
                 {
                     if (playerTurn == 0)
                     {
@@ -3359,24 +2545,24 @@ public class Game : MonoBehaviour
                         VoiceMiss();
                     }
                 }
-                if (pinCounts == 1 && PinCounter.pinCount > 0 && GameManager.type == GameManager.GameState.Replay)
+                if (pinCounts == 1 && PinCounter.pinCount > 0 && type == GameState.Replay)
                 {
                     VoiceOne();
                 }
-                if (pinCounts == 2 && PinCounter.pinCount > 0 && GameManager.type == GameManager.GameState.Replay || pinCounts == 3 && PinCounter.pinCount > 0 && GameManager.type == GameManager.GameState.Replay || pinCounts == 4 && PinCounter.pinCount > 0 && GameManager.type == GameManager.GameState.Replay)
+                if (pinCounts == 2 && PinCounter.pinCount > 0 && type == GameState.Replay || pinCounts == 3 && PinCounter.pinCount > 0 && type == GameState.Replay || pinCounts == 4 && PinCounter.pinCount > 0 && type == GameState.Replay)
                 {
                     VoiceFew();
                 }
-                if (pinCounts == 5 && PinCounter.pinCount > 0 && GameManager.type == GameManager.GameState.Replay || pinCounts == 6 && PinCounter.pinCount > 0 && GameManager.type == GameManager.GameState.Replay || pinCounts == 7 && PinCounter.pinCount > 0 && GameManager.type == GameManager.GameState.Replay || pinCounts == 8 && PinCounter.pinCount > 0 && GameManager.type == GameManager.GameState.Replay || pinCounts == 9 && PinCounter.pinCount > 0 && GameManager.type == GameManager.GameState.Replay)
+                if (pinCounts == 5 && PinCounter.pinCount > 0 && type == GameState.Replay || pinCounts == 6 && PinCounter.pinCount > 0 && type == GameState.Replay || pinCounts == 7 && PinCounter.pinCount > 0 && type == GameState.Replay || pinCounts == 8 && PinCounter.pinCount > 0 && type == GameState.Replay || pinCounts == 9 && PinCounter.pinCount > 0 && type == GameState.Replay)
                 {
                     VoiceMost();
                     crowdType = Crowds.NoCrowd;
                 }
             }
         }
-        if (throwBall == maxBalls)
+        if (throwBall >= 2)
         {
-            if (pinCounts == 0 && PinCounter.pinCount > 0 && GameManager.type == GameManager.GameState.Replay)
+            if (pinCounts == 0 && PinCounter.pinCount > 0 && type == GameState.Replay)
             {
                 if (playerTurn == 0)
                 {
@@ -3399,15 +2585,15 @@ public class Game : MonoBehaviour
                     VoiceMiss();
                 }
             }
-            if (pinCounts == 1 && PinCounter.pinCount > 0 && GameManager.type == GameManager.GameState.Replay)
+            if (pinCounts == 1 && PinCounter.pinCount > 0 && type == GameState.Replay)
             {
                 VoiceOne();
             }
-            if (pinCounts == 2 && PinCounter.pinCount > 0 && GameManager.type == GameManager.GameState.Replay || pinCounts == 3 && PinCounter.pinCount > 0 && GameManager.type == GameManager.GameState.Replay || pinCounts == 4 && PinCounter.pinCount > 0 && GameManager.type == GameManager.GameState.Replay)
+            if (pinCounts == 2 && PinCounter.pinCount > 0 && type == GameState.Replay || pinCounts == 3 && PinCounter.pinCount > 0 && type == GameState.Replay || pinCounts == 4 && PinCounter.pinCount > 0 && type == GameState.Replay)
             {
                 VoiceFew();
             }
-            if (pinCounts == 5 && PinCounter.pinCount > 0 && GameManager.type == GameManager.GameState.Replay || pinCounts == 6 && PinCounter.pinCount > 0 && GameManager.type == GameManager.GameState.Replay || pinCounts == 7 && PinCounter.pinCount > 0 && GameManager.type == GameManager.GameState.Replay || pinCounts == 8 && PinCounter.pinCount > 0 && GameManager.type == GameManager.GameState.Replay || pinCounts == 9 && PinCounter.pinCount > 0 && GameManager.type == GameManager.GameState.Replay || pinCounts == 10 && PinCounter.pinCount > 0 && GameManager.type == GameManager.GameState.Replay)
+            if (pinCounts == 5 && PinCounter.pinCount > 0 && type == GameState.Replay || pinCounts == 6 && PinCounter.pinCount > 0 && type == GameState.Replay || pinCounts == 7 && PinCounter.pinCount > 0 && type == GameState.Replay || pinCounts == 8 && PinCounter.pinCount > 0 && type == GameState.Replay || pinCounts == 9 && PinCounter.pinCount > 0 && type == GameState.Replay || pinCounts == 10 && PinCounter.pinCount > 0 && type == GameState.Replay)
             {
                 VoiceMost();
                 if (pinCounts == 5 || pinCounts == 6)
@@ -3429,13 +2615,12 @@ public class Game : MonoBehaviour
         if (PinCounter.pinCount > 0)
         {
             scoreDisplay[turns].ResetStrike();
-            scoreDisplay3[turns].ResetStrike();
         }
     }
 
     public void VoiceStrike()
     {
-        if (GameManager.isVoice && GameManager.type != GameManager.GameState.Menu && maxBalls != 1)
+        if (GameManager.isVoice && type != GameState.Menu && maxBalls != 1)
         {
             commentator.Strike(commentatorAudio);
             crowdAudio.Stop();
@@ -3450,7 +2635,7 @@ public class Game : MonoBehaviour
 
     public void VoiceSpare()
     {
-        if (GameManager.isVoice && GameManager.type != GameManager.GameState.Menu && maxBalls != 1)
+        if (GameManager.isVoice && type != GameState.Menu && maxBalls != 1)
         {
             commentator.Spare(commentatorAudio);
             crowdAudio.Stop();
@@ -3465,7 +2650,7 @@ public class Game : MonoBehaviour
 
     public void VoiceGutterball()
     {
-        if (GameManager.isVoice && GameManager.type != GameManager.GameState.Menu && maxBalls != 1)
+        if (GameManager.isVoice && type != GameState.Menu && maxBalls != 1)
         {
             commentator.Gutterball(commentatorAudio);
             crowdAudio.Stop();
@@ -3480,7 +2665,7 @@ public class Game : MonoBehaviour
 
     public void VoiceDouble()
     {
-        if (GameManager.isVoice && GameManager.type != GameManager.GameState.Menu && maxBalls != 1)
+        if (GameManager.isVoice && type != GameState.Menu && maxBalls != 1)
         {
             commentator.Double(commentatorAudio);
             crowdAudio.Stop();
@@ -3495,7 +2680,7 @@ public class Game : MonoBehaviour
 
     public void VoiceTurkey()
     {
-        if (GameManager.isVoice && GameManager.type != GameManager.GameState.Menu && maxBalls != 1)
+        if (GameManager.isVoice && type != GameState.Menu && maxBalls != 1)
         {
             commentator.Turkey(commentatorAudio);
             crowdAudio.Stop();
@@ -3510,7 +2695,7 @@ public class Game : MonoBehaviour
 
     public void VoiceSplit()
     {
-        if (GameManager.isVoice && GameManager.type != GameManager.GameState.Menu && maxBalls != 1)
+        if (GameManager.isVoice && type != GameState.Menu && maxBalls != 1)
         {
             commentator.Split(commentatorAudio);
             crowdAudio.Stop();
@@ -3525,7 +2710,7 @@ public class Game : MonoBehaviour
 
     public void VoiceSplit710()
     {
-        if (GameManager.isVoice && GameManager.type != GameManager.GameState.Menu && maxBalls != 1)
+        if (GameManager.isVoice && type != GameState.Menu && maxBalls != 1)
         {
             commentator.Split710(commentatorAudio);
             crowdAudio.Stop();
@@ -3540,7 +2725,7 @@ public class Game : MonoBehaviour
 
     public void VoiceSplitPick()
     {
-        if (GameManager.isVoice && GameManager.type != GameManager.GameState.Menu && maxBalls != 1)
+        if (GameManager.isVoice && type != GameState.Menu && maxBalls != 1)
         {
             commentator.SplitPick(commentatorAudio);
             crowdAudio.Stop();
@@ -3555,9 +2740,10 @@ public class Game : MonoBehaviour
 
     public void VoiceMost()
     {
-        if (GameManager.isVoice && GameManager.type != GameManager.GameState.Menu && maxBalls != 1)
+        if (GameManager.isVoice && type != GameState.Menu && maxBalls != 1)
         {
             commentator.Most(commentatorAudio);
+            crowdAudio.Stop();
             commentatorIndex = 1;
             commentatorAudio.Play();
         }
@@ -3565,7 +2751,7 @@ public class Game : MonoBehaviour
 
     public void VoiceFew()
     {
-        if (GameManager.isVoice && GameManager.type != GameManager.GameState.Menu && maxBalls != 1)
+        if (GameManager.isVoice && type != GameState.Menu && maxBalls != 1)
         {
             commentator.Few(commentatorAudio);
             crowdAudio.Stop();
@@ -3580,7 +2766,7 @@ public class Game : MonoBehaviour
 
     public void VoiceOne()
     {
-        if (GameManager.isVoice && GameManager.type != GameManager.GameState.Menu && maxBalls != 1)
+        if (GameManager.isVoice && type != GameState.Menu && maxBalls != 1)
         {
             commentator.One(commentatorAudio);
             crowdAudio.Stop();
@@ -3595,7 +2781,7 @@ public class Game : MonoBehaviour
 
     public void VoiceMiss()
     {
-        if (GameManager.isVoice && GameManager.type != GameManager.GameState.Menu && maxBalls != 1)
+        if (GameManager.isVoice && type != GameState.Menu && maxBalls != 1)
         {
             commentator.Miss(commentatorAudio);
             crowdAudio.Stop();
@@ -3610,7 +2796,7 @@ public class Game : MonoBehaviour
 
     public void VoiceEndBad()
     {
-        if (GameManager.isVoice && GameManager.type != GameManager.GameState.Menu && maxBalls != 1)
+        if (GameManager.isVoice && type != GameState.Menu && maxBalls != 1)
         {
             commentator.EndBad(commentatorAudio);
             commentatorIndex = 1;
@@ -3624,7 +2810,7 @@ public class Game : MonoBehaviour
 
     public void VoiceEndOk()
     {
-        if (GameManager.isVoice && GameManager.type != GameManager.GameState.Menu && maxBalls != 1)
+        if (GameManager.isVoice && type != GameState.Menu && maxBalls != 1)
         {
             commentator.EndOk(commentatorAudio);
             commentatorIndex = 1;
@@ -3638,7 +2824,7 @@ public class Game : MonoBehaviour
 
     public void VoiceEndGood()
     {
-        if (GameManager.isVoice && GameManager.type != GameManager.GameState.Menu && maxBalls != 1)
+        if (GameManager.isVoice && type != GameState.Menu && maxBalls != 1)
         {
             commentator.EndGood(commentatorAudio);
             commentatorIndex = 1;
@@ -3652,7 +2838,7 @@ public class Game : MonoBehaviour
 
     public void VoiceEndGreat()
     {
-        if (GameManager.isVoice && GameManager.type != GameManager.GameState.Menu && maxBalls != 1)
+        if (GameManager.isVoice && type != GameState.Menu && maxBalls != 1)
         {
             commentator.EndGreat(commentatorAudio);
             commentatorIndex = 1;
@@ -3666,7 +2852,7 @@ public class Game : MonoBehaviour
 
     public void PerfectGame()
     {
-        if (GameManager.isVoice && GameManager.type != GameManager.GameState.Menu && maxBalls != 1)
+        if (GameManager.isVoice && type != GameState.Menu && maxBalls != 1)
         {
             commentatorAudio.clip = Resources.Load<AudioClip>("Sound/crowd-perfect");
             commentatorAudio.Play();
@@ -3685,38 +2871,38 @@ public class Game : MonoBehaviour
 
     public void VoiceStop()
     {
-        commentator.commentators1[(int)GameManager.voices1].Strike.voiceIndex = Random.Range(0, commentator.commentators1[(int)GameManager.voices1].Strike.voices.Length);
-        commentator.commentators1[(int)GameManager.voices1].Spare.voiceIndex = Random.Range(0, commentator.commentators1[(int)GameManager.voices1].Spare.voices.Length);
-        commentator.commentators1[(int)GameManager.voices1].Gutterball.voiceIndex = Random.Range(0, commentator.commentators1[(int)GameManager.voices1].Gutterball.voices.Length);
-        commentator.commentators1[(int)GameManager.voices1].Double.voiceIndex = Random.Range(0, commentator.commentators1[(int)GameManager.voices1].Double.voices.Length);
-        commentator.commentators1[(int)GameManager.voices1].Turkey.voiceIndex = Random.Range(0, commentator.commentators1[(int)GameManager.voices1].Turkey.voices.Length);
-        commentator.commentators1[(int)GameManager.voices1].Split.voiceIndex = Random.Range(0, commentator.commentators1[(int)GameManager.voices1].Split.voices.Length);
-        commentator.commentators1[(int)GameManager.voices1].Split710.voiceIndex = Random.Range(0, commentator.commentators1[(int)GameManager.voices1].Split710.voices.Length);
-        commentator.commentators1[(int)GameManager.voices1].SplitPick.voiceIndex = Random.Range(0, commentator.commentators1[(int)GameManager.voices1].SplitPick.voices.Length);
-        commentator.commentators1[(int)GameManager.voices1].Most.voiceIndex = Random.Range(0, commentator.commentators1[(int)GameManager.voices1].Most.voices.Length);
-        commentator.commentators1[(int)GameManager.voices1].Few.voiceIndex = Random.Range(0, commentator.commentators1[(int)GameManager.voices1].Few.voices.Length);
-        commentator.commentators1[(int)GameManager.voices1].One.voiceIndex = Random.Range(0, commentator.commentators1[(int)GameManager.voices1].One.voices.Length);
-        commentator.commentators1[(int)GameManager.voices1].Miss.voiceIndex = Random.Range(0, commentator.commentators1[(int)GameManager.voices1].Miss.voices.Length);
-        commentator.commentators1[(int)GameManager.voices1].EndBad.voiceIndex = Random.Range(0, commentator.commentators1[(int)GameManager.voices1].EndBad.voices.Length);
-        commentator.commentators1[(int)GameManager.voices1].EndOk.voiceIndex = Random.Range(0, commentator.commentators1[(int)GameManager.voices1].EndOk.voices.Length);
-        commentator.commentators1[(int)GameManager.voices1].EndGood.voiceIndex = Random.Range(0, commentator.commentators1[(int)GameManager.voices1].EndGood.voices.Length);
-        commentator.commentators1[(int)GameManager.voices1].EndGreat.voiceIndex = Random.Range(0, commentator.commentators1[(int)GameManager.voices1].EndGreat.voices.Length);
-        commentator.commentators2[(int)GameManager.voices2].Strike.voiceIndex = Random.Range(0, commentator.commentators2[(int)GameManager.voices2].Strike.voices.Length);
-        commentator.commentators2[(int)GameManager.voices2].Spare.voiceIndex = Random.Range(0, commentator.commentators2[(int)GameManager.voices2].Spare.voices.Length);
-        commentator.commentators2[(int)GameManager.voices2].Gutterball.voiceIndex = Random.Range(0, commentator.commentators2[(int)GameManager.voices2].Gutterball.voices.Length);
-        commentator.commentators2[(int)GameManager.voices2].Double.voiceIndex = Random.Range(0, commentator.commentators2[(int)GameManager.voices2].Double.voices.Length);
-        commentator.commentators2[(int)GameManager.voices2].Turkey.voiceIndex = Random.Range(0, commentator.commentators2[(int)GameManager.voices2].Turkey.voices.Length);
-        commentator.commentators2[(int)GameManager.voices2].Split.voiceIndex = Random.Range(0, commentator.commentators2[(int)GameManager.voices2].Split.voices.Length);
-        commentator.commentators2[(int)GameManager.voices2].Split710.voiceIndex = Random.Range(0, commentator.commentators2[(int)GameManager.voices2].Split710.voices.Length);
-        commentator.commentators2[(int)GameManager.voices2].SplitPick.voiceIndex = Random.Range(0, commentator.commentators2[(int)GameManager.voices2].SplitPick.voices.Length);
-        commentator.commentators2[(int)GameManager.voices2].Most.voiceIndex = Random.Range(0, commentator.commentators2[(int)GameManager.voices2].Most.voices.Length);
-        commentator.commentators2[(int)GameManager.voices2].Few.voiceIndex = Random.Range(0, commentator.commentators2[(int)GameManager.voices2].Few.voices.Length);
-        commentator.commentators2[(int)GameManager.voices2].One.voiceIndex = Random.Range(0, commentator.commentators2[(int)GameManager.voices2].One.voices.Length);
-        commentator.commentators2[(int)GameManager.voices2].Miss.voiceIndex = Random.Range(0, commentator.commentators2[(int)GameManager.voices2].Miss.voices.Length);
-        commentator.commentators2[(int)GameManager.voices2].EndBad.voiceIndex = Random.Range(0, commentator.commentators2[(int)GameManager.voices2].EndBad.voices.Length);
-        commentator.commentators2[(int)GameManager.voices2].EndOk.voiceIndex = Random.Range(0, commentator.commentators2[(int)GameManager.voices2].EndOk.voices.Length);
-        commentator.commentators2[(int)GameManager.voices2].EndGood.voiceIndex = Random.Range(0, commentator.commentators2[(int)GameManager.voices2].EndGood.voices.Length);
-        commentator.commentators2[(int)GameManager.voices2].EndGreat.voiceIndex = Random.Range(0, commentator.commentators2[(int)GameManager.voices2].EndGreat.voices.Length);
+        commentator.commentators1[(int)voices1].Strike.voiceIndex = Random.Range(0, commentator.commentators1[(int)voices1].Strike.voices.Length);
+        commentator.commentators1[(int)voices1].Spare.voiceIndex = Random.Range(0, commentator.commentators1[(int)voices1].Spare.voices.Length);
+        commentator.commentators1[(int)voices1].Gutterball.voiceIndex = Random.Range(0, commentator.commentators1[(int)voices1].Gutterball.voices.Length);
+        commentator.commentators1[(int)voices1].Double.voiceIndex = Random.Range(0, commentator.commentators1[(int)voices1].Double.voices.Length);
+        commentator.commentators1[(int)voices1].Turkey.voiceIndex = Random.Range(0, commentator.commentators1[(int)voices1].Turkey.voices.Length);
+        commentator.commentators1[(int)voices1].Split.voiceIndex = Random.Range(0, commentator.commentators1[(int)voices1].Split.voices.Length);
+        commentator.commentators1[(int)voices1].Split710.voiceIndex = Random.Range(0, commentator.commentators1[(int)voices1].Split710.voices.Length);
+        commentator.commentators1[(int)voices1].SplitPick.voiceIndex = Random.Range(0, commentator.commentators1[(int)voices1].SplitPick.voices.Length);
+        commentator.commentators1[(int)voices1].Most.voiceIndex = Random.Range(0, commentator.commentators1[(int)voices1].Most.voices.Length);
+        commentator.commentators1[(int)voices1].Few.voiceIndex = Random.Range(0, commentator.commentators1[(int)voices1].Few.voices.Length);
+        commentator.commentators1[(int)voices1].One.voiceIndex = Random.Range(0, commentator.commentators1[(int)voices1].One.voices.Length);
+        commentator.commentators1[(int)voices1].Miss.voiceIndex = Random.Range(0, commentator.commentators1[(int)voices1].Miss.voices.Length);
+        commentator.commentators1[(int)voices1].EndBad.voiceIndex = Random.Range(0, commentator.commentators1[(int)voices1].EndBad.voices.Length);
+        commentator.commentators1[(int)voices1].EndOk.voiceIndex = Random.Range(0, commentator.commentators1[(int)voices1].EndOk.voices.Length);
+        commentator.commentators1[(int)voices1].EndGood.voiceIndex = Random.Range(0, commentator.commentators1[(int)voices1].EndGood.voices.Length);
+        commentator.commentators1[(int)voices1].EndGreat.voiceIndex = Random.Range(0, commentator.commentators1[(int)voices1].EndGreat.voices.Length);
+        commentator.commentators2[(int)voices2].Strike.voiceIndex = Random.Range(0, commentator.commentators2[(int)voices2].Strike.voices.Length);
+        commentator.commentators2[(int)voices2].Spare.voiceIndex = Random.Range(0, commentator.commentators2[(int)voices2].Spare.voices.Length);
+        commentator.commentators2[(int)voices2].Gutterball.voiceIndex = Random.Range(0, commentator.commentators2[(int)voices2].Gutterball.voices.Length);
+        commentator.commentators2[(int)voices2].Double.voiceIndex = Random.Range(0, commentator.commentators2[(int)voices2].Double.voices.Length);
+        commentator.commentators2[(int)voices2].Turkey.voiceIndex = Random.Range(0, commentator.commentators2[(int)voices2].Turkey.voices.Length);
+        commentator.commentators2[(int)voices2].Split.voiceIndex = Random.Range(0, commentator.commentators2[(int)voices2].Split.voices.Length);
+        commentator.commentators2[(int)voices2].Split710.voiceIndex = Random.Range(0, commentator.commentators2[(int)voices2].Split710.voices.Length);
+        commentator.commentators2[(int)voices2].SplitPick.voiceIndex = Random.Range(0, commentator.commentators2[(int)voices2].SplitPick.voices.Length);
+        commentator.commentators2[(int)voices2].Most.voiceIndex = Random.Range(0, commentator.commentators2[(int)voices2].Most.voices.Length);
+        commentator.commentators2[(int)voices2].Few.voiceIndex = Random.Range(0, commentator.commentators2[(int)voices2].Few.voices.Length);
+        commentator.commentators2[(int)voices2].One.voiceIndex = Random.Range(0, commentator.commentators2[(int)voices2].One.voices.Length);
+        commentator.commentators2[(int)voices2].Miss.voiceIndex = Random.Range(0, commentator.commentators2[(int)voices2].Miss.voices.Length);
+        commentator.commentators2[(int)voices2].EndBad.voiceIndex = Random.Range(0, commentator.commentators2[(int)voices2].EndBad.voices.Length);
+        commentator.commentators2[(int)voices2].EndOk.voiceIndex = Random.Range(0, commentator.commentators2[(int)voices2].EndOk.voices.Length);
+        commentator.commentators2[(int)voices2].EndGood.voiceIndex = Random.Range(0, commentator.commentators2[(int)voices2].EndGood.voices.Length);
+        commentator.commentators2[(int)voices2].EndGreat.voiceIndex = Random.Range(0, commentator.commentators2[(int)voices2].EndGreat.voices.Length);
         commentatorIndex = 0;
         commentatorAudio.Stop();
     }
@@ -3731,7 +2917,7 @@ public class Game : MonoBehaviour
 
     public void CheerBig()
     {
-        if (GameManager.isCrowd && GameManager.type != GameManager.GameState.Menu)
+        if (GameManager.isCrowd && type != GameState.Menu)
         {
             crowd.CheerBig(crowdAudio);
         }
@@ -3739,7 +2925,7 @@ public class Game : MonoBehaviour
 
     public void CheerMed()
     {
-        if (GameManager.isCrowd && GameManager.type != GameManager.GameState.Menu)
+        if (GameManager.isCrowd && type != GameState.Menu)
         {
             crowd.CheerMed(crowdAudio);
         }
@@ -3747,7 +2933,7 @@ public class Game : MonoBehaviour
 
     public void CrowdOk()
     {
-        if (GameManager.isCrowd && GameManager.type != GameManager.GameState.Menu)
+        if (GameManager.isCrowd && type != GameState.Menu)
         {
             crowd.CrowdOk(crowdAudio);
         }
@@ -3755,7 +2941,7 @@ public class Game : MonoBehaviour
 
     public void CrowdHohum()
     {
-        if (GameManager.isCrowd && GameManager.type != GameManager.GameState.Menu)
+        if (GameManager.isCrowd && type != GameState.Menu)
         {
             crowd.CrowdHohum(crowdAudio);
         }
@@ -3763,7 +2949,7 @@ public class Game : MonoBehaviour
 
     public void CrowdCrap()
     {
-        if (GameManager.isCrowd && GameManager.type != GameManager.GameState.Menu)
+        if (GameManager.isCrowd && type != GameState.Menu)
         {
             crowd.CrowdCrap(crowdAudio);
         }
@@ -3771,7 +2957,7 @@ public class Game : MonoBehaviour
 
     public void Laugh()
     {
-        if (GameManager.isCrowd && GameManager.type != GameManager.GameState.Menu)
+        if (GameManager.isCrowd && type != GameState.Menu)
         {
             crowd.Laugh(crowdAudio);
         }
@@ -3779,11 +2965,11 @@ public class Game : MonoBehaviour
 
     public void Roll()
     {
-        if (GameManager.isCrowd && GameManager.type != GameManager.GameState.Menu)
+        if (GameManager.isCrowd && type != GameState.Menu)
         {
             crowd.Roll(rollCrowd);
         }
-        if (!isComputer && crowd.roll.Length >= 1 && crowdType == Crowds.NoCrowd && GameManager.type != GameManager.GameState.Menu)
+        if (!isComputer && crowd.roll.Length >= 1 && crowdType == Crowds.NoCrowd && type != GameState.Menu)
         {
             crowdAudio.Stop();
         }
@@ -3791,7 +2977,7 @@ public class Game : MonoBehaviour
 
     public void Oooh()
     {
-        if (GameManager.isCrowd && GameManager.type != GameManager.GameState.Menu)
+        if (GameManager.isCrowd && type != GameState.Menu)
         {
             crowd.Oooh(crowdAudio);
         }
@@ -3799,7 +2985,7 @@ public class Game : MonoBehaviour
 
     public void GutterLaugh()
     {
-        if (GameManager.isCrowd && !GameManager.isVoice && GameManager.type != GameManager.GameState.Menu)
+        if (GameManager.isCrowd && !GameManager.isVoice && type != GameState.Menu)
         {
             crowd.Laugh(commentatorAudio);
             crowdAudio.Stop();
@@ -3878,7 +3064,7 @@ public class Game : MonoBehaviour
         }
         else if (PinCounter.pinCount == 0 || throwBall == maxBalls || isResetPins)
         {
-            if (GameManager.type == GameManager.GameState.Menu)
+            if (type == GameState.Menu)
             {
                 RandomChargeBall();
             }
@@ -3919,43 +3105,43 @@ public class Game : MonoBehaviour
                 ballObject.SetActive(false);
             }
             cameraFollow.EndCam();
-            GameManager.type = GameManager.GameState.EndGame;
+            type = GameState.EndGame;
             CrowdStop();
             if (maxBalls == 1)
             {
                 winGameBalls[17].SetActive(true);
                 wins = 0;
             }
-            else if (GameManager.allPlayers == GameManager.Players.OnePlayer && maxBalls != 1)
+            else if (allPlayers == Players.OnePlayer && maxBalls != 1)
             {
-                gameManager.bowler[gameManager.turnNameIndex1].playerStrikes += strikes1;
-                gameManager.bowler[gameManager.turnNameIndex1].playerSpares += spares1;
-                gameManager.bowler[gameManager.turnNameIndex1].playerGutters += gutters1;
+                gameManager.bowler[GameManager.turnNameIndex1].playerStrikes += strikes1;
+                gameManager.bowler[GameManager.turnNameIndex1].playerSpares += spares1;
+                gameManager.bowler[GameManager.turnNameIndex1].playerGutters += gutters1;
                 winGameBalls[0].SetActive(true);
                 wins = 1;
                 if (score1 <= 99)
                 {
-                    gameManager.bowler[gameManager.turnNameIndex1].playerMoney += 0;
+                    gameManager.bowler[GameManager.turnNameIndex1].playerMoney += 0;
                 }
                 else if (score1 >= 100 && score1 <= 149)
                 {
-                    gameManager.bowler[gameManager.turnNameIndex1].playerMoney += 50;
+                    gameManager.bowler[GameManager.turnNameIndex1].playerMoney += 50;
                 }
                 else if (score1 >= 150 && score1 <= 199)
                 {
-                    gameManager.bowler[gameManager.turnNameIndex1].playerMoney += 100;
+                    gameManager.bowler[GameManager.turnNameIndex1].playerMoney += 100;
                 }
                 else if (score1 >= 200 && score1 <= 249)
                 {
-                    gameManager.bowler[gameManager.turnNameIndex1].playerMoney += 500;
+                    gameManager.bowler[GameManager.turnNameIndex1].playerMoney += 500;
                 }
                 else if (score1 >= 250 && score1 <= 299)
                 {
-                    gameManager.bowler[gameManager.turnNameIndex1].playerMoney += 1000;
+                    gameManager.bowler[GameManager.turnNameIndex1].playerMoney += 1000;
                 }
                 else if (score1 >= 300)
                 {
-                    gameManager.bowler[gameManager.turnNameIndex1].playerMoney += 5000;
+                    gameManager.bowler[GameManager.turnNameIndex1].playerMoney += 5000;
                 }
                 foreach (Text winPrize1 in winGamePrize1)
                 {
@@ -3985,38 +3171,38 @@ public class Game : MonoBehaviour
                     }
                 }
             }
-            else if (GameManager.allPlayers == GameManager.Players.TwoPlayer && maxBalls != 1)
+            else if (allPlayers == Players.TwoPlayer && maxBalls != 1)
             {
-                gameManager.bowler[gameManager.turnNameIndex1].playerStrikes += strikes1;
-                gameManager.bowler[gameManager.turnNameIndex1].playerSpares += spares1;
-                gameManager.bowler[gameManager.turnNameIndex1].playerGutters += gutters1;
-                gameManager.bowler[gameManager.turnNameIndex2].playerStrikes += strikes2;
-                gameManager.bowler[gameManager.turnNameIndex2].playerSpares += spares2;
-                gameManager.bowler[gameManager.turnNameIndex2].playerGutters += gutters2;
+                gameManager.bowler[GameManager.turnNameIndex1].playerStrikes += strikes1;
+                gameManager.bowler[GameManager.turnNameIndex1].playerSpares += spares1;
+                gameManager.bowler[GameManager.turnNameIndex1].playerGutters += gutters1;
+                gameManager.bowler[GameManager.turnNameIndex2].playerStrikes += strikes2;
+                gameManager.bowler[GameManager.turnNameIndex2].playerSpares += spares2;
+                gameManager.bowler[GameManager.turnNameIndex2].playerGutters += gutters2;
                 if (score2 < score1)
                 {
                     winGameBalls[0].SetActive(true);
                     wins = 1;
-                    gameManager.bowler[gameManager.turnNameIndex1].playerMoney += 1000;
-                    gameManager.bowler[gameManager.turnNameIndex1].playerWin++;
-                    gameManager.bowler[gameManager.turnNameIndex2].playerLoss++;
+                    gameManager.bowler[GameManager.turnNameIndex1].playerMoney += 1000;
+                    gameManager.bowler[GameManager.turnNameIndex1].playerWin++;
+                    gameManager.bowler[GameManager.turnNameIndex2].playerLoss++;
                 }
                 else if (score1 < score2)
                 {
                     winGameBalls[1].SetActive(true);
                     wins = 2;
-                    gameManager.bowler[gameManager.turnNameIndex2].playerMoney += 1000;
-                    gameManager.bowler[gameManager.turnNameIndex1].playerLoss++;
-                    gameManager.bowler[gameManager.turnNameIndex2].playerWin++;
+                    gameManager.bowler[GameManager.turnNameIndex2].playerMoney += 1000;
+                    gameManager.bowler[GameManager.turnNameIndex1].playerLoss++;
+                    gameManager.bowler[GameManager.turnNameIndex2].playerWin++;
                 }
                 else if (score1 == score2)
                 {
                     winGameBalls[5].SetActive(true);
                     wins = 1;
-                    gameManager.bowler[gameManager.turnNameIndex1].playerMoney += 1000;
-                    gameManager.bowler[gameManager.turnNameIndex2].playerMoney += 1000;
-                    gameManager.bowler[gameManager.turnNameIndex1].playerWin++;
-                    gameManager.bowler[gameManager.turnNameIndex2].playerWin++;
+                    gameManager.bowler[GameManager.turnNameIndex1].playerMoney += 1000;
+                    gameManager.bowler[GameManager.turnNameIndex2].playerMoney += 1000;
+                    gameManager.bowler[GameManager.turnNameIndex1].playerWin++;
+                    gameManager.bowler[GameManager.turnNameIndex2].playerWin++;
                 }
                 foreach (Text winPrize1 in winGamePrize1)
                 {
@@ -4027,84 +3213,84 @@ public class Game : MonoBehaviour
                     winPrize2.text = "prize: 1,000";
                 }
             }
-            else if (GameManager.allPlayers == GameManager.Players.ThreePlayer && maxBalls != 1)
+            else if (allPlayers == Players.ThreePlayer && maxBalls != 1)
             {
-                gameManager.bowler[gameManager.turnNameIndex1].playerStrikes += strikes1;
-                gameManager.bowler[gameManager.turnNameIndex1].playerSpares += spares1;
-                gameManager.bowler[gameManager.turnNameIndex1].playerGutters += gutters1;
-                gameManager.bowler[gameManager.turnNameIndex2].playerStrikes += strikes2;
-                gameManager.bowler[gameManager.turnNameIndex2].playerSpares += spares2;
-                gameManager.bowler[gameManager.turnNameIndex2].playerGutters += gutters2;
-                gameManager.bowler[gameManager.turnNameIndex3].playerStrikes += strikes3;
-                gameManager.bowler[gameManager.turnNameIndex3].playerSpares += spares3;
-                gameManager.bowler[gameManager.turnNameIndex3].playerGutters += gutters3;
+                gameManager.bowler[GameManager.turnNameIndex1].playerStrikes += strikes1;
+                gameManager.bowler[GameManager.turnNameIndex1].playerSpares += spares1;
+                gameManager.bowler[GameManager.turnNameIndex1].playerGutters += gutters1;
+                gameManager.bowler[GameManager.turnNameIndex2].playerStrikes += strikes2;
+                gameManager.bowler[GameManager.turnNameIndex2].playerSpares += spares2;
+                gameManager.bowler[GameManager.turnNameIndex2].playerGutters += gutters2;
+                gameManager.bowler[GameManager.turnNameIndex3].playerStrikes += strikes3;
+                gameManager.bowler[GameManager.turnNameIndex3].playerSpares += spares3;
+                gameManager.bowler[GameManager.turnNameIndex3].playerGutters += gutters3;
                 if (score2 < score1 && score3 < score1)
                 {
                     winGameBalls[0].SetActive(true);
                     wins = 1;
-                    gameManager.bowler[gameManager.turnNameIndex1].playerMoney += 2500;
-                    gameManager.bowler[gameManager.turnNameIndex1].playerWin++;
-                    gameManager.bowler[gameManager.turnNameIndex2].playerLoss++;
-                    gameManager.bowler[gameManager.turnNameIndex3].playerLoss++;
+                    gameManager.bowler[GameManager.turnNameIndex1].playerMoney += 2500;
+                    gameManager.bowler[GameManager.turnNameIndex1].playerWin++;
+                    gameManager.bowler[GameManager.turnNameIndex2].playerLoss++;
+                    gameManager.bowler[GameManager.turnNameIndex3].playerLoss++;
                 }
                 else if (score1 < score2 && score3 < score2)
                 {
                     winGameBalls[1].SetActive(true);
                     wins = 2;
-                    gameManager.bowler[gameManager.turnNameIndex2].playerMoney += 2500;
-                    gameManager.bowler[gameManager.turnNameIndex1].playerLoss++;
-                    gameManager.bowler[gameManager.turnNameIndex2].playerWin++;
-                    gameManager.bowler[gameManager.turnNameIndex3].playerLoss++;
+                    gameManager.bowler[GameManager.turnNameIndex2].playerMoney += 2500;
+                    gameManager.bowler[GameManager.turnNameIndex1].playerLoss++;
+                    gameManager.bowler[GameManager.turnNameIndex2].playerWin++;
+                    gameManager.bowler[GameManager.turnNameIndex3].playerLoss++;
                 }
                 else if (score1 < score3 && score2 < score3)
                 {
                     winGameBalls[2].SetActive(true);
                     wins = 3;
-                    gameManager.bowler[gameManager.turnNameIndex3].playerMoney += 2500;
-                    gameManager.bowler[gameManager.turnNameIndex1].playerLoss++;
-                    gameManager.bowler[gameManager.turnNameIndex2].playerLoss++;
-                    gameManager.bowler[gameManager.turnNameIndex3].playerWin++;
+                    gameManager.bowler[GameManager.turnNameIndex3].playerMoney += 2500;
+                    gameManager.bowler[GameManager.turnNameIndex1].playerLoss++;
+                    gameManager.bowler[GameManager.turnNameIndex2].playerLoss++;
+                    gameManager.bowler[GameManager.turnNameIndex3].playerWin++;
                 }
                 else if (score1 == score2 && score1 < score3)
                 {
                     winGameBalls[5].SetActive(true);
                     wins = 1;
-                    gameManager.bowler[gameManager.turnNameIndex1].playerMoney += 2500;
-                    gameManager.bowler[gameManager.turnNameIndex2].playerMoney += 2500;
-                    gameManager.bowler[gameManager.turnNameIndex1].playerWin++;
-                    gameManager.bowler[gameManager.turnNameIndex2].playerWin++;
-                    gameManager.bowler[gameManager.turnNameIndex3].playerLoss++;
+                    gameManager.bowler[GameManager.turnNameIndex1].playerMoney += 2500;
+                    gameManager.bowler[GameManager.turnNameIndex2].playerMoney += 2500;
+                    gameManager.bowler[GameManager.turnNameIndex1].playerWin++;
+                    gameManager.bowler[GameManager.turnNameIndex2].playerWin++;
+                    gameManager.bowler[GameManager.turnNameIndex3].playerLoss++;
                 }
                 else if (score1 < score2 && score1 == score3)
                 {
                     winGameBalls[6].SetActive(true);
                     wins = 1;
-                    gameManager.bowler[gameManager.turnNameIndex1].playerMoney += 2500;
-                    gameManager.bowler[gameManager.turnNameIndex3].playerMoney += 2500;
-                    gameManager.bowler[gameManager.turnNameIndex1].playerWin++;
-                    gameManager.bowler[gameManager.turnNameIndex2].playerLoss++;
-                    gameManager.bowler[gameManager.turnNameIndex3].playerWin++;
+                    gameManager.bowler[GameManager.turnNameIndex1].playerMoney += 2500;
+                    gameManager.bowler[GameManager.turnNameIndex3].playerMoney += 2500;
+                    gameManager.bowler[GameManager.turnNameIndex1].playerWin++;
+                    gameManager.bowler[GameManager.turnNameIndex2].playerLoss++;
+                    gameManager.bowler[GameManager.turnNameIndex3].playerWin++;
                 }
                 else if (score1 < score2 && score2 == score3)
                 {
                     winGameBalls[9].SetActive(true);
                     wins = 2;
-                    gameManager.bowler[gameManager.turnNameIndex2].playerMoney += 2500;
-                    gameManager.bowler[gameManager.turnNameIndex3].playerMoney += 2500;
-                    gameManager.bowler[gameManager.turnNameIndex1].playerLoss++;
-                    gameManager.bowler[gameManager.turnNameIndex2].playerWin++;
-                    gameManager.bowler[gameManager.turnNameIndex3].playerWin++;
+                    gameManager.bowler[GameManager.turnNameIndex2].playerMoney += 2500;
+                    gameManager.bowler[GameManager.turnNameIndex3].playerMoney += 2500;
+                    gameManager.bowler[GameManager.turnNameIndex1].playerLoss++;
+                    gameManager.bowler[GameManager.turnNameIndex2].playerWin++;
+                    gameManager.bowler[GameManager.turnNameIndex3].playerWin++;
                 }
                 else if (score1 == score2 && score1 == score3)
                 {
                     winGameBalls[12].SetActive(true);
                     wins = 1;
-                    gameManager.bowler[gameManager.turnNameIndex1].playerMoney += 2500;
-                    gameManager.bowler[gameManager.turnNameIndex2].playerMoney += 2500;
-                    gameManager.bowler[gameManager.turnNameIndex3].playerMoney += 2500;
-                    gameManager.bowler[gameManager.turnNameIndex1].playerWin++;
-                    gameManager.bowler[gameManager.turnNameIndex2].playerWin++;
-                    gameManager.bowler[gameManager.turnNameIndex3].playerWin++;
+                    gameManager.bowler[GameManager.turnNameIndex1].playerMoney += 2500;
+                    gameManager.bowler[GameManager.turnNameIndex2].playerMoney += 2500;
+                    gameManager.bowler[GameManager.turnNameIndex3].playerMoney += 2500;
+                    gameManager.bowler[GameManager.turnNameIndex1].playerWin++;
+                    gameManager.bowler[GameManager.turnNameIndex2].playerWin++;
+                    gameManager.bowler[GameManager.turnNameIndex3].playerWin++;
                 }
                 foreach (Text winPrize1 in winGamePrize1)
                 {
@@ -4119,186 +3305,186 @@ public class Game : MonoBehaviour
                     winPrize3.text = "prize: 2,500";
                 }
             }
-            else if (GameManager.allPlayers == GameManager.Players.FourPlayer && maxBalls != 1)
+            else if (allPlayers == Players.FourPlayer && maxBalls != 1)
             {
-                gameManager.bowler[gameManager.turnNameIndex1].playerStrikes += strikes1;
-                gameManager.bowler[gameManager.turnNameIndex1].playerSpares += spares1;
-                gameManager.bowler[gameManager.turnNameIndex1].playerGutters += gutters1;
-                gameManager.bowler[gameManager.turnNameIndex2].playerStrikes += strikes2;
-                gameManager.bowler[gameManager.turnNameIndex2].playerSpares += spares2;
-                gameManager.bowler[gameManager.turnNameIndex2].playerGutters += gutters2;
-                gameManager.bowler[gameManager.turnNameIndex3].playerStrikes += strikes3;
-                gameManager.bowler[gameManager.turnNameIndex3].playerSpares += spares3;
-                gameManager.bowler[gameManager.turnNameIndex3].playerGutters += gutters3;
-                gameManager.bowler[gameManager.turnNameIndex4].playerStrikes += strikes4;
-                gameManager.bowler[gameManager.turnNameIndex4].playerSpares += spares4;
-                gameManager.bowler[gameManager.turnNameIndex4].playerGutters += gutters4;
+                gameManager.bowler[GameManager.turnNameIndex1].playerStrikes += strikes1;
+                gameManager.bowler[GameManager.turnNameIndex1].playerSpares += spares1;
+                gameManager.bowler[GameManager.turnNameIndex1].playerGutters += gutters1;
+                gameManager.bowler[GameManager.turnNameIndex2].playerStrikes += strikes2;
+                gameManager.bowler[GameManager.turnNameIndex2].playerSpares += spares2;
+                gameManager.bowler[GameManager.turnNameIndex2].playerGutters += gutters2;
+                gameManager.bowler[GameManager.turnNameIndex3].playerStrikes += strikes3;
+                gameManager.bowler[GameManager.turnNameIndex3].playerSpares += spares3;
+                gameManager.bowler[GameManager.turnNameIndex3].playerGutters += gutters3;
+                gameManager.bowler[GameManager.turnNameIndex4].playerStrikes += strikes4;
+                gameManager.bowler[GameManager.turnNameIndex4].playerSpares += spares4;
+                gameManager.bowler[GameManager.turnNameIndex4].playerGutters += gutters4;
                 if (score2 < score1 && score3 < score1 && score4 < score1)
                 {
                     winGameBalls[0].SetActive(true);
                     wins = 1;
-                    gameManager.bowler[gameManager.turnNameIndex1].playerMoney += 5000;
-                    gameManager.bowler[gameManager.turnNameIndex1].playerWin++;
-                    gameManager.bowler[gameManager.turnNameIndex2].playerLoss++;
-                    gameManager.bowler[gameManager.turnNameIndex3].playerLoss++;
-                    gameManager.bowler[gameManager.turnNameIndex4].playerLoss++;
+                    gameManager.bowler[GameManager.turnNameIndex1].playerMoney += 5000;
+                    gameManager.bowler[GameManager.turnNameIndex1].playerWin++;
+                    gameManager.bowler[GameManager.turnNameIndex2].playerLoss++;
+                    gameManager.bowler[GameManager.turnNameIndex3].playerLoss++;
+                    gameManager.bowler[GameManager.turnNameIndex4].playerLoss++;
                 }
                 else if (score1 < score2 && score3 < score2 && score4 < score2)
                 {
                     winGameBalls[1].SetActive(true);
                     wins = 2;
-                    gameManager.bowler[gameManager.turnNameIndex2].playerMoney += 5000;
-                    gameManager.bowler[gameManager.turnNameIndex1].playerLoss++;
-                    gameManager.bowler[gameManager.turnNameIndex2].playerWin++;
-                    gameManager.bowler[gameManager.turnNameIndex3].playerLoss++;
-                    gameManager.bowler[gameManager.turnNameIndex4].playerLoss++;
+                    gameManager.bowler[GameManager.turnNameIndex2].playerMoney += 5000;
+                    gameManager.bowler[GameManager.turnNameIndex1].playerLoss++;
+                    gameManager.bowler[GameManager.turnNameIndex2].playerWin++;
+                    gameManager.bowler[GameManager.turnNameIndex3].playerLoss++;
+                    gameManager.bowler[GameManager.turnNameIndex4].playerLoss++;
                 }
                 else if (score1 < score3 && score2 < score3 && score4 < score3)
                 {
                     winGameBalls[2].SetActive(true);
                     wins = 3;
-                    gameManager.bowler[gameManager.turnNameIndex3].playerMoney += 5000;
-                    gameManager.bowler[gameManager.turnNameIndex1].playerLoss++;
-                    gameManager.bowler[gameManager.turnNameIndex2].playerLoss++;
-                    gameManager.bowler[gameManager.turnNameIndex3].playerWin++;
-                    gameManager.bowler[gameManager.turnNameIndex4].playerLoss++;
+                    gameManager.bowler[GameManager.turnNameIndex3].playerMoney += 5000;
+                    gameManager.bowler[GameManager.turnNameIndex1].playerLoss++;
+                    gameManager.bowler[GameManager.turnNameIndex2].playerLoss++;
+                    gameManager.bowler[GameManager.turnNameIndex3].playerWin++;
+                    gameManager.bowler[GameManager.turnNameIndex4].playerLoss++;
                 }
                 else if (score1 < score4 && score4 < score2 && score4 < score3)
                 {
                     winGameBalls[3].SetActive(true);
                     wins = 4;
-                    gameManager.bowler[gameManager.turnNameIndex4].playerMoney += 5000;
-                    gameManager.bowler[gameManager.turnNameIndex1].playerLoss++;
-                    gameManager.bowler[gameManager.turnNameIndex2].playerLoss++;
-                    gameManager.bowler[gameManager.turnNameIndex3].playerLoss++;
-                    gameManager.bowler[gameManager.turnNameIndex4].playerWin++;
+                    gameManager.bowler[GameManager.turnNameIndex4].playerMoney += 5000;
+                    gameManager.bowler[GameManager.turnNameIndex1].playerLoss++;
+                    gameManager.bowler[GameManager.turnNameIndex2].playerLoss++;
+                    gameManager.bowler[GameManager.turnNameIndex3].playerLoss++;
+                    gameManager.bowler[GameManager.turnNameIndex4].playerWin++;
                 }
                 else if (score1 == score2 && score3 < score1 && score4 < score1)
                 {
                     winGameBalls[5].SetActive(true);
                     wins = 1;
-                    gameManager.bowler[gameManager.turnNameIndex1].playerMoney += 5000;
-                    gameManager.bowler[gameManager.turnNameIndex2].playerMoney += 5000;
-                    gameManager.bowler[gameManager.turnNameIndex1].playerWin++;
-                    gameManager.bowler[gameManager.turnNameIndex2].playerWin++;
-                    gameManager.bowler[gameManager.turnNameIndex3].playerLoss++;
-                    gameManager.bowler[gameManager.turnNameIndex4].playerLoss++;
+                    gameManager.bowler[GameManager.turnNameIndex1].playerMoney += 5000;
+                    gameManager.bowler[GameManager.turnNameIndex2].playerMoney += 5000;
+                    gameManager.bowler[GameManager.turnNameIndex1].playerWin++;
+                    gameManager.bowler[GameManager.turnNameIndex2].playerWin++;
+                    gameManager.bowler[GameManager.turnNameIndex3].playerLoss++;
+                    gameManager.bowler[GameManager.turnNameIndex4].playerLoss++;
                 }
                 else if (score2 < score1 && score1 == score3 && score4 < score1)
                 {
                     winGameBalls[6].SetActive(true);
                     wins = 1;
-                    gameManager.bowler[gameManager.turnNameIndex1].playerMoney += 5000;
-                    gameManager.bowler[gameManager.turnNameIndex3].playerMoney += 5000;
-                    gameManager.bowler[gameManager.turnNameIndex1].playerWin++;
-                    gameManager.bowler[gameManager.turnNameIndex2].playerLoss++;
-                    gameManager.bowler[gameManager.turnNameIndex3].playerWin++;
-                    gameManager.bowler[gameManager.turnNameIndex4].playerLoss++;
+                    gameManager.bowler[GameManager.turnNameIndex1].playerMoney += 5000;
+                    gameManager.bowler[GameManager.turnNameIndex3].playerMoney += 5000;
+                    gameManager.bowler[GameManager.turnNameIndex1].playerWin++;
+                    gameManager.bowler[GameManager.turnNameIndex2].playerLoss++;
+                    gameManager.bowler[GameManager.turnNameIndex3].playerWin++;
+                    gameManager.bowler[GameManager.turnNameIndex4].playerLoss++;
                 }
                 else if (score2 < score1 && score3 < score1 && score1 == score4)
                 {
                     winGameBalls[7].SetActive(true);
                     wins = 1;
-                    gameManager.bowler[gameManager.turnNameIndex1].playerMoney += 5000;
-                    gameManager.bowler[gameManager.turnNameIndex4].playerMoney += 5000;
-                    gameManager.bowler[gameManager.turnNameIndex1].playerWin++;
-                    gameManager.bowler[gameManager.turnNameIndex2].playerLoss++;
-                    gameManager.bowler[gameManager.turnNameIndex3].playerLoss++;
-                    gameManager.bowler[gameManager.turnNameIndex4].playerWin++;
+                    gameManager.bowler[GameManager.turnNameIndex1].playerMoney += 5000;
+                    gameManager.bowler[GameManager.turnNameIndex4].playerMoney += 5000;
+                    gameManager.bowler[GameManager.turnNameIndex1].playerWin++;
+                    gameManager.bowler[GameManager.turnNameIndex2].playerLoss++;
+                    gameManager.bowler[GameManager.turnNameIndex3].playerLoss++;
+                    gameManager.bowler[GameManager.turnNameIndex4].playerWin++;
                 }
                 else if (score1 < score2 && score2 == score3 && score1 < score2)
                 {
                     winGameBalls[9].SetActive(true);
                     wins = 2;
-                    gameManager.bowler[gameManager.turnNameIndex2].playerMoney += 5000;
-                    gameManager.bowler[gameManager.turnNameIndex3].playerMoney += 5000;
-                    gameManager.bowler[gameManager.turnNameIndex1].playerLoss++;
-                    gameManager.bowler[gameManager.turnNameIndex2].playerWin++;
-                    gameManager.bowler[gameManager.turnNameIndex3].playerWin++;
-                    gameManager.bowler[gameManager.turnNameIndex4].playerLoss++;
+                    gameManager.bowler[GameManager.turnNameIndex2].playerMoney += 5000;
+                    gameManager.bowler[GameManager.turnNameIndex3].playerMoney += 5000;
+                    gameManager.bowler[GameManager.turnNameIndex1].playerLoss++;
+                    gameManager.bowler[GameManager.turnNameIndex2].playerWin++;
+                    gameManager.bowler[GameManager.turnNameIndex3].playerWin++;
+                    gameManager.bowler[GameManager.turnNameIndex4].playerLoss++;
                 }
                 else if (score1 < score2 && score3 < score2 && score2 == score4)
                 {
                     winGameBalls[10].SetActive(true);
                     wins = 2;
-                    gameManager.bowler[gameManager.turnNameIndex2].playerMoney += 5000;
-                    gameManager.bowler[gameManager.turnNameIndex4].playerMoney += 5000;
-                    gameManager.bowler[gameManager.turnNameIndex1].playerLoss++;
-                    gameManager.bowler[gameManager.turnNameIndex2].playerWin++;
-                    gameManager.bowler[gameManager.turnNameIndex3].playerLoss++;
-                    gameManager.bowler[gameManager.turnNameIndex4].playerWin++;
+                    gameManager.bowler[GameManager.turnNameIndex2].playerMoney += 5000;
+                    gameManager.bowler[GameManager.turnNameIndex4].playerMoney += 5000;
+                    gameManager.bowler[GameManager.turnNameIndex1].playerLoss++;
+                    gameManager.bowler[GameManager.turnNameIndex2].playerWin++;
+                    gameManager.bowler[GameManager.turnNameIndex3].playerLoss++;
+                    gameManager.bowler[GameManager.turnNameIndex4].playerWin++;
                 }
                 else if (score1 < score3 && score2 < score3 && score3 == score4)
                 {
                     winGameBalls[11].SetActive(true);
                     wins = 3;
-                    gameManager.bowler[gameManager.turnNameIndex3].playerMoney += 5000;
-                    gameManager.bowler[gameManager.turnNameIndex4].playerMoney += 5000;
-                    gameManager.bowler[gameManager.turnNameIndex1].playerLoss++;
-                    gameManager.bowler[gameManager.turnNameIndex2].playerLoss++;
-                    gameManager.bowler[gameManager.turnNameIndex3].playerWin++;
-                    gameManager.bowler[gameManager.turnNameIndex4].playerWin++;
+                    gameManager.bowler[GameManager.turnNameIndex3].playerMoney += 5000;
+                    gameManager.bowler[GameManager.turnNameIndex4].playerMoney += 5000;
+                    gameManager.bowler[GameManager.turnNameIndex1].playerLoss++;
+                    gameManager.bowler[GameManager.turnNameIndex2].playerLoss++;
+                    gameManager.bowler[GameManager.turnNameIndex3].playerWin++;
+                    gameManager.bowler[GameManager.turnNameIndex4].playerWin++;
                 }
                 else if (score1 == score2 && score1 == score3 && score4 < score1)
                 {
                     winGameBalls[12].SetActive(true);
                     wins = 1;
-                    gameManager.bowler[gameManager.turnNameIndex1].playerMoney += 5000;
-                    gameManager.bowler[gameManager.turnNameIndex2].playerMoney += 5000;
-                    gameManager.bowler[gameManager.turnNameIndex3].playerMoney += 5000;
-                    gameManager.bowler[gameManager.turnNameIndex1].playerWin++;
-                    gameManager.bowler[gameManager.turnNameIndex2].playerWin++;
-                    gameManager.bowler[gameManager.turnNameIndex3].playerWin++;
-                    gameManager.bowler[gameManager.turnNameIndex4].playerLoss++;
+                    gameManager.bowler[GameManager.turnNameIndex1].playerMoney += 5000;
+                    gameManager.bowler[GameManager.turnNameIndex2].playerMoney += 5000;
+                    gameManager.bowler[GameManager.turnNameIndex3].playerMoney += 5000;
+                    gameManager.bowler[GameManager.turnNameIndex1].playerWin++;
+                    gameManager.bowler[GameManager.turnNameIndex2].playerWin++;
+                    gameManager.bowler[GameManager.turnNameIndex3].playerWin++;
+                    gameManager.bowler[GameManager.turnNameIndex4].playerLoss++;
                 }
                 else if (score1 == score2 && score3 < score1 && score1 == score4)
                 {
                     winGameBalls[13].SetActive(true);
                     wins = 1;
-                    gameManager.bowler[gameManager.turnNameIndex1].playerMoney += 5000;
-                    gameManager.bowler[gameManager.turnNameIndex2].playerMoney += 5000;
-                    gameManager.bowler[gameManager.turnNameIndex4].playerMoney += 5000;
-                    gameManager.bowler[gameManager.turnNameIndex1].playerWin++;
-                    gameManager.bowler[gameManager.turnNameIndex2].playerWin++;
-                    gameManager.bowler[gameManager.turnNameIndex3].playerLoss++;
-                    gameManager.bowler[gameManager.turnNameIndex4].playerWin++;
+                    gameManager.bowler[GameManager.turnNameIndex1].playerMoney += 5000;
+                    gameManager.bowler[GameManager.turnNameIndex2].playerMoney += 5000;
+                    gameManager.bowler[GameManager.turnNameIndex4].playerMoney += 5000;
+                    gameManager.bowler[GameManager.turnNameIndex1].playerWin++;
+                    gameManager.bowler[GameManager.turnNameIndex2].playerWin++;
+                    gameManager.bowler[GameManager.turnNameIndex3].playerLoss++;
+                    gameManager.bowler[GameManager.turnNameIndex4].playerWin++;
                 }
                 else if (score2 < score1 && score1 == score3 && score1 == score4)
                 {
                     winGameBalls[14].SetActive(true);
                     wins = 1;
-                    gameManager.bowler[gameManager.turnNameIndex1].playerMoney += 5000;
-                    gameManager.bowler[gameManager.turnNameIndex3].playerMoney += 5000;
-                    gameManager.bowler[gameManager.turnNameIndex4].playerMoney += 5000;
-                    gameManager.bowler[gameManager.turnNameIndex1].playerWin++;
-                    gameManager.bowler[gameManager.turnNameIndex2].playerLoss++;
-                    gameManager.bowler[gameManager.turnNameIndex3].playerWin++;
-                    gameManager.bowler[gameManager.turnNameIndex4].playerWin++;
+                    gameManager.bowler[GameManager.turnNameIndex1].playerMoney += 5000;
+                    gameManager.bowler[GameManager.turnNameIndex3].playerMoney += 5000;
+                    gameManager.bowler[GameManager.turnNameIndex4].playerMoney += 5000;
+                    gameManager.bowler[GameManager.turnNameIndex1].playerWin++;
+                    gameManager.bowler[GameManager.turnNameIndex2].playerLoss++;
+                    gameManager.bowler[GameManager.turnNameIndex3].playerWin++;
+                    gameManager.bowler[GameManager.turnNameIndex4].playerWin++;
                 }
                 else if (score1 < score2 && score2 == score3 && score2 == score4)
                 {
                     winGameBalls[15].SetActive(true);
                     wins = 2;
-                    gameManager.bowler[gameManager.turnNameIndex2].playerMoney += 5000;
-                    gameManager.bowler[gameManager.turnNameIndex3].playerMoney += 5000;
-                    gameManager.bowler[gameManager.turnNameIndex4].playerMoney += 5000;
-                    gameManager.bowler[gameManager.turnNameIndex1].playerLoss++;
-                    gameManager.bowler[gameManager.turnNameIndex2].playerWin++;
-                    gameManager.bowler[gameManager.turnNameIndex3].playerWin++;
-                    gameManager.bowler[gameManager.turnNameIndex4].playerWin++;
+                    gameManager.bowler[GameManager.turnNameIndex2].playerMoney += 5000;
+                    gameManager.bowler[GameManager.turnNameIndex3].playerMoney += 5000;
+                    gameManager.bowler[GameManager.turnNameIndex4].playerMoney += 5000;
+                    gameManager.bowler[GameManager.turnNameIndex1].playerLoss++;
+                    gameManager.bowler[GameManager.turnNameIndex2].playerWin++;
+                    gameManager.bowler[GameManager.turnNameIndex3].playerWin++;
+                    gameManager.bowler[GameManager.turnNameIndex4].playerWin++;
                 }
                 else if (score1 == score2 && score1 == score3 && score1 == score4)
                 {
                     winGameBalls[16].SetActive(true);
                     wins = 1;
-                    gameManager.bowler[gameManager.turnNameIndex1].playerMoney += 5000;
-                    gameManager.bowler[gameManager.turnNameIndex2].playerMoney += 5000;
-                    gameManager.bowler[gameManager.turnNameIndex3].playerMoney += 5000;
-                    gameManager.bowler[gameManager.turnNameIndex4].playerMoney += 5000;
-                    gameManager.bowler[gameManager.turnNameIndex1].playerWin++;
-                    gameManager.bowler[gameManager.turnNameIndex2].playerWin++;
-                    gameManager.bowler[gameManager.turnNameIndex3].playerWin++;
-                    gameManager.bowler[gameManager.turnNameIndex4].playerWin++;
+                    gameManager.bowler[GameManager.turnNameIndex1].playerMoney += 5000;
+                    gameManager.bowler[GameManager.turnNameIndex2].playerMoney += 5000;
+                    gameManager.bowler[GameManager.turnNameIndex3].playerMoney += 5000;
+                    gameManager.bowler[GameManager.turnNameIndex4].playerMoney += 5000;
+                    gameManager.bowler[GameManager.turnNameIndex1].playerWin++;
+                    gameManager.bowler[GameManager.turnNameIndex2].playerWin++;
+                    gameManager.bowler[GameManager.turnNameIndex3].playerWin++;
+                    gameManager.bowler[GameManager.turnNameIndex4].playerWin++;
                 }
                 foreach (Text winPrize1 in winGamePrize1)
                 {
@@ -4317,30 +3503,30 @@ public class Game : MonoBehaviour
                     winPrize4.text = "prize: 5,000";
                 }
             }
-            else if (GameManager.allPlayers == GameManager.Players.Computer && maxBalls != 1)
+            else if (allPlayers == Players.Computer && maxBalls != 1)
             {
-                gameManager.bowler[gameManager.turnNameIndex1].playerStrikes += strikes1;
-                gameManager.bowler[gameManager.turnNameIndex1].playerSpares += spares1;
-                gameManager.bowler[gameManager.turnNameIndex1].playerGutters += gutters1;
+                gameManager.bowler[GameManager.turnNameIndex1].playerStrikes += strikes1;
+                gameManager.bowler[GameManager.turnNameIndex1].playerSpares += spares1;
+                gameManager.bowler[GameManager.turnNameIndex1].playerGutters += gutters1;
                 if (score2 < score1)
                 {
                     winGameBalls[0].SetActive(true);
                     wins = 1;
-                    gameManager.bowler[gameManager.turnNameIndex1].playerMoney += 1000;
-                    gameManager.bowler[gameManager.turnNameIndex1].playerWin++;
+                    gameManager.bowler[GameManager.turnNameIndex1].playerMoney += 1000;
+                    gameManager.bowler[GameManager.turnNameIndex1].playerWin++;
                 }
                 else if (score1 < score2)
                 {
                     winGameBalls[4].SetActive(true);
                     wins = 5;
-                    gameManager.bowler[gameManager.turnNameIndex1].playerLoss++;
+                    gameManager.bowler[GameManager.turnNameIndex1].playerLoss++;
                 }
                 else if (score1 == score2)
                 {
                     winGameBalls[8].SetActive(true);
                     wins = 1;
-                    gameManager.bowler[gameManager.turnNameIndex1].playerMoney += 1000;
-                    gameManager.bowler[gameManager.turnNameIndex1].playerWin++;
+                    gameManager.bowler[GameManager.turnNameIndex1].playerMoney += 1000;
+                    gameManager.bowler[GameManager.turnNameIndex1].playerWin++;
                 }
                 foreach (Text winPrize1 in winGamePrize1)
                 {
@@ -4353,30 +3539,26 @@ public class Game : MonoBehaviour
             }
             if (wins == 0)
             {
-                if (stage >= gameManager.chooseBalls[gameManager.unlockBallSpare].totalLock && gameManager.chooseBalls[gameManager.unlockBallSpare].isLock == 1 && gameManager.chooseBalls[gameManager.unlockBallSpare].lockType == ChooseBall.LockType.Spare)
+                if (stage >= gameManager.chooseBalls[GameManager.unlockBallSpare].totalLock && gameManager.chooseBalls[GameManager.unlockBallSpare].isLock == 1 && gameManager.chooseBalls[GameManager.unlockBallSpare].lockType == ChooseBall.LockType.Spare)
                 {
                     unlockedText.SetActive(true);
                     unlockedBallSpare.SetActive(true);
-                    PlayerPrefs.SetInt("SaveBalls" + gameManager.unlockBallSpare, 0);
-                    PlayerPrefs.SetInt("SaveBallSpare", gameManager.unlockBallSpare += 1);
+                    PlayerPrefs.SetInt("SaveBalls" + GameManager.unlockBallSpare, 0);
+                    PlayerPrefs.SetInt("SaveBallSpare", GameManager.unlockBallSpare += 1);
                 }
             }
             else if (wins == 1)
             {
-                playerNameText.text = gameManager.bowler[gameManager.turnNameIndex1].playerName;
-                ballNameText.text = gameManager.chooseBalls[gameManager.turnBalls1].ballName;
-                ballDataText.text = gameManager.chooseBalls[gameManager.turnBalls1].lbs + "lbs.  speed:" + gameManager.chooseBalls[gameManager.turnBalls1].speed + "  spin:" + gameManager.chooseBalls[gameManager.turnBalls1].spin;
-                ballRender.material = gameManager.chooseBalls[gameManager.turnBalls1].ballMat;
+                playerNameText.text = gameManager.bowler[GameManager.turnNameIndex1].playerName;
+                ballNameText.text = gameManager.chooseBalls[GameManager.turnBalls1].ballName;
+                ballDataText.text = gameManager.chooseBalls[GameManager.turnBalls1].lbs + "lbs.  speed:" + gameManager.chooseBalls[GameManager.turnBalls1].speed + "  spin:" + gameManager.chooseBalls[GameManager.turnBalls1].spin;
+                ballRender.material = gameManager.chooseBalls[GameManager.turnBalls1].ballMat;
                 playerTurn = 0;
                 turns = 0;
                 playersBallTwo[0].SetActive(true);
                 playersBallTwo[1].SetActive(false);
                 playersBallTwo[2].SetActive(false);
                 playersBallTwo[3].SetActive(false);
-                playersBallThree[0].SetActive(true);
-                playersBallThree[1].SetActive(false);
-                playersBallThree[2].SetActive(false);
-                playersBallThree[3].SetActive(false);
                 if (score1 <= 99)
                 {
                     VoiceEndBad();
@@ -4401,42 +3583,38 @@ public class Game : MonoBehaviour
                     PerfectGame();
                     winCrowd.clip = Resources.Load<AudioClip>("Sound/end-perfect");
                 }
-                if (score1 >= 200 && gameManager.isLockAlleys[(int)GameManager.alleyLockType] == 1)
+                if (score1 >= 200 && gameManager.isLockAlleys[(int)alleyLockType] == 1)
                 {
                     unlockedText.SetActive(true);
                     unlockedAlley.SetActive(true);
-                    PlayerPrefs.SetInt("SaveAlleys" + (int)GameManager.alleyLockType, 2);
+                    PlayerPrefs.SetInt("SaveAlleys" + (int)alleyLockType, 2);
                 }
-                if (GameManager.allPlayers == GameManager.Players.Computer && gameManager.chooseBalls[gameManager.compuObj[gameManager.turnBallsCPU].cpuIndex].isLock == 1)
+                if (allPlayers == Players.Computer && gameManager.chooseBalls[gameManager.compuObj[GameManager.turnBallsCPU].cpuIndex].isLock == 1)
                 {
                     unlockedText.SetActive(true);
                     unlockedBallBeat.SetActive(true);
-                    PlayerPrefs.SetInt("SaveBalls" + gameManager.compuObj[gameManager.turnBallsCPU].cpuIndex, 0);
+                    PlayerPrefs.SetInt("SaveBalls" + gameManager.compuObj[GameManager.turnBallsCPU].cpuIndex, 0);
                 }
-                if (score1 >= gameManager.chooseBalls[gameManager.unlockBallScore].totalLock && gameManager.chooseBalls[gameManager.unlockBallScore].isLock == 1 && gameManager.chooseBalls[gameManager.unlockBallScore].lockType == ChooseBall.LockType.Score)
+                if (score1 >= gameManager.chooseBalls[GameManager.unlockBallScore].totalLock && gameManager.chooseBalls[GameManager.unlockBallScore].isLock == 1 && gameManager.chooseBalls[GameManager.unlockBallScore].lockType == ChooseBall.LockType.Score)
                 {
                     unlockedText.SetActive(true);
                     unlockedBallScore.SetActive(true);
-                    PlayerPrefs.SetInt("SaveBalls" + gameManager.unlockBallScore, 0);
-                    PlayerPrefs.SetInt("SaveBallScore", gameManager.unlockBallScore += 1);
+                    PlayerPrefs.SetInt("SaveBalls" + GameManager.unlockBallScore, 0);
+                    PlayerPrefs.SetInt("SaveBallScore", GameManager.unlockBallScore += 1);
                 }
             }
             else if (wins == 2)
             {
-                playerNameText.text = gameManager.bowler[gameManager.turnNameIndex2].playerName;
-                ballNameText.text = gameManager.chooseBalls[gameManager.turnBalls2].ballName;
-                ballDataText.text = gameManager.chooseBalls[gameManager.turnBalls2].lbs + "lbs.  speed:" + gameManager.chooseBalls[gameManager.turnBalls2].speed + "  spin:" + gameManager.chooseBalls[gameManager.turnBalls2].spin;
-                ballRender.material = gameManager.chooseBalls[gameManager.turnBalls2].ballMat;
+                playerNameText.text = gameManager.bowler[GameManager.turnNameIndex2].playerName;
+                ballNameText.text = gameManager.chooseBalls[GameManager.turnBalls2].ballName;
+                ballDataText.text = gameManager.chooseBalls[GameManager.turnBalls2].lbs + "lbs.  speed:" + gameManager.chooseBalls[GameManager.turnBalls2].speed + "  spin:" + gameManager.chooseBalls[GameManager.turnBalls2].spin;
+                ballRender.material = gameManager.chooseBalls[GameManager.turnBalls2].ballMat;
                 playerTurn = 1;
                 turns = 1;
                 playersBallTwo[0].SetActive(false);
                 playersBallTwo[1].SetActive(true);
                 playersBallTwo[2].SetActive(false);
                 playersBallTwo[3].SetActive(false);
-                playersBallThree[0].SetActive(false);
-                playersBallThree[1].SetActive(true);
-                playersBallThree[2].SetActive(false);
-                playersBallThree[3].SetActive(false);
                 if (score2 <= 99)
                 {
                     VoiceEndBad();
@@ -4461,36 +3639,32 @@ public class Game : MonoBehaviour
                     PerfectGame();
                     winCrowd.clip = Resources.Load<AudioClip>("Sound/end-perfect");
                 }
-                if (score2 >= 200 && gameManager.isLockAlleys[(int)GameManager.alleyLockType] == 1)
+                if (score2 >= 200 && gameManager.isLockAlleys[(int)alleyLockType] == 1)
                 {
                     unlockedText.SetActive(true);
                     unlockedAlley.SetActive(true);
-                    PlayerPrefs.SetInt("SaveAlleys" + (int)GameManager.alleyLockType, 2);
+                    PlayerPrefs.SetInt("SaveAlleys" + (int)alleyLockType, 2);
                 }
-                if (score2 >= gameManager.chooseBalls[gameManager.unlockBallScore].totalLock && gameManager.chooseBalls[gameManager.unlockBallScore].isLock == 1 && gameManager.chooseBalls[gameManager.unlockBallScore].lockType == ChooseBall.LockType.Score)
+                if (score2 >= gameManager.chooseBalls[GameManager.unlockBallScore].totalLock && gameManager.chooseBalls[GameManager.unlockBallScore].isLock == 1 && gameManager.chooseBalls[GameManager.unlockBallScore].lockType == ChooseBall.LockType.Score)
                 {
                     unlockedText.SetActive(true);
                     unlockedBallScore.SetActive(true);
-                    PlayerPrefs.SetInt("SaveBalls" + gameManager.unlockBallScore, 0);
-                    PlayerPrefs.SetInt("SaveBallScore", gameManager.unlockBallScore += 1);
+                    PlayerPrefs.SetInt("SaveBalls" + GameManager.unlockBallScore, 0);
+                    PlayerPrefs.SetInt("SaveBallScore", GameManager.unlockBallScore += 1);
                 }
             }
             else if (wins == 3)
             {
-                playerNameText.text = gameManager.bowler[gameManager.turnNameIndex3].playerName;
-                ballNameText.text = gameManager.chooseBalls[gameManager.turnBalls3].ballName;
-                ballDataText.text = gameManager.chooseBalls[gameManager.turnBalls3].lbs + "lbs.  speed:" + gameManager.chooseBalls[gameManager.turnBalls3].speed + "  spin:" + gameManager.chooseBalls[gameManager.turnBalls3].spin;
-                ballRender.material = gameManager.chooseBalls[gameManager.turnBalls3].ballMat;
+                playerNameText.text = gameManager.bowler[GameManager.turnNameIndex3].playerName;
+                ballNameText.text = gameManager.chooseBalls[GameManager.turnBalls3].ballName;
+                ballDataText.text = gameManager.chooseBalls[GameManager.turnBalls3].lbs + "lbs.  speed:" + gameManager.chooseBalls[GameManager.turnBalls3].speed + "  spin:" + gameManager.chooseBalls[GameManager.turnBalls3].spin;
+                ballRender.material = gameManager.chooseBalls[GameManager.turnBalls3].ballMat;
                 playerTurn = 2;
                 turns = 2;
                 playersBallTwo[0].SetActive(false);
                 playersBallTwo[1].SetActive(false);
                 playersBallTwo[2].SetActive(true);
                 playersBallTwo[3].SetActive(false);
-                playersBallThree[0].SetActive(false);
-                playersBallThree[1].SetActive(false);
-                playersBallThree[2].SetActive(true);
-                playersBallThree[3].SetActive(false);
                 if (score3 <= 99)
                 {
                     VoiceEndBad();
@@ -4515,36 +3689,32 @@ public class Game : MonoBehaviour
                     PerfectGame();
                     winCrowd.clip = Resources.Load<AudioClip>("Sound/end-perfect");
                 }
-                if (score3 >= 200 && gameManager.isLockAlleys[(int)GameManager.alleyLockType] == 1)
+                if (score3 >= 200 && gameManager.isLockAlleys[(int)alleyLockType] == 1)
                 {
                     unlockedText.SetActive(true);
                     unlockedAlley.SetActive(true);
-                    PlayerPrefs.SetInt("SaveAlleys" + (int)GameManager.alleyLockType, 2);
+                    PlayerPrefs.SetInt("SaveAlleys" + (int)alleyLockType, 2);
                 }
-                if (score3 >= gameManager.chooseBalls[gameManager.unlockBallScore].totalLock && gameManager.chooseBalls[gameManager.unlockBallScore].isLock == 1 && gameManager.chooseBalls[gameManager.unlockBallScore].lockType == ChooseBall.LockType.Score)
+                if (score3 >= gameManager.chooseBalls[GameManager.unlockBallScore].totalLock && gameManager.chooseBalls[GameManager.unlockBallScore].isLock == 1 && gameManager.chooseBalls[GameManager.unlockBallScore].lockType == ChooseBall.LockType.Score)
                 {
                     unlockedText.SetActive(true);
                     unlockedBallScore.SetActive(true);
-                    PlayerPrefs.SetInt("SaveBalls" + gameManager.unlockBallScore, 0);
-                    PlayerPrefs.SetInt("SaveBallScore", gameManager.unlockBallScore += 1);
+                    PlayerPrefs.SetInt("SaveBalls" + GameManager.unlockBallScore, 0);
+                    PlayerPrefs.SetInt("SaveBallScore", GameManager.unlockBallScore += 1);
                 }
             }
             else if (wins == 4)
             {
-                playerNameText.text = gameManager.bowler[gameManager.turnNameIndex4].playerName;
-                ballNameText.text = gameManager.chooseBalls[gameManager.turnBalls4].ballName;
-                ballDataText.text = gameManager.chooseBalls[gameManager.turnBalls4].lbs + "lbs.  speed:" + gameManager.chooseBalls[gameManager.turnBalls4].speed + "  spin:" + gameManager.chooseBalls[gameManager.turnBalls4].spin;
-                ballRender.material = gameManager.chooseBalls[gameManager.turnBalls4].ballMat;
+                playerNameText.text = gameManager.bowler[GameManager.turnNameIndex4].playerName;
+                ballNameText.text = gameManager.chooseBalls[GameManager.turnBalls4].ballName;
+                ballDataText.text = gameManager.chooseBalls[GameManager.turnBalls4].lbs + "lbs.  speed:" + gameManager.chooseBalls[GameManager.turnBalls4].speed + "  spin:" + gameManager.chooseBalls[GameManager.turnBalls4].spin;
+                ballRender.material = gameManager.chooseBalls[GameManager.turnBalls4].ballMat;
                 playerTurn = 3;
                 turns = 3;
                 playersBallTwo[0].SetActive(false);
                 playersBallTwo[1].SetActive(false);
                 playersBallTwo[2].SetActive(false);
                 playersBallTwo[3].SetActive(true);
-                playersBallThree[0].SetActive(false);
-                playersBallThree[1].SetActive(false);
-                playersBallThree[2].SetActive(false);
-                playersBallThree[3].SetActive(true);
                 if (score4 <= 99)
                 {
                     VoiceEndBad();
@@ -4569,36 +3739,32 @@ public class Game : MonoBehaviour
                     PerfectGame();
                     winCrowd.clip = Resources.Load<AudioClip>("Sound/end-perfect");
                 }
-                if (score4 >= 200 && gameManager.isLockAlleys[(int)GameManager.alleyLockType] == 1)
+                if (score4 >= 200 && gameManager.isLockAlleys[(int)alleyLockType] == 1)
                 {
                     unlockedText.SetActive(true);
                     unlockedAlley.SetActive(true);
-                    PlayerPrefs.SetInt("SaveAlleys" + (int)GameManager.alleyLockType, 2);
+                    PlayerPrefs.SetInt("SaveAlleys" + (int)alleyLockType, 2);
                 }
-                if (score4 >= gameManager.chooseBalls[gameManager.unlockBallScore].totalLock && gameManager.chooseBalls[gameManager.unlockBallScore].isLock == 1 && gameManager.chooseBalls[gameManager.unlockBallScore].lockType == ChooseBall.LockType.Score)
+                if (score4 >= gameManager.chooseBalls[GameManager.unlockBallScore].totalLock && gameManager.chooseBalls[GameManager.unlockBallScore].isLock == 1 && gameManager.chooseBalls[GameManager.unlockBallScore].lockType == ChooseBall.LockType.Score)
                 {
                     unlockedText.SetActive(true);
                     unlockedBallScore.SetActive(true);
-                    PlayerPrefs.SetInt("SaveBalls" + gameManager.unlockBallScore, 0);
-                    PlayerPrefs.SetInt("SaveBallScore", gameManager.unlockBallScore += 1);
+                    PlayerPrefs.SetInt("SaveBalls" + GameManager.unlockBallScore, 0);
+                    PlayerPrefs.SetInt("SaveBallScore", GameManager.unlockBallScore += 1);
                 }
             }
             else if (wins == 5)
             {
-                playerNameText.text = gameManager.chooseBalls[gameManager.compuObj[gameManager.turnBallsCPU].cpuIndex].CPUName;
-                ballNameText.text = gameManager.chooseBalls[gameManager.compuObj[gameManager.turnBallsCPU].cpuIndex].ballName;
-                ballDataText.text = gameManager.chooseBalls[gameManager.compuObj[gameManager.turnBallsCPU].cpuIndex].lbs + "lbs.  speed:" + gameManager.chooseBalls[gameManager.compuObj[gameManager.turnBallsCPU].cpuIndex].speed + "  spin:" + gameManager.chooseBalls[gameManager.compuObj[gameManager.turnBallsCPU].cpuIndex].spin;
-                ballRender.material = gameManager.chooseBalls[gameManager.compuObj[gameManager.turnBallsCPU].cpuIndex].ballMat;
+                playerNameText.text = gameManager.chooseBalls[gameManager.compuObj[GameManager.turnBallsCPU].cpuIndex].CPUName;
+                ballNameText.text = gameManager.chooseBalls[gameManager.compuObj[GameManager.turnBallsCPU].cpuIndex].ballName;
+                ballDataText.text = gameManager.chooseBalls[gameManager.compuObj[GameManager.turnBallsCPU].cpuIndex].lbs + "lbs.  speed:" + gameManager.chooseBalls[gameManager.compuObj[GameManager.turnBallsCPU].cpuIndex].speed + "  spin:" + gameManager.chooseBalls[gameManager.compuObj[GameManager.turnBallsCPU].cpuIndex].spin;
+                ballRender.material = gameManager.chooseBalls[gameManager.compuObj[GameManager.turnBallsCPU].cpuIndex].ballMat;
                 playerTurn = 4;
                 turns = 1;
                 playersBallTwo[0].SetActive(false);
                 playersBallTwo[1].SetActive(true);
                 playersBallTwo[2].SetActive(false);
                 playersBallTwo[3].SetActive(false);
-                playersBallThree[0].SetActive(false);
-                playersBallThree[1].SetActive(true);
-                playersBallThree[2].SetActive(false);
-                playersBallThree[3].SetActive(false);
                 if (score2 <= 99)
                 {
                     VoiceEndBad();
@@ -4626,35 +3792,37 @@ public class Game : MonoBehaviour
             }
             foreach (PlayerObj playerEarn in gameManager.bowler)
             {
-                if (playerEarn.playerMoney >= gameManager.chooseBalls[gameManager.unlockBallEarn].totalLock && gameManager.chooseBalls[gameManager.unlockBallEarn].isLock == 1 && gameManager.chooseBalls[gameManager.unlockBallEarn].lockType == ChooseBall.LockType.Earn)
+                if (playerEarn.playerMoney >= gameManager.chooseBalls[GameManager.unlockBallEarn].totalLock && gameManager.chooseBalls[GameManager.unlockBallEarn].isLock == 1 && gameManager.chooseBalls[GameManager.unlockBallEarn].lockType == ChooseBall.LockType.Earn)
                 {
                     unlockedText.SetActive(true);
                     unlockedBallEarn.SetActive(true);
-                    PlayerPrefs.SetInt("SaveBalls" + gameManager.unlockBallEarn, 0);
-                    if (gameManager.unlockBallEarn < 39)
+                    PlayerPrefs.SetInt("SaveBalls" + GameManager.unlockBallEarn, 0);
+                    if (GameManager.unlockBallEarn < 39)
                     {
-                        PlayerPrefs.SetInt("SaveBallEarn", gameManager.unlockBallEarn += 5);
+                        PlayerPrefs.SetInt("SaveBallEarn", GameManager.unlockBallEarn += 5);
                     }
-                    else if (gameManager.unlockBallEarn == 39)
+                    else if (GameManager.unlockBallEarn == 39)
                     {
                         PlayerPrefs.SetInt("SaveBallEarn", 84);
                     }
                 }
             }
             FileData.SaveToSAV<PlayerObj>(gameManager.bowler, "SaveBowler");
+            GameManager.moneys += addCash;
         }
         else
         {
-            if (GameManager.type != GameManager.GameState.Menu)
+            if (type != GameState.Menu)
             {
                 if (nextTurn == 0)
                 {
-                    playerNameText.text = gameManager.bowler[gameManager.turnNameIndex1].playerName;
-                    ballNameText.text = gameManager.chooseBalls[gameManager.turnBalls1].ballName;
-                    ballDataText.text = gameManager.chooseBalls[gameManager.turnBalls1].lbs + "lbs.  speed:" + gameManager.chooseBalls[gameManager.turnBalls1].speed + "  spin:" + gameManager.chooseBalls[gameManager.turnBalls1].spin;
-                    ballRender.material = gameManager.chooseBalls[gameManager.turnBalls1].ballMat;
-                    ball.ChargeBall(gameManager.chooseBalls[gameManager.turnBalls1].ballMat, gameManager.chooseBalls[gameManager.turnBalls1].lbs, gameManager.chooseBalls[gameManager.turnBalls1].speed, gameManager.chooseBalls[gameManager.turnBalls1].spin);
+                    playerNameText.text = gameManager.bowler[GameManager.turnNameIndex1].playerName;
+                    ballNameText.text = gameManager.chooseBalls[GameManager.turnBalls1].ballName;
+                    ballDataText.text = gameManager.chooseBalls[GameManager.turnBalls1].lbs + "lbs.  speed:" + gameManager.chooseBalls[GameManager.turnBalls1].speed + "  spin:" + gameManager.chooseBalls[GameManager.turnBalls1].spin;
+                    ballRender.material = gameManager.chooseBalls[GameManager.turnBalls1].ballMat;
+                    ball.ChargeBall(gameManager.chooseBalls[GameManager.turnBalls1].ballMat, gameManager.chooseBalls[GameManager.turnBalls1].lbs, gameManager.chooseBalls[GameManager.turnBalls1].speed, gameManager.chooseBalls[GameManager.turnBalls1].spin);
                     chooseBallUI.SetActive(true);
+                    powerUpUI.SetActive(true);
                     playerTurn = 0;
                     turns = 0;
                     isComputer = false;
@@ -4662,19 +3830,16 @@ public class Game : MonoBehaviour
                     playersBallTwo[1].SetActive(false);
                     playersBallTwo[2].SetActive(false);
                     playersBallTwo[3].SetActive(false);
-                    playersBallThree[0].SetActive(true);
-                    playersBallThree[1].SetActive(false);
-                    playersBallThree[2].SetActive(false);
-                    playersBallThree[3].SetActive(false);
                 }
                 else if (nextTurn == 1)
                 {
-                    playerNameText.text = gameManager.bowler[gameManager.turnNameIndex2].playerName;
-                    ballNameText.text = gameManager.chooseBalls[gameManager.turnBalls2].ballName;
-                    ballDataText.text = gameManager.chooseBalls[gameManager.turnBalls2].lbs + "lbs.  speed:" + gameManager.chooseBalls[gameManager.turnBalls2].speed + "  spin:" + gameManager.chooseBalls[gameManager.turnBalls2].spin;
-                    ballRender.material = gameManager.chooseBalls[gameManager.turnBalls2].ballMat;
-                    ball.ChargeBall(gameManager.chooseBalls[gameManager.turnBalls2].ballMat, gameManager.chooseBalls[gameManager.turnBalls2].lbs, gameManager.chooseBalls[gameManager.turnBalls2].speed, gameManager.chooseBalls[gameManager.turnBalls2].spin);
+                    playerNameText.text = gameManager.bowler[GameManager.turnNameIndex2].playerName;
+                    ballNameText.text = gameManager.chooseBalls[GameManager.turnBalls2].ballName;
+                    ballDataText.text = gameManager.chooseBalls[GameManager.turnBalls2].lbs + "lbs.  speed:" + gameManager.chooseBalls[GameManager.turnBalls2].speed + "  spin:" + gameManager.chooseBalls[GameManager.turnBalls2].spin;
+                    ballRender.material = gameManager.chooseBalls[GameManager.turnBalls2].ballMat;
+                    ball.ChargeBall(gameManager.chooseBalls[GameManager.turnBalls2].ballMat, gameManager.chooseBalls[GameManager.turnBalls2].lbs, gameManager.chooseBalls[GameManager.turnBalls2].speed, gameManager.chooseBalls[GameManager.turnBalls2].spin);
                     chooseBallUI.SetActive(true);
+                    powerUpUI.SetActive(true);
                     playerTurn = 1;
                     turns = 1;
                     isComputer = false;
@@ -4682,19 +3847,16 @@ public class Game : MonoBehaviour
                     playersBallTwo[1].SetActive(true);
                     playersBallTwo[2].SetActive(false);
                     playersBallTwo[3].SetActive(false);
-                    playersBallThree[0].SetActive(false);
-                    playersBallThree[1].SetActive(true);
-                    playersBallThree[2].SetActive(false);
-                    playersBallThree[3].SetActive(false);
                 }
                 else if (nextTurn == 2)
                 {
-                    playerNameText.text = gameManager.bowler[gameManager.turnNameIndex3].playerName;
-                    ballNameText.text = gameManager.chooseBalls[gameManager.turnBalls3].ballName;
-                    ballDataText.text = gameManager.chooseBalls[gameManager.turnBalls3].lbs + "lbs.  speed:" + gameManager.chooseBalls[gameManager.turnBalls3].speed + "  spin:" + gameManager.chooseBalls[gameManager.turnBalls3].spin;
-                    ballRender.material = gameManager.chooseBalls[gameManager.turnBalls3].ballMat;
-                    ball.ChargeBall(gameManager.chooseBalls[gameManager.turnBalls3].ballMat, gameManager.chooseBalls[gameManager.turnBalls3].lbs, gameManager.chooseBalls[gameManager.turnBalls3].speed, gameManager.chooseBalls[gameManager.turnBalls3].spin);
+                    playerNameText.text = gameManager.bowler[GameManager.turnNameIndex3].playerName;
+                    ballNameText.text = gameManager.chooseBalls[GameManager.turnBalls3].ballName;
+                    ballDataText.text = gameManager.chooseBalls[GameManager.turnBalls3].lbs + "lbs.  speed:" + gameManager.chooseBalls[GameManager.turnBalls3].speed + "  spin:" + gameManager.chooseBalls[GameManager.turnBalls3].spin;
+                    ballRender.material = gameManager.chooseBalls[GameManager.turnBalls3].ballMat;
+                    ball.ChargeBall(gameManager.chooseBalls[GameManager.turnBalls3].ballMat, gameManager.chooseBalls[GameManager.turnBalls3].lbs, gameManager.chooseBalls[GameManager.turnBalls3].speed, gameManager.chooseBalls[GameManager.turnBalls3].spin);
                     chooseBallUI.SetActive(true);
+                    powerUpUI.SetActive(true);
                     playerTurn = 2;
                     turns = 2;
                     isComputer = false;
@@ -4702,19 +3864,16 @@ public class Game : MonoBehaviour
                     playersBallTwo[1].SetActive(false);
                     playersBallTwo[2].SetActive(true);
                     playersBallTwo[3].SetActive(false);
-                    playersBallThree[0].SetActive(false);
-                    playersBallThree[1].SetActive(false);
-                    playersBallThree[2].SetActive(true);
-                    playersBallThree[3].SetActive(false);
                 }
                 else if (nextTurn == 3)
                 {
-                    playerNameText.text = gameManager.bowler[gameManager.turnNameIndex4].playerName;
-                    ballNameText.text = gameManager.chooseBalls[gameManager.turnBalls4].ballName;
-                    ballDataText.text = gameManager.chooseBalls[gameManager.turnBalls4].lbs + "lbs.  speed:" + gameManager.chooseBalls[gameManager.turnBalls4].speed + "  spin:" + gameManager.chooseBalls[gameManager.turnBalls4].spin;
-                    ballRender.material = gameManager.chooseBalls[gameManager.turnBalls4].ballMat;
-                    ball.ChargeBall(gameManager.chooseBalls[gameManager.turnBalls4].ballMat, gameManager.chooseBalls[gameManager.turnBalls4].lbs, gameManager.chooseBalls[gameManager.turnBalls4].speed, gameManager.chooseBalls[gameManager.turnBalls4].spin);
+                    playerNameText.text = gameManager.bowler[GameManager.turnNameIndex4].playerName;
+                    ballNameText.text = gameManager.chooseBalls[GameManager.turnBalls4].ballName;
+                    ballDataText.text = gameManager.chooseBalls[GameManager.turnBalls4].lbs + "lbs.  speed:" + gameManager.chooseBalls[GameManager.turnBalls4].speed + "  spin:" + gameManager.chooseBalls[GameManager.turnBalls4].spin;
+                    ballRender.material = gameManager.chooseBalls[GameManager.turnBalls4].ballMat;
+                    ball.ChargeBall(gameManager.chooseBalls[GameManager.turnBalls4].ballMat, gameManager.chooseBalls[GameManager.turnBalls4].lbs, gameManager.chooseBalls[GameManager.turnBalls4].speed, gameManager.chooseBalls[GameManager.turnBalls4].spin);
                     chooseBallUI.SetActive(true);
+                    powerUpUI.SetActive(true);
                     playerTurn = 3;
                     turns = 3;
                     isComputer = false;
@@ -4722,19 +3881,16 @@ public class Game : MonoBehaviour
                     playersBallTwo[1].SetActive(false);
                     playersBallTwo[2].SetActive(false);
                     playersBallTwo[3].SetActive(true);
-                    playersBallThree[0].SetActive(false);
-                    playersBallThree[1].SetActive(false);
-                    playersBallThree[2].SetActive(false);
-                    playersBallThree[3].SetActive(true);
                 }
                 else if (nextTurn == 4)
                 {
-                    playerNameText.text = gameManager.chooseBalls[gameManager.compuObj[gameManager.turnBallsCPU].cpuIndex].CPUName;
-                    ballNameText.text = gameManager.chooseBalls[gameManager.compuObj[gameManager.turnBallsCPU].cpuIndex].ballName;
-                    ballDataText.text = gameManager.chooseBalls[gameManager.compuObj[gameManager.turnBallsCPU].cpuIndex].lbs + "lbs.  speed:" + gameManager.chooseBalls[gameManager.compuObj[gameManager.turnBallsCPU].cpuIndex].speed + "  spin:" + gameManager.chooseBalls[gameManager.compuObj[gameManager.turnBallsCPU].cpuIndex].spin;
-                    ballRender.material = gameManager.chooseBalls[gameManager.compuObj[gameManager.turnBallsCPU].cpuIndex].ballMat;
-                    ball.ChargeBall(gameManager.chooseBalls[gameManager.compuObj[gameManager.turnBallsCPU].cpuIndex].ballMat, gameManager.chooseBalls[gameManager.compuObj[gameManager.turnBallsCPU].cpuIndex].lbs, gameManager.chooseBalls[gameManager.compuObj[gameManager.turnBallsCPU].cpuIndex].speed, gameManager.chooseBalls[gameManager.compuObj[gameManager.turnBallsCPU].cpuIndex].spin);
+                    playerNameText.text = gameManager.chooseBalls[gameManager.compuObj[GameManager.turnBallsCPU].cpuIndex].CPUName;
+                    ballNameText.text = gameManager.chooseBalls[gameManager.compuObj[GameManager.turnBallsCPU].cpuIndex].ballName;
+                    ballDataText.text = gameManager.chooseBalls[gameManager.compuObj[GameManager.turnBallsCPU].cpuIndex].lbs + "lbs.  speed:" + gameManager.chooseBalls[gameManager.compuObj[GameManager.turnBallsCPU].cpuIndex].speed + "  spin:" + gameManager.chooseBalls[gameManager.compuObj[GameManager.turnBallsCPU].cpuIndex].spin;
+                    ballRender.material = gameManager.chooseBalls[gameManager.compuObj[GameManager.turnBallsCPU].cpuIndex].ballMat;
+                    ball.ChargeBall(gameManager.chooseBalls[gameManager.compuObj[GameManager.turnBallsCPU].cpuIndex].ballMat, gameManager.chooseBalls[gameManager.compuObj[GameManager.turnBallsCPU].cpuIndex].lbs, gameManager.chooseBalls[gameManager.compuObj[GameManager.turnBallsCPU].cpuIndex].speed, gameManager.chooseBalls[gameManager.compuObj[GameManager.turnBallsCPU].cpuIndex].spin);
                     chooseBallUI.SetActive(false);
+                    powerUpUI.SetActive(false);
                     playerTurn = 4;
                     turns = 1;
                     isComputer = true;
@@ -4742,10 +3898,6 @@ public class Game : MonoBehaviour
                     playersBallTwo[1].SetActive(true);
                     playersBallTwo[2].SetActive(false);
                     playersBallTwo[3].SetActive(false);
-                    playersBallThree[0].SetActive(false);
-                    playersBallThree[1].SetActive(true);
-                    playersBallThree[2].SetActive(false);
-                    playersBallThree[3].SetActive(false);
                 }
             }
             else
@@ -4753,7 +3905,7 @@ public class Game : MonoBehaviour
                 ball.ResetBowl();
                 ball.ResetCam();
             }
-            if (GameManager.type == GameManager.GameState.Replay)
+            if (type == GameState.Replay)
             {
                 if (isComputer)
                 {
@@ -4765,7 +3917,7 @@ public class Game : MonoBehaviour
                     ball.Reset();
                     ball.ResetCam();
                 }
-                GameManager.type = GameManager.GameState.Game;
+                type = GameState.Game;
             }
         }
     }
@@ -4780,11 +3932,11 @@ public class Game : MonoBehaviour
             }
             if (GameObject.FindObjectOfType<PinSetter>().isThunder && GameManager.isWeather)
             {
-                if (sfx != null && gameManager != null && GameManager.isSound && GameManager.type != GameManager.GameState.Menu)
+                if (sfx != null && gameManager != null && GameManager.isSound && type != GameState.Menu)
                 {
                     PlayClip("thunder");
                 }
-                if (rainPorch != null && gameManager != null && GameManager.isSound && GameManager.type != GameManager.GameState.Menu)
+                if (rainPorch != null && gameManager != null && GameManager.isSound && type != GameState.Menu)
                 {
                     rainPorch.Play();
                 }
@@ -4810,7 +3962,7 @@ public class Game : MonoBehaviour
 
     public void PlayClip(string clipName)
     {
-        if (GameManager.isSound && GameManager.type != GameManager.GameState.Menu)
+        if (GameManager.isSound && type != GameState.Menu)
         {
             sfx.PlayOneShot(Resources.Load<AudioClip>("Sound/" + clipName));
         }
@@ -4818,7 +3970,7 @@ public class Game : MonoBehaviour
 
     public void MouseDown()
     {
-        if (Input.GetMouseButtonDown(0) && GameManager.type == GameManager.GameState.Replay)
+        if (Input.GetMouseButtonDown(0) && type == GameState.Replay)
         {
             if (isAnim)
             {
@@ -4857,7 +4009,7 @@ public class Game : MonoBehaviour
                     replays[i].RigidBodyCollider(true);
                     replays[i].SetTransform(replays[i].actionReplayRecords.Count - 1);
                     replays[i].Clear();
-                    if (!isScooper && throwBall < maxBalls)
+                    if (throwBall < maxBalls)
                     {
                         replays[i].SetVelocity();
                     }
@@ -4874,7 +4026,7 @@ public class Game : MonoBehaviour
         AudioStop();
         loadingUI.SetActive(true);
         SceneManager.LoadScene("Main");
-        GameManager.type = GameManager.GameState.Intro;
+        type = GameState.Intro;
         PlayerPrefs.SetInt("PinModes", (int)GameManager.pinMode);
     }
 
@@ -4889,7 +4041,7 @@ public class Game : MonoBehaviour
         CrowdStop();
         AudioStop();
         SceneManager.LoadScene("Main");
-        GameManager.type = GameManager.GameState.Menu;
+        type = GameState.Menu;
     }
 
     public void EndGame()
@@ -4899,235 +4051,235 @@ public class Game : MonoBehaviour
             switch (GameManager.chooseAlleys)
             {
                 case GameManager.Alley.Retro:
-                    if (GameManager.allPlayers == GameManager.Players.OnePlayer)
+                    if (allPlayers == Players.OnePlayer)
                     {
-                        AddBowlerScore(gameManager.r_hs, new ScoreBowler(gameManager.bowler[gameManager.turnNameIndex1].playerName, score1, strikes1, spares1, gutters1), "HS_Retro");
+                        AddBowlerScore(gameManager.r_hs, new ScoreBowler(gameManager.bowler[GameManager.turnNameIndex1].playerName, score1, strikes1, spares1, gutters1), "HS_Retro");
                     }
-                    if (GameManager.allPlayers == GameManager.Players.TwoPlayer)
+                    if (allPlayers == Players.TwoPlayer)
                     {
-                        AddBowlerScore(gameManager.r_hs, new ScoreBowler(gameManager.bowler[gameManager.turnNameIndex1].playerName, score1, strikes1, spares1, gutters1), "HS_Retro");
-                        AddBowlerScore(gameManager.r_hs, new ScoreBowler(gameManager.bowler[gameManager.turnNameIndex2].playerName, score2, strikes2, spares2, gutters2), "HS_Retro");
+                        AddBowlerScore(gameManager.r_hs, new ScoreBowler(gameManager.bowler[GameManager.turnNameIndex1].playerName, score1, strikes1, spares1, gutters1), "HS_Retro");
+                        AddBowlerScore(gameManager.r_hs, new ScoreBowler(gameManager.bowler[GameManager.turnNameIndex2].playerName, score2, strikes2, spares2, gutters2), "HS_Retro");
                     }
-                    if (GameManager.allPlayers == GameManager.Players.ThreePlayer)
+                    if (allPlayers == Players.ThreePlayer)
                     {
-                        AddBowlerScore(gameManager.r_hs, new ScoreBowler(gameManager.bowler[gameManager.turnNameIndex1].playerName, score1, strikes1, spares1, gutters1), "HS_Retro");
-                        AddBowlerScore(gameManager.r_hs, new ScoreBowler(gameManager.bowler[gameManager.turnNameIndex2].playerName, score2, strikes2, spares2, gutters2), "HS_Retro");
-                        AddBowlerScore(gameManager.r_hs, new ScoreBowler(gameManager.bowler[gameManager.turnNameIndex3].playerName, score3, strikes3, spares3, gutters3), "HS_Retro");
+                        AddBowlerScore(gameManager.r_hs, new ScoreBowler(gameManager.bowler[GameManager.turnNameIndex1].playerName, score1, strikes1, spares1, gutters1), "HS_Retro");
+                        AddBowlerScore(gameManager.r_hs, new ScoreBowler(gameManager.bowler[GameManager.turnNameIndex2].playerName, score2, strikes2, spares2, gutters2), "HS_Retro");
+                        AddBowlerScore(gameManager.r_hs, new ScoreBowler(gameManager.bowler[GameManager.turnNameIndex3].playerName, score3, strikes3, spares3, gutters3), "HS_Retro");
                     }
-                    if (GameManager.allPlayers == GameManager.Players.FourPlayer)
+                    if (allPlayers == Players.FourPlayer)
                     {
-                        AddBowlerScore(gameManager.r_hs, new ScoreBowler(gameManager.bowler[gameManager.turnNameIndex1].playerName, score1, strikes1, spares1, gutters1), "HS_Retro");
-                        AddBowlerScore(gameManager.r_hs, new ScoreBowler(gameManager.bowler[gameManager.turnNameIndex2].playerName, score2, strikes2, spares2, gutters2), "HS_Retro");
-                        AddBowlerScore(gameManager.r_hs, new ScoreBowler(gameManager.bowler[gameManager.turnNameIndex3].playerName, score3, strikes3, spares3, gutters3), "HS_Retro");
-                        AddBowlerScore(gameManager.r_hs, new ScoreBowler(gameManager.bowler[gameManager.turnNameIndex4].playerName, score4, strikes4, spares4, gutters4), "HS_Retro");
+                        AddBowlerScore(gameManager.r_hs, new ScoreBowler(gameManager.bowler[GameManager.turnNameIndex1].playerName, score1, strikes1, spares1, gutters1), "HS_Retro");
+                        AddBowlerScore(gameManager.r_hs, new ScoreBowler(gameManager.bowler[GameManager.turnNameIndex2].playerName, score2, strikes2, spares2, gutters2), "HS_Retro");
+                        AddBowlerScore(gameManager.r_hs, new ScoreBowler(gameManager.bowler[GameManager.turnNameIndex3].playerName, score3, strikes3, spares3, gutters3), "HS_Retro");
+                        AddBowlerScore(gameManager.r_hs, new ScoreBowler(gameManager.bowler[GameManager.turnNameIndex4].playerName, score4, strikes4, spares4, gutters4), "HS_Retro");
                     }
-                    if (GameManager.allPlayers == GameManager.Players.Computer)
+                    if (allPlayers == Players.Computer)
                     {
-                        AddBowlerScore(gameManager.r_hs, new ScoreBowler(gameManager.bowler[gameManager.turnNameIndex1].playerName, score1, strikes1, spares1, gutters1), "HS_Retro");
-                        AddBowlerScore(gameManager.r_hs, new ScoreBowler(gameManager.chooseBalls[gameManager.compuObj[gameManager.turnBallsCPU].cpuIndex].CPUName, score2, strikes2, spares2, gutters2), "HS_Retro");
+                        AddBowlerScore(gameManager.r_hs, new ScoreBowler(gameManager.bowler[GameManager.turnNameIndex1].playerName, score1, strikes1, spares1, gutters1), "HS_Retro");
+                        AddBowlerScore(gameManager.r_hs, new ScoreBowler(gameManager.chooseBalls[gameManager.compuObj[GameManager.turnBallsCPU].cpuIndex].CPUName, score2, strikes2, spares2, gutters2), "HS_Retro");
                     }
                     break;
                 case GameManager.Alley.Wacky:
-                    if (GameManager.allPlayers == GameManager.Players.OnePlayer)
+                    if (allPlayers == Players.OnePlayer)
                     {
-                        AddBowlerScore(gameManager.w_hs, new ScoreBowler(gameManager.bowler[gameManager.turnNameIndex1].playerName, score1, strikes1, spares1, gutters1), "HS_Wacky");
+                        AddBowlerScore(gameManager.w_hs, new ScoreBowler(gameManager.bowler[GameManager.turnNameIndex1].playerName, score1, strikes1, spares1, gutters1), "HS_Wacky");
                     }
-                    if (GameManager.allPlayers == GameManager.Players.TwoPlayer)
+                    if (allPlayers == Players.TwoPlayer)
                     {
-                        AddBowlerScore(gameManager.w_hs, new ScoreBowler(gameManager.bowler[gameManager.turnNameIndex1].playerName, score1, strikes1, spares1, gutters1), "HS_Wacky");
-                        AddBowlerScore(gameManager.w_hs, new ScoreBowler(gameManager.bowler[gameManager.turnNameIndex2].playerName, score2, strikes2, spares2, gutters2), "HS_Wacky");
+                        AddBowlerScore(gameManager.w_hs, new ScoreBowler(gameManager.bowler[GameManager.turnNameIndex1].playerName, score1, strikes1, spares1, gutters1), "HS_Wacky");
+                        AddBowlerScore(gameManager.w_hs, new ScoreBowler(gameManager.bowler[GameManager.turnNameIndex2].playerName, score2, strikes2, spares2, gutters2), "HS_Wacky");
                     }
-                    if (GameManager.allPlayers == GameManager.Players.ThreePlayer)
+                    if (allPlayers == Players.ThreePlayer)
                     {
-                        AddBowlerScore(gameManager.w_hs, new ScoreBowler(gameManager.bowler[gameManager.turnNameIndex1].playerName, score1, strikes1, spares1, gutters1), "HS_Wacky");
-                        AddBowlerScore(gameManager.w_hs, new ScoreBowler(gameManager.bowler[gameManager.turnNameIndex2].playerName, score2, strikes2, spares2, gutters2), "HS_Wacky");
-                        AddBowlerScore(gameManager.w_hs, new ScoreBowler(gameManager.bowler[gameManager.turnNameIndex3].playerName, score3, strikes3, spares3, gutters3), "HS_Wacky");
+                        AddBowlerScore(gameManager.w_hs, new ScoreBowler(gameManager.bowler[GameManager.turnNameIndex1].playerName, score1, strikes1, spares1, gutters1), "HS_Wacky");
+                        AddBowlerScore(gameManager.w_hs, new ScoreBowler(gameManager.bowler[GameManager.turnNameIndex2].playerName, score2, strikes2, spares2, gutters2), "HS_Wacky");
+                        AddBowlerScore(gameManager.w_hs, new ScoreBowler(gameManager.bowler[GameManager.turnNameIndex3].playerName, score3, strikes3, spares3, gutters3), "HS_Wacky");
                     }
-                    if (GameManager.allPlayers == GameManager.Players.FourPlayer)
+                    if (allPlayers == Players.FourPlayer)
                     {
-                        AddBowlerScore(gameManager.w_hs, new ScoreBowler(gameManager.bowler[gameManager.turnNameIndex1].playerName, score1, strikes1, spares1, gutters1), "HS_Wacky");
-                        AddBowlerScore(gameManager.w_hs, new ScoreBowler(gameManager.bowler[gameManager.turnNameIndex2].playerName, score2, strikes2, spares2, gutters2), "HS_Wacky");
-                        AddBowlerScore(gameManager.w_hs, new ScoreBowler(gameManager.bowler[gameManager.turnNameIndex3].playerName, score3, strikes3, spares3, gutters3), "HS_Wacky");
-                        AddBowlerScore(gameManager.w_hs, new ScoreBowler(gameManager.bowler[gameManager.turnNameIndex4].playerName, score4, strikes4, spares4, gutters4), "HS_Wacky");
+                        AddBowlerScore(gameManager.w_hs, new ScoreBowler(gameManager.bowler[GameManager.turnNameIndex1].playerName, score1, strikes1, spares1, gutters1), "HS_Wacky");
+                        AddBowlerScore(gameManager.w_hs, new ScoreBowler(gameManager.bowler[GameManager.turnNameIndex2].playerName, score2, strikes2, spares2, gutters2), "HS_Wacky");
+                        AddBowlerScore(gameManager.w_hs, new ScoreBowler(gameManager.bowler[GameManager.turnNameIndex3].playerName, score3, strikes3, spares3, gutters3), "HS_Wacky");
+                        AddBowlerScore(gameManager.w_hs, new ScoreBowler(gameManager.bowler[GameManager.turnNameIndex4].playerName, score4, strikes4, spares4, gutters4), "HS_Wacky");
                     }
-                    if (GameManager.allPlayers == GameManager.Players.Computer)
+                    if (allPlayers == Players.Computer)
                     {
-                        AddBowlerScore(gameManager.w_hs, new ScoreBowler(gameManager.bowler[gameManager.turnNameIndex1].playerName, score1, strikes1, spares1, gutters1), "HS_Wacky");
-                        AddBowlerScore(gameManager.w_hs, new ScoreBowler(gameManager.chooseBalls[gameManager.compuObj[gameManager.turnBallsCPU].cpuIndex].CPUName, score2, strikes2, spares2, gutters2), "HS_Wacky");
+                        AddBowlerScore(gameManager.w_hs, new ScoreBowler(gameManager.bowler[GameManager.turnNameIndex1].playerName, score1, strikes1, spares1, gutters1), "HS_Wacky");
+                        AddBowlerScore(gameManager.w_hs, new ScoreBowler(gameManager.chooseBalls[gameManager.compuObj[GameManager.turnBallsCPU].cpuIndex].CPUName, score2, strikes2, spares2, gutters2), "HS_Wacky");
                     }
                     break;
                 case GameManager.Alley.Iceberg:
-                    if (GameManager.allPlayers == GameManager.Players.OnePlayer)
+                    if (allPlayers == Players.OnePlayer)
                     {
-                        AddBowlerScore(gameManager.i_hs, new ScoreBowler(gameManager.bowler[gameManager.turnNameIndex1].playerName, score1, strikes1, spares1, gutters1), "HS_Iceberg");
+                        AddBowlerScore(gameManager.i_hs, new ScoreBowler(gameManager.bowler[GameManager.turnNameIndex1].playerName, score1, strikes1, spares1, gutters1), "HS_Iceberg");
                     }
-                    if (GameManager.allPlayers == GameManager.Players.TwoPlayer)
+                    if (allPlayers == Players.TwoPlayer)
                     {
-                        AddBowlerScore(gameManager.i_hs, new ScoreBowler(gameManager.bowler[gameManager.turnNameIndex1].playerName, score1, strikes1, spares1, gutters1), "HS_Iceberg");
-                        AddBowlerScore(gameManager.i_hs, new ScoreBowler(gameManager.bowler[gameManager.turnNameIndex2].playerName, score2, strikes2, spares2, gutters2), "HS_Iceberg");
+                        AddBowlerScore(gameManager.i_hs, new ScoreBowler(gameManager.bowler[GameManager.turnNameIndex1].playerName, score1, strikes1, spares1, gutters1), "HS_Iceberg");
+                        AddBowlerScore(gameManager.i_hs, new ScoreBowler(gameManager.bowler[GameManager.turnNameIndex2].playerName, score2, strikes2, spares2, gutters2), "HS_Iceberg");
                     }
-                    if (GameManager.allPlayers == GameManager.Players.ThreePlayer)
+                    if (allPlayers == Players.ThreePlayer)
                     {
-                        AddBowlerScore(gameManager.i_hs, new ScoreBowler(gameManager.bowler[gameManager.turnNameIndex1].playerName, score1, strikes1, spares1, gutters1), "HS_Iceberg");
-                        AddBowlerScore(gameManager.i_hs, new ScoreBowler(gameManager.bowler[gameManager.turnNameIndex2].playerName, score2, strikes2, spares2, gutters2), "HS_Iceberg");
-                        AddBowlerScore(gameManager.i_hs, new ScoreBowler(gameManager.bowler[gameManager.turnNameIndex3].playerName, score3, strikes3, spares3, gutters3), "HS_Iceberg");
+                        AddBowlerScore(gameManager.i_hs, new ScoreBowler(gameManager.bowler[GameManager.turnNameIndex1].playerName, score1, strikes1, spares1, gutters1), "HS_Iceberg");
+                        AddBowlerScore(gameManager.i_hs, new ScoreBowler(gameManager.bowler[GameManager.turnNameIndex2].playerName, score2, strikes2, spares2, gutters2), "HS_Iceberg");
+                        AddBowlerScore(gameManager.i_hs, new ScoreBowler(gameManager.bowler[GameManager.turnNameIndex3].playerName, score3, strikes3, spares3, gutters3), "HS_Iceberg");
                     }
-                    if (GameManager.allPlayers == GameManager.Players.FourPlayer)
+                    if (allPlayers == Players.FourPlayer)
                     {
-                        AddBowlerScore(gameManager.i_hs, new ScoreBowler(gameManager.bowler[gameManager.turnNameIndex1].playerName, score1, strikes1, spares1, gutters1), "HS_Iceberg");
-                        AddBowlerScore(gameManager.i_hs, new ScoreBowler(gameManager.bowler[gameManager.turnNameIndex2].playerName, score2, strikes2, spares2, gutters2), "HS_Iceberg");
-                        AddBowlerScore(gameManager.i_hs, new ScoreBowler(gameManager.bowler[gameManager.turnNameIndex3].playerName, score3, strikes3, spares3, gutters3), "HS_Iceberg");
-                        AddBowlerScore(gameManager.i_hs, new ScoreBowler(gameManager.bowler[gameManager.turnNameIndex4].playerName, score4, strikes4, spares4, gutters4), "HS_Iceberg");
+                        AddBowlerScore(gameManager.i_hs, new ScoreBowler(gameManager.bowler[GameManager.turnNameIndex1].playerName, score1, strikes1, spares1, gutters1), "HS_Iceberg");
+                        AddBowlerScore(gameManager.i_hs, new ScoreBowler(gameManager.bowler[GameManager.turnNameIndex2].playerName, score2, strikes2, spares2, gutters2), "HS_Iceberg");
+                        AddBowlerScore(gameManager.i_hs, new ScoreBowler(gameManager.bowler[GameManager.turnNameIndex3].playerName, score3, strikes3, spares3, gutters3), "HS_Iceberg");
+                        AddBowlerScore(gameManager.i_hs, new ScoreBowler(gameManager.bowler[GameManager.turnNameIndex4].playerName, score4, strikes4, spares4, gutters4), "HS_Iceberg");
                     }
-                    if (GameManager.allPlayers == GameManager.Players.Computer)
+                    if (allPlayers == Players.Computer)
                     {
-                        AddBowlerScore(gameManager.i_hs, new ScoreBowler(gameManager.bowler[gameManager.turnNameIndex1].playerName, score1, strikes1, spares1, gutters1), "HS_Iceberg");
-                        AddBowlerScore(gameManager.i_hs, new ScoreBowler(gameManager.chooseBalls[gameManager.compuObj[gameManager.turnBallsCPU].cpuIndex].CPUName, score2, strikes2, spares2, gutters2), "HS_Iceberg");
+                        AddBowlerScore(gameManager.i_hs, new ScoreBowler(gameManager.bowler[GameManager.turnNameIndex1].playerName, score1, strikes1, spares1, gutters1), "HS_Iceberg");
+                        AddBowlerScore(gameManager.i_hs, new ScoreBowler(gameManager.chooseBalls[gameManager.compuObj[GameManager.turnBallsCPU].cpuIndex].CPUName, score2, strikes2, spares2, gutters2), "HS_Iceberg");
                     }
                     break;
                 case GameManager.Alley.Jungle:
-                    if (GameManager.allPlayers == GameManager.Players.OnePlayer)
+                    if (allPlayers == Players.OnePlayer)
                     {
-                        AddBowlerScore(gameManager.j_hs, new ScoreBowler(gameManager.bowler[gameManager.turnNameIndex1].playerName, score1, strikes1, spares1, gutters1), "HS_Jungle");
+                        AddBowlerScore(gameManager.j_hs, new ScoreBowler(gameManager.bowler[GameManager.turnNameIndex1].playerName, score1, strikes1, spares1, gutters1), "HS_Jungle");
                     }
-                    if (GameManager.allPlayers == GameManager.Players.TwoPlayer)
+                    if (allPlayers == Players.TwoPlayer)
                     {
-                        AddBowlerScore(gameManager.j_hs, new ScoreBowler(gameManager.bowler[gameManager.turnNameIndex1].playerName, score1, strikes1, spares1, gutters1), "HS_Jungle");
-                        AddBowlerScore(gameManager.j_hs, new ScoreBowler(gameManager.bowler[gameManager.turnNameIndex2].playerName, score2, strikes2, spares2, gutters2), "HS_Jungle");
+                        AddBowlerScore(gameManager.j_hs, new ScoreBowler(gameManager.bowler[GameManager.turnNameIndex1].playerName, score1, strikes1, spares1, gutters1), "HS_Jungle");
+                        AddBowlerScore(gameManager.j_hs, new ScoreBowler(gameManager.bowler[GameManager.turnNameIndex2].playerName, score2, strikes2, spares2, gutters2), "HS_Jungle");
                     }
-                    if (GameManager.allPlayers == GameManager.Players.ThreePlayer)
+                    if (allPlayers == Players.ThreePlayer)
                     {
-                        AddBowlerScore(gameManager.j_hs, new ScoreBowler(gameManager.bowler[gameManager.turnNameIndex1].playerName, score1, strikes1, spares1, gutters1), "HS_Jungle");
-                        AddBowlerScore(gameManager.j_hs, new ScoreBowler(gameManager.bowler[gameManager.turnNameIndex2].playerName, score2, strikes2, spares2, gutters2), "HS_Jungle");
-                        AddBowlerScore(gameManager.j_hs, new ScoreBowler(gameManager.bowler[gameManager.turnNameIndex3].playerName, score3, strikes3, spares3, gutters3), "HS_Jungle");
+                        AddBowlerScore(gameManager.j_hs, new ScoreBowler(gameManager.bowler[GameManager.turnNameIndex1].playerName, score1, strikes1, spares1, gutters1), "HS_Jungle");
+                        AddBowlerScore(gameManager.j_hs, new ScoreBowler(gameManager.bowler[GameManager.turnNameIndex2].playerName, score2, strikes2, spares2, gutters2), "HS_Jungle");
+                        AddBowlerScore(gameManager.j_hs, new ScoreBowler(gameManager.bowler[GameManager.turnNameIndex3].playerName, score3, strikes3, spares3, gutters3), "HS_Jungle");
                     }
-                    if (GameManager.allPlayers == GameManager.Players.FourPlayer)
+                    if (allPlayers == Players.FourPlayer)
                     {
-                        AddBowlerScore(gameManager.j_hs, new ScoreBowler(gameManager.bowler[gameManager.turnNameIndex1].playerName, score1, strikes1, spares1, gutters1), "HS_Jungle");
-                        AddBowlerScore(gameManager.j_hs, new ScoreBowler(gameManager.bowler[gameManager.turnNameIndex2].playerName, score2, strikes2, spares2, gutters2), "HS_Jungle");
-                        AddBowlerScore(gameManager.j_hs, new ScoreBowler(gameManager.bowler[gameManager.turnNameIndex3].playerName, score3, strikes3, spares3, gutters3), "HS_Jungle");
-                        AddBowlerScore(gameManager.j_hs, new ScoreBowler(gameManager.bowler[gameManager.turnNameIndex4].playerName, score4, strikes4, spares4, gutters4), "HS_Jungle");
+                        AddBowlerScore(gameManager.j_hs, new ScoreBowler(gameManager.bowler[GameManager.turnNameIndex1].playerName, score1, strikes1, spares1, gutters1), "HS_Jungle");
+                        AddBowlerScore(gameManager.j_hs, new ScoreBowler(gameManager.bowler[GameManager.turnNameIndex2].playerName, score2, strikes2, spares2, gutters2), "HS_Jungle");
+                        AddBowlerScore(gameManager.j_hs, new ScoreBowler(gameManager.bowler[GameManager.turnNameIndex3].playerName, score3, strikes3, spares3, gutters3), "HS_Jungle");
+                        AddBowlerScore(gameManager.j_hs, new ScoreBowler(gameManager.bowler[GameManager.turnNameIndex4].playerName, score4, strikes4, spares4, gutters4), "HS_Jungle");
                     }
-                    if (GameManager.allPlayers == GameManager.Players.Computer)
+                    if (allPlayers == Players.Computer)
                     {
-                        AddBowlerScore(gameManager.j_hs, new ScoreBowler(gameManager.bowler[gameManager.turnNameIndex1].playerName, score1, strikes1, spares1, gutters1), "HS_Jungle");
-                        AddBowlerScore(gameManager.j_hs, new ScoreBowler(gameManager.chooseBalls[gameManager.compuObj[gameManager.turnBallsCPU].cpuIndex].CPUName, score2, strikes2, spares2, gutters2), "HS_Jungle");
+                        AddBowlerScore(gameManager.j_hs, new ScoreBowler(gameManager.bowler[GameManager.turnNameIndex1].playerName, score1, strikes1, spares1, gutters1), "HS_Jungle");
+                        AddBowlerScore(gameManager.j_hs, new ScoreBowler(gameManager.chooseBalls[gameManager.compuObj[GameManager.turnBallsCPU].cpuIndex].CPUName, score2, strikes2, spares2, gutters2), "HS_Jungle");
                     }
                     break;
                 case GameManager.Alley.Zen:
-                    if (GameManager.allPlayers == GameManager.Players.OnePlayer)
+                    if (allPlayers == Players.OnePlayer)
                     {
-                        AddBowlerScore(gameManager.z_hs, new ScoreBowler(gameManager.bowler[gameManager.turnNameIndex1].playerName, score1, strikes1, spares1, gutters1), "HS_Zen");
+                        AddBowlerScore(gameManager.z_hs, new ScoreBowler(gameManager.bowler[GameManager.turnNameIndex1].playerName, score1, strikes1, spares1, gutters1), "HS_Zen");
                     }
-                    if (GameManager.allPlayers == GameManager.Players.TwoPlayer)
+                    if (allPlayers == Players.TwoPlayer)
                     {
-                        AddBowlerScore(gameManager.z_hs, new ScoreBowler(gameManager.bowler[gameManager.turnNameIndex1].playerName, score1, strikes1, spares1, gutters1), "HS_Zen");
-                        AddBowlerScore(gameManager.z_hs, new ScoreBowler(gameManager.bowler[gameManager.turnNameIndex2].playerName, score2, strikes2, spares2, gutters2), "HS_Zen");
+                        AddBowlerScore(gameManager.z_hs, new ScoreBowler(gameManager.bowler[GameManager.turnNameIndex1].playerName, score1, strikes1, spares1, gutters1), "HS_Zen");
+                        AddBowlerScore(gameManager.z_hs, new ScoreBowler(gameManager.bowler[GameManager.turnNameIndex2].playerName, score2, strikes2, spares2, gutters2), "HS_Zen");
                     }
-                    if (GameManager.allPlayers == GameManager.Players.ThreePlayer)
+                    if (allPlayers == Players.ThreePlayer)
                     {
-                        AddBowlerScore(gameManager.z_hs, new ScoreBowler(gameManager.bowler[gameManager.turnNameIndex1].playerName, score1, strikes1, spares1, gutters1), "HS_Zen");
-                        AddBowlerScore(gameManager.z_hs, new ScoreBowler(gameManager.bowler[gameManager.turnNameIndex2].playerName, score2, strikes2, spares2, gutters2), "HS_Zen");
-                        AddBowlerScore(gameManager.z_hs, new ScoreBowler(gameManager.bowler[gameManager.turnNameIndex3].playerName, score3, strikes3, spares3, gutters3), "HS_Zen");
+                        AddBowlerScore(gameManager.z_hs, new ScoreBowler(gameManager.bowler[GameManager.turnNameIndex1].playerName, score1, strikes1, spares1, gutters1), "HS_Zen");
+                        AddBowlerScore(gameManager.z_hs, new ScoreBowler(gameManager.bowler[GameManager.turnNameIndex2].playerName, score2, strikes2, spares2, gutters2), "HS_Zen");
+                        AddBowlerScore(gameManager.z_hs, new ScoreBowler(gameManager.bowler[GameManager.turnNameIndex3].playerName, score3, strikes3, spares3, gutters3), "HS_Zen");
                     }
-                    if (GameManager.allPlayers == GameManager.Players.FourPlayer)
+                    if (allPlayers == Players.FourPlayer)
                     {
-                        AddBowlerScore(gameManager.z_hs, new ScoreBowler(gameManager.bowler[gameManager.turnNameIndex1].playerName, score1, strikes1, spares1, gutters1), "HS_Zen");
-                        AddBowlerScore(gameManager.z_hs, new ScoreBowler(gameManager.bowler[gameManager.turnNameIndex2].playerName, score2, strikes2, spares2, gutters2), "HS_Zen");
-                        AddBowlerScore(gameManager.z_hs, new ScoreBowler(gameManager.bowler[gameManager.turnNameIndex3].playerName, score3, strikes3, spares3, gutters3), "HS_Zen");
-                        AddBowlerScore(gameManager.z_hs, new ScoreBowler(gameManager.bowler[gameManager.turnNameIndex4].playerName, score4, strikes4, spares4, gutters4), "HS_Zen");
+                        AddBowlerScore(gameManager.z_hs, new ScoreBowler(gameManager.bowler[GameManager.turnNameIndex1].playerName, score1, strikes1, spares1, gutters1), "HS_Zen");
+                        AddBowlerScore(gameManager.z_hs, new ScoreBowler(gameManager.bowler[GameManager.turnNameIndex2].playerName, score2, strikes2, spares2, gutters2), "HS_Zen");
+                        AddBowlerScore(gameManager.z_hs, new ScoreBowler(gameManager.bowler[GameManager.turnNameIndex3].playerName, score3, strikes3, spares3, gutters3), "HS_Zen");
+                        AddBowlerScore(gameManager.z_hs, new ScoreBowler(gameManager.bowler[GameManager.turnNameIndex4].playerName, score4, strikes4, spares4, gutters4), "HS_Zen");
                     }
-                    if (GameManager.allPlayers == GameManager.Players.Computer)
+                    if (allPlayers == Players.Computer)
                     {
-                        AddBowlerScore(gameManager.z_hs, new ScoreBowler(gameManager.bowler[gameManager.turnNameIndex1].playerName, score1, strikes1, spares1, gutters1), "HS_Zen");
-                        AddBowlerScore(gameManager.z_hs, new ScoreBowler(gameManager.chooseBalls[gameManager.compuObj[gameManager.turnBallsCPU].cpuIndex].CPUName, score2, strikes2, spares2, gutters2), "HS_Zen");
+                        AddBowlerScore(gameManager.z_hs, new ScoreBowler(gameManager.bowler[GameManager.turnNameIndex1].playerName, score1, strikes1, spares1, gutters1), "HS_Zen");
+                        AddBowlerScore(gameManager.z_hs, new ScoreBowler(gameManager.chooseBalls[gameManager.compuObj[GameManager.turnBallsCPU].cpuIndex].CPUName, score2, strikes2, spares2, gutters2), "HS_Zen");
                     }
                     break;
                 case GameManager.Alley.Cosmic:
-                    if (GameManager.allPlayers == GameManager.Players.OnePlayer)
+                    if (allPlayers == Players.OnePlayer)
                     {
-                        AddBowlerScore(gameManager.c_hs, new ScoreBowler(gameManager.bowler[gameManager.turnNameIndex1].playerName, score1, strikes1, spares1, gutters1), "HS_Cosmic");
+                        AddBowlerScore(gameManager.c_hs, new ScoreBowler(gameManager.bowler[GameManager.turnNameIndex1].playerName, score1, strikes1, spares1, gutters1), "HS_Cosmic");
                     }
-                    if (GameManager.allPlayers == GameManager.Players.TwoPlayer)
+                    if (allPlayers == Players.TwoPlayer)
                     {
-                        AddBowlerScore(gameManager.c_hs, new ScoreBowler(gameManager.bowler[gameManager.turnNameIndex1].playerName, score1, strikes1, spares1, gutters1), "HS_Cosmic");
-                        AddBowlerScore(gameManager.c_hs, new ScoreBowler(gameManager.bowler[gameManager.turnNameIndex2].playerName, score2, strikes2, spares2, gutters2), "HS_Cosmic");
+                        AddBowlerScore(gameManager.c_hs, new ScoreBowler(gameManager.bowler[GameManager.turnNameIndex1].playerName, score1, strikes1, spares1, gutters1), "HS_Cosmic");
+                        AddBowlerScore(gameManager.c_hs, new ScoreBowler(gameManager.bowler[GameManager.turnNameIndex2].playerName, score2, strikes2, spares2, gutters2), "HS_Cosmic");
                     }
-                    if (GameManager.allPlayers == GameManager.Players.ThreePlayer)
+                    if (allPlayers == Players.ThreePlayer)
                     {
-                        AddBowlerScore(gameManager.c_hs, new ScoreBowler(gameManager.bowler[gameManager.turnNameIndex1].playerName, score1, strikes1, spares1, gutters1), "HS_Cosmic");
-                        AddBowlerScore(gameManager.c_hs, new ScoreBowler(gameManager.bowler[gameManager.turnNameIndex2].playerName, score2, strikes2, spares2, gutters2), "HS_Cosmic");
-                        AddBowlerScore(gameManager.c_hs, new ScoreBowler(gameManager.bowler[gameManager.turnNameIndex3].playerName, score3, strikes3, spares3, gutters3), "HS_Cosmic");
+                        AddBowlerScore(gameManager.c_hs, new ScoreBowler(gameManager.bowler[GameManager.turnNameIndex1].playerName, score1, strikes1, spares1, gutters1), "HS_Cosmic");
+                        AddBowlerScore(gameManager.c_hs, new ScoreBowler(gameManager.bowler[GameManager.turnNameIndex2].playerName, score2, strikes2, spares2, gutters2), "HS_Cosmic");
+                        AddBowlerScore(gameManager.c_hs, new ScoreBowler(gameManager.bowler[GameManager.turnNameIndex3].playerName, score3, strikes3, spares3, gutters3), "HS_Cosmic");
                     }
-                    if (GameManager.allPlayers == GameManager.Players.FourPlayer)
+                    if (allPlayers == Players.FourPlayer)
                     {
-                        AddBowlerScore(gameManager.c_hs, new ScoreBowler(gameManager.bowler[gameManager.turnNameIndex1].playerName, score1, strikes1, spares1, gutters1), "HS_Cosmic");
-                        AddBowlerScore(gameManager.c_hs, new ScoreBowler(gameManager.bowler[gameManager.turnNameIndex2].playerName, score2, strikes2, spares2, gutters2), "HS_Cosmic");
-                        AddBowlerScore(gameManager.c_hs, new ScoreBowler(gameManager.bowler[gameManager.turnNameIndex3].playerName, score3, strikes3, spares3, gutters3), "HS_Cosmic");
-                        AddBowlerScore(gameManager.c_hs, new ScoreBowler(gameManager.bowler[gameManager.turnNameIndex4].playerName, score4, strikes4, spares4, gutters4), "HS_Cosmic");
+                        AddBowlerScore(gameManager.c_hs, new ScoreBowler(gameManager.bowler[GameManager.turnNameIndex1].playerName, score1, strikes1, spares1, gutters1), "HS_Cosmic");
+                        AddBowlerScore(gameManager.c_hs, new ScoreBowler(gameManager.bowler[GameManager.turnNameIndex2].playerName, score2, strikes2, spares2, gutters2), "HS_Cosmic");
+                        AddBowlerScore(gameManager.c_hs, new ScoreBowler(gameManager.bowler[GameManager.turnNameIndex3].playerName, score3, strikes3, spares3, gutters3), "HS_Cosmic");
+                        AddBowlerScore(gameManager.c_hs, new ScoreBowler(gameManager.bowler[GameManager.turnNameIndex4].playerName, score4, strikes4, spares4, gutters4), "HS_Cosmic");
                     }
-                    if (GameManager.allPlayers == GameManager.Players.Computer)
+                    if (allPlayers == Players.Computer)
                     {
-                        AddBowlerScore(gameManager.c_hs, new ScoreBowler(gameManager.bowler[gameManager.turnNameIndex1].playerName, score1, strikes1, spares1, gutters1), "HS_Cosmic");
-                        AddBowlerScore(gameManager.c_hs, new ScoreBowler(gameManager.chooseBalls[gameManager.compuObj[gameManager.turnBallsCPU].cpuIndex].CPUName, score2, strikes2, spares2, gutters2), "HS_Cosmic");
+                        AddBowlerScore(gameManager.c_hs, new ScoreBowler(gameManager.bowler[GameManager.turnNameIndex1].playerName, score1, strikes1, spares1, gutters1), "HS_Cosmic");
+                        AddBowlerScore(gameManager.c_hs, new ScoreBowler(gameManager.chooseBalls[gameManager.compuObj[GameManager.turnBallsCPU].cpuIndex].CPUName, score2, strikes2, spares2, gutters2), "HS_Cosmic");
                     }
                     break;
                 case GameManager.Alley.Barnyard:
-                    if (GameManager.allPlayers == GameManager.Players.OnePlayer)
+                    if (allPlayers == Players.OnePlayer)
                     {
-                        AddBowlerScore(gameManager.b_hs, new ScoreBowler(gameManager.bowler[gameManager.turnNameIndex1].playerName, score1, strikes1, spares1, gutters1), "HS_Barnyard");
+                        AddBowlerScore(gameManager.b_hs, new ScoreBowler(gameManager.bowler[GameManager.turnNameIndex1].playerName, score1, strikes1, spares1, gutters1), "HS_Barnyard");
                     }
-                    if (GameManager.allPlayers == GameManager.Players.TwoPlayer)
+                    if (allPlayers == Players.TwoPlayer)
                     {
-                        AddBowlerScore(gameManager.b_hs, new ScoreBowler(gameManager.bowler[gameManager.turnNameIndex1].playerName, score1, strikes1, spares1, gutters1), "HS_Barnyard");
-                        AddBowlerScore(gameManager.b_hs, new ScoreBowler(gameManager.bowler[gameManager.turnNameIndex2].playerName, score2, strikes2, spares2, gutters2), "HS_Barnyard");
+                        AddBowlerScore(gameManager.b_hs, new ScoreBowler(gameManager.bowler[GameManager.turnNameIndex1].playerName, score1, strikes1, spares1, gutters1), "HS_Barnyard");
+                        AddBowlerScore(gameManager.b_hs, new ScoreBowler(gameManager.bowler[GameManager.turnNameIndex2].playerName, score2, strikes2, spares2, gutters2), "HS_Barnyard");
                     }
-                    if (GameManager.allPlayers == GameManager.Players.ThreePlayer)
+                    if (allPlayers == Players.ThreePlayer)
                     {
-                        AddBowlerScore(gameManager.b_hs, new ScoreBowler(gameManager.bowler[gameManager.turnNameIndex1].playerName, score1, strikes1, spares1, gutters1), "HS_Barnyard");
-                        AddBowlerScore(gameManager.b_hs, new ScoreBowler(gameManager.bowler[gameManager.turnNameIndex2].playerName, score2, strikes2, spares2, gutters2), "HS_Barnyard");
-                        AddBowlerScore(gameManager.b_hs, new ScoreBowler(gameManager.bowler[gameManager.turnNameIndex3].playerName, score3, strikes3, spares3, gutters3), "HS_Barnyard");
+                        AddBowlerScore(gameManager.b_hs, new ScoreBowler(gameManager.bowler[GameManager.turnNameIndex1].playerName, score1, strikes1, spares1, gutters1), "HS_Barnyard");
+                        AddBowlerScore(gameManager.b_hs, new ScoreBowler(gameManager.bowler[GameManager.turnNameIndex2].playerName, score2, strikes2, spares2, gutters2), "HS_Barnyard");
+                        AddBowlerScore(gameManager.b_hs, new ScoreBowler(gameManager.bowler[GameManager.turnNameIndex3].playerName, score3, strikes3, spares3, gutters3), "HS_Barnyard");
                     }
-                    if (GameManager.allPlayers == GameManager.Players.FourPlayer)
+                    if (allPlayers == Players.FourPlayer)
                     {
-                        AddBowlerScore(gameManager.b_hs, new ScoreBowler(gameManager.bowler[gameManager.turnNameIndex1].playerName, score1, strikes1, spares1, gutters1), "HS_Barnyard");
-                        AddBowlerScore(gameManager.b_hs, new ScoreBowler(gameManager.bowler[gameManager.turnNameIndex2].playerName, score2, strikes2, spares2, gutters2), "HS_Barnyard");
-                        AddBowlerScore(gameManager.b_hs, new ScoreBowler(gameManager.bowler[gameManager.turnNameIndex3].playerName, score3, strikes3, spares3, gutters3), "HS_Barnyard");
-                        AddBowlerScore(gameManager.b_hs, new ScoreBowler(gameManager.bowler[gameManager.turnNameIndex4].playerName, score4, strikes4, spares4, gutters4), "HS_Barnyard");
+                        AddBowlerScore(gameManager.b_hs, new ScoreBowler(gameManager.bowler[GameManager.turnNameIndex1].playerName, score1, strikes1, spares1, gutters1), "HS_Barnyard");
+                        AddBowlerScore(gameManager.b_hs, new ScoreBowler(gameManager.bowler[GameManager.turnNameIndex2].playerName, score2, strikes2, spares2, gutters2), "HS_Barnyard");
+                        AddBowlerScore(gameManager.b_hs, new ScoreBowler(gameManager.bowler[GameManager.turnNameIndex3].playerName, score3, strikes3, spares3, gutters3), "HS_Barnyard");
+                        AddBowlerScore(gameManager.b_hs, new ScoreBowler(gameManager.bowler[GameManager.turnNameIndex4].playerName, score4, strikes4, spares4, gutters4), "HS_Barnyard");
                     }
-                    if (GameManager.allPlayers == GameManager.Players.Computer)
+                    if (allPlayers == Players.Computer)
                     {
-                        AddBowlerScore(gameManager.b_hs, new ScoreBowler(gameManager.bowler[gameManager.turnNameIndex1].playerName, score1, strikes1, spares1, gutters1), "HS_Barnyard");
-                        AddBowlerScore(gameManager.b_hs, new ScoreBowler(gameManager.chooseBalls[gameManager.compuObj[gameManager.turnBallsCPU].cpuIndex].CPUName, score2, strikes2, spares2, gutters2), "HS_Barnyard");
+                        AddBowlerScore(gameManager.b_hs, new ScoreBowler(gameManager.bowler[GameManager.turnNameIndex1].playerName, score1, strikes1, spares1, gutters1), "HS_Barnyard");
+                        AddBowlerScore(gameManager.b_hs, new ScoreBowler(gameManager.chooseBalls[gameManager.compuObj[GameManager.turnBallsCPU].cpuIndex].CPUName, score2, strikes2, spares2, gutters2), "HS_Barnyard");
                     }
                     break;
                 case GameManager.Alley.Mineshaft:
-                    if (GameManager.allPlayers == GameManager.Players.OnePlayer)
+                    if (allPlayers == Players.OnePlayer)
                     {
-                        AddBowlerScore(gameManager.m_hs, new ScoreBowler(gameManager.bowler[gameManager.turnNameIndex1].playerName, score1, strikes1, spares1, gutters1), "HS_Mineshaft");
+                        AddBowlerScore(gameManager.m_hs, new ScoreBowler(gameManager.bowler[GameManager.turnNameIndex1].playerName, score1, strikes1, spares1, gutters1), "HS_Mineshaft");
                     }
-                    if (GameManager.allPlayers == GameManager.Players.TwoPlayer)
+                    if (allPlayers == Players.TwoPlayer)
                     {
-                        AddBowlerScore(gameManager.m_hs, new ScoreBowler(gameManager.bowler[gameManager.turnNameIndex1].playerName, score1, strikes1, spares1, gutters1), "HS_Mineshaft");
-                        AddBowlerScore(gameManager.m_hs, new ScoreBowler(gameManager.bowler[gameManager.turnNameIndex2].playerName, score2, strikes2, spares2, gutters2), "HS_Mineshaft");
+                        AddBowlerScore(gameManager.m_hs, new ScoreBowler(gameManager.bowler[GameManager.turnNameIndex1].playerName, score1, strikes1, spares1, gutters1), "HS_Mineshaft");
+                        AddBowlerScore(gameManager.m_hs, new ScoreBowler(gameManager.bowler[GameManager.turnNameIndex2].playerName, score2, strikes2, spares2, gutters2), "HS_Mineshaft");
                     }
-                    if (GameManager.allPlayers == GameManager.Players.ThreePlayer)
+                    if (allPlayers == Players.ThreePlayer)
                     {
-                        AddBowlerScore(gameManager.m_hs, new ScoreBowler(gameManager.bowler[gameManager.turnNameIndex1].playerName, score1, strikes1, spares1, gutters1), "HS_Mineshaft");
-                        AddBowlerScore(gameManager.m_hs, new ScoreBowler(gameManager.bowler[gameManager.turnNameIndex2].playerName, score2, strikes2, spares2, gutters2), "HS_Mineshaft");
-                        AddBowlerScore(gameManager.m_hs, new ScoreBowler(gameManager.bowler[gameManager.turnNameIndex3].playerName, score3, strikes3, spares3, gutters3), "HS_Mineshaft");
+                        AddBowlerScore(gameManager.m_hs, new ScoreBowler(gameManager.bowler[GameManager.turnNameIndex1].playerName, score1, strikes1, spares1, gutters1), "HS_Mineshaft");
+                        AddBowlerScore(gameManager.m_hs, new ScoreBowler(gameManager.bowler[GameManager.turnNameIndex2].playerName, score2, strikes2, spares2, gutters2), "HS_Mineshaft");
+                        AddBowlerScore(gameManager.m_hs, new ScoreBowler(gameManager.bowler[GameManager.turnNameIndex3].playerName, score3, strikes3, spares3, gutters3), "HS_Mineshaft");
                     }
-                    if (GameManager.allPlayers == GameManager.Players.FourPlayer)
+                    if (allPlayers == Players.FourPlayer)
                     {
-                        AddBowlerScore(gameManager.m_hs, new ScoreBowler(gameManager.bowler[gameManager.turnNameIndex1].playerName, score1, strikes1, spares1, gutters1), "HS_Mineshaft");
-                        AddBowlerScore(gameManager.m_hs, new ScoreBowler(gameManager.bowler[gameManager.turnNameIndex2].playerName, score2, strikes2, spares2, gutters2), "HS_Mineshaft");
-                        AddBowlerScore(gameManager.m_hs, new ScoreBowler(gameManager.bowler[gameManager.turnNameIndex3].playerName, score3, strikes3, spares3, gutters3), "HS_Mineshaft");
-                        AddBowlerScore(gameManager.m_hs, new ScoreBowler(gameManager.bowler[gameManager.turnNameIndex4].playerName, score4, strikes4, spares4, gutters4), "HS_Mineshaft");
+                        AddBowlerScore(gameManager.m_hs, new ScoreBowler(gameManager.bowler[GameManager.turnNameIndex1].playerName, score1, strikes1, spares1, gutters1), "HS_Mineshaft");
+                        AddBowlerScore(gameManager.m_hs, new ScoreBowler(gameManager.bowler[GameManager.turnNameIndex2].playerName, score2, strikes2, spares2, gutters2), "HS_Mineshaft");
+                        AddBowlerScore(gameManager.m_hs, new ScoreBowler(gameManager.bowler[GameManager.turnNameIndex3].playerName, score3, strikes3, spares3, gutters3), "HS_Mineshaft");
+                        AddBowlerScore(gameManager.m_hs, new ScoreBowler(gameManager.bowler[GameManager.turnNameIndex4].playerName, score4, strikes4, spares4, gutters4), "HS_Mineshaft");
                     }
-                    if (GameManager.allPlayers == GameManager.Players.Computer)
+                    if (allPlayers == Players.Computer)
                     {
-                        AddBowlerScore(gameManager.m_hs, new ScoreBowler(gameManager.bowler[gameManager.turnNameIndex1].playerName, score1, strikes1, spares1, gutters1), "HS_Mineshaft");
-                        AddBowlerScore(gameManager.m_hs, new ScoreBowler(gameManager.chooseBalls[gameManager.compuObj[gameManager.turnBallsCPU].cpuIndex].CPUName, score2, strikes2, spares2, gutters2), "HS_Mineshaft");
+                        AddBowlerScore(gameManager.m_hs, new ScoreBowler(gameManager.bowler[GameManager.turnNameIndex1].playerName, score1, strikes1, spares1, gutters1), "HS_Mineshaft");
+                        AddBowlerScore(gameManager.m_hs, new ScoreBowler(gameManager.chooseBalls[gameManager.compuObj[GameManager.turnBallsCPU].cpuIndex].CPUName, score2, strikes2, spares2, gutters2), "HS_Mineshaft");
                     }
                     break;
             }
@@ -5142,7 +4294,7 @@ public class Game : MonoBehaviour
         sfx.Stop();
         rainPorch.Stop();
         SceneManager.LoadScene("Main");
-        GameManager.type = GameManager.GameState.Menu;
+        type = GameState.Menu;
     }
 
     void AddBowlerScore(List<ScoreBowler> bowlerList, ScoreBowler element, string filename)
@@ -5179,10 +4331,10 @@ public class Game : MonoBehaviour
     IEnumerator EmailSend()
     {
         sendingEmail.SetActive(true);
-        yield return new WaitForSeconds(3);
+        yield return new WaitForSeconds(9);
         sendingEmail.SetActive(false);
         emailSent.SetActive(true);
-        yield return new WaitForSeconds(3);
+        yield return new WaitForSeconds(6);
         emailSent.SetActive(false);
         menuAlleyUI.SetActive(true);
     }
@@ -5200,10 +4352,10 @@ public class Game : MonoBehaviour
 
     public void PrevGutterball1()
     {
-        GameManager.voices1--;
-        if (GameManager.voices1 < GameManager.Commentators.Baxter)
+        voices1--;
+        if (voices1 < Commentators.Baxter)
         {
-            GameManager.voices1 = GameManager.Commentators.Master;
+            voices1 = Commentators.Master;
         }
         if (GameManager.isVoice)
         {
@@ -5217,10 +4369,10 @@ public class Game : MonoBehaviour
 
     public void NextGutterball1()
     {
-        GameManager.voices1++;
-        if (GameManager.voices1 > GameManager.Commentators.Master)
+        voices1++;
+        if (voices1 > Commentators.Master)
         {
-            GameManager.voices1 = GameManager.Commentators.Baxter;
+            voices1 = Commentators.Baxter;
         }
         if (GameManager.isVoice)
         {
@@ -5234,10 +4386,10 @@ public class Game : MonoBehaviour
 
     public void PrevGutterball2()
     {
-        GameManager.voices2--;
-        if (GameManager.voices2 < GameManager.Commentators.Baxter)
+        voices2--;
+        if (voices2 < Commentators.Baxter)
         {
-            GameManager.voices2 = GameManager.Commentators.Master;
+            voices2 = Commentators.Master;
         }
         if (GameManager.isVoice)
         {
@@ -5251,10 +4403,10 @@ public class Game : MonoBehaviour
 
     public void NextGutterball2()
     {
-        GameManager.voices2++;
-        if (GameManager.voices2 > GameManager.Commentators.Master)
+        voices2++;
+        if (voices2 > Commentators.Master)
         {
-            GameManager.voices2 = GameManager.Commentators.Baxter;
+            voices2 = Commentators.Baxter;
         }
         if (GameManager.isVoice)
         {
@@ -5268,46 +4420,46 @@ public class Game : MonoBehaviour
 
     public void PrevQuality()
     {
-        gameManager.qualityIndex--;
-        if (gameManager.qualityIndex < 0)
+        GameManager.qualityIndex--;
+        if (GameManager.qualityIndex < 0)
         {
-            gameManager.qualityIndex = 5;
+            GameManager.qualityIndex = 5;
         }
-        QualitySettings.SetQualityLevel(gameManager.qualityIndex);
-        PlayerPrefs.SetInt("SaveQuality", gameManager.qualityIndex);
+        QualitySettings.SetQualityLevel(GameManager.qualityIndex);
+        PlayerPrefs.SetInt("SaveQuality", GameManager.qualityIndex);
     }
 
     public void NextQuality()
     {
-        gameManager.qualityIndex++;
-        if (gameManager.qualityIndex > 5)
+        GameManager.qualityIndex++;
+        if (GameManager.qualityIndex > 5)
         {
-            gameManager.qualityIndex = 0;
+            GameManager.qualityIndex = 0;
         }
-        QualitySettings.SetQualityLevel(gameManager.qualityIndex);
-        PlayerPrefs.SetInt("SaveQuality", gameManager.qualityIndex);
+        QualitySettings.SetQualityLevel(GameManager.qualityIndex);
+        PlayerPrefs.SetInt("SaveQuality", GameManager.qualityIndex);
     }
 
     public void PrevResolution()
     {
-        gameManager.resolutionIndex--;
-        if (gameManager.resolutionIndex < 0)
+        GameManager.resolutionIndex--;
+        if (GameManager.resolutionIndex < 0)
         {
-            gameManager.resolutionIndex = GameManager.resolutions.Length - 1;
+            GameManager.resolutionIndex = GameManager.resolutions.Length - 1;
         }
-        Screen.SetResolution(GameManager.resolutions[gameManager.resolutionIndex].width, GameManager.resolutions[gameManager.resolutionIndex].height, Screen.fullScreen);
-        PlayerPrefs.SetInt("SaveResolution", gameManager.resolutionIndex);
+        Screen.SetResolution(GameManager.resolutions[GameManager.resolutionIndex].width, GameManager.resolutions[GameManager.resolutionIndex].height, Screen.fullScreen);
+        PlayerPrefs.SetInt("SaveResolution", GameManager.resolutionIndex);
     }
 
     public void NextResolution()
     {
-        gameManager.resolutionIndex++;
-        if (gameManager.resolutionIndex > GameManager.resolutions.Length - 1)
+        GameManager.resolutionIndex++;
+        if (GameManager.resolutionIndex > GameManager.resolutions.Length - 1)
         {
-            gameManager.resolutionIndex = 0;
+            GameManager.resolutionIndex = 0;
         }
-        Screen.SetResolution(GameManager.resolutions[gameManager.resolutionIndex].width, GameManager.resolutions[gameManager.resolutionIndex].height, Screen.fullScreen);
-        PlayerPrefs.SetInt("SaveResolution", gameManager.resolutionIndex);
+        Screen.SetResolution(GameManager.resolutions[GameManager.resolutionIndex].width, GameManager.resolutions[GameManager.resolutionIndex].height, Screen.fullScreen);
+        PlayerPrefs.SetInt("SaveResolution", GameManager.resolutionIndex);
     }
 
     public void TenPin()
@@ -5321,32 +4473,6 @@ public class Game : MonoBehaviour
         {
             setObject.SetActive(true);
             GameManager.pinMode = GameManager.PinMode.Spare;
-        }
-        else if (GameManager.unlockRegister == 1)
-        {
-            registerUI.SetActive(true);
-        }
-    }
-
-    public void Duckpin(GameObject setObject)
-    {
-        if (GameManager.unlockRegister == 0)
-        {
-            setObject.SetActive(true);
-            GameManager.pinMode = GameManager.PinMode.Duckpin;
-        }
-        else if (GameManager.unlockRegister == 1)
-        {
-            registerUI.SetActive(true);
-        }
-    }
-
-    public void Candlepin(GameObject setObject)
-    {
-        if (GameManager.unlockRegister == 0)
-        {
-            setObject.SetActive(true);
-            GameManager.pinMode = GameManager.PinMode.Candlepin;
         }
         else if (GameManager.unlockRegister == 1)
         {
@@ -5384,210 +4510,210 @@ public class Game : MonoBehaviour
     {
         if (playerTurn == 0)
         {
-            gameManager.turnNameIndex1--;
+            GameManager.turnNameIndex1--;
         }
         else if (playerTurn == 1)
         {
-            gameManager.turnNameIndex2--;
+            GameManager.turnNameIndex2--;
         }
         else if (playerTurn == 2)
         {
-            gameManager.turnNameIndex3--;
+            GameManager.turnNameIndex3--;
         }
         else if (playerTurn == 3)
         {
-            gameManager.turnNameIndex4--;
+            GameManager.turnNameIndex4--;
         }
-        if (gameManager.turnNameIndex1 < 0)
+        if (GameManager.turnNameIndex1 < 0)
         {
-            gameManager.turnNameIndex1 = gameManager.bowler.Count - 1;
+            GameManager.turnNameIndex1 = gameManager.bowler.Count - 1;
         }
-        else if (gameManager.turnNameIndex2 < 0)
+        else if (GameManager.turnNameIndex2 < 0)
         {
-            gameManager.turnNameIndex2 = gameManager.bowler.Count - 1;
+            GameManager.turnNameIndex2 = gameManager.bowler.Count - 1;
         }
-        else if (gameManager.turnNameIndex3 < 0)
+        else if (GameManager.turnNameIndex3 < 0)
         {
-            gameManager.turnNameIndex3 = gameManager.bowler.Count - 1;
+            GameManager.turnNameIndex3 = gameManager.bowler.Count - 1;
         }
-        else if (gameManager.turnNameIndex4 < 0)
+        else if (GameManager.turnNameIndex4 < 0)
         {
-            gameManager.turnNameIndex4 = gameManager.bowler.Count - 1;
+            GameManager.turnNameIndex4 = gameManager.bowler.Count - 1;
         }
-        PlayerPrefs.SetInt("SavePlayer1", gameManager.turnNameIndex1);
-        PlayerPrefs.SetInt("SavePlayer2", gameManager.turnNameIndex2);
-        PlayerPrefs.SetInt("SavePlayer3", gameManager.turnNameIndex3);
-        PlayerPrefs.SetInt("SavePlayer4", gameManager.turnNameIndex4);
+        PlayerPrefs.SetInt("SavePlayer1", GameManager.turnNameIndex1);
+        PlayerPrefs.SetInt("SavePlayer2", GameManager.turnNameIndex2);
+        PlayerPrefs.SetInt("SavePlayer3", GameManager.turnNameIndex3);
+        PlayerPrefs.SetInt("SavePlayer4", GameManager.turnNameIndex4);
     }
 
     public void NextBowler()
     {
         if (playerTurn == 0)
         {
-            gameManager.turnNameIndex1++;
+            GameManager.turnNameIndex1++;
         }
         else if (playerTurn == 1)
         {
-            gameManager.turnNameIndex2++;
+            GameManager.turnNameIndex2++;
         }
         else if (playerTurn == 2)
         {
-            gameManager.turnNameIndex3++;
+            GameManager.turnNameIndex3++;
         }
         else if (playerTurn == 3)
         {
-            gameManager.turnNameIndex4++;
+            GameManager.turnNameIndex4++;
         }
-        if (gameManager.turnNameIndex1 >= gameManager.bowler.Count)
+        if (GameManager.turnNameIndex1 >= gameManager.bowler.Count)
         {
-            gameManager.turnNameIndex1 = 0;
+            GameManager.turnNameIndex1 = 0;
         }
-        else if (gameManager.turnNameIndex2 >= gameManager.bowler.Count)
+        else if (GameManager.turnNameIndex2 >= gameManager.bowler.Count)
         {
-            gameManager.turnNameIndex2 = 0;
+            GameManager.turnNameIndex2 = 0;
         }
-        else if (gameManager.turnNameIndex3 >= gameManager.bowler.Count)
+        else if (GameManager.turnNameIndex3 >= gameManager.bowler.Count)
         {
-            gameManager.turnNameIndex3 = 0;
+            GameManager.turnNameIndex3 = 0;
         }
-        else if (gameManager.turnNameIndex4 >= gameManager.bowler.Count)
+        else if (GameManager.turnNameIndex4 >= gameManager.bowler.Count)
         {
-            gameManager.turnNameIndex4 = 0;
+            GameManager.turnNameIndex4 = 0;
         }
-        PlayerPrefs.SetInt("SavePlayer1", gameManager.turnNameIndex1);
-        PlayerPrefs.SetInt("SavePlayer2", gameManager.turnNameIndex2);
-        PlayerPrefs.SetInt("SavePlayer3", gameManager.turnNameIndex3);
-        PlayerPrefs.SetInt("SavePlayer4", gameManager.turnNameIndex4);
+        PlayerPrefs.SetInt("SavePlayer1", GameManager.turnNameIndex1);
+        PlayerPrefs.SetInt("SavePlayer2", GameManager.turnNameIndex2);
+        PlayerPrefs.SetInt("SavePlayer3", GameManager.turnNameIndex3);
+        PlayerPrefs.SetInt("SavePlayer4", GameManager.turnNameIndex4);
     }
 
     public void PrevBalls()
     {
         if (playerTurn == 0)
         {
-            gameManager.turnBalls1--;
+            GameManager.turnBalls1--;
         }
         else if (playerTurn == 1)
         {
-            gameManager.turnBalls2--;
+            GameManager.turnBalls2--;
         }
         else if (playerTurn == 2)
         {
-            gameManager.turnBalls3--;
+            GameManager.turnBalls3--;
         }
         else if (playerTurn == 3)
         {
-            gameManager.turnBalls4--;
+            GameManager.turnBalls4--;
         }
         else if (playerTurn == 4)
         {
-            gameManager.turnBallsCPU--;
+            GameManager.turnBallsCPU--;
         }
-        if (GameManager.type != GameManager.GameState.Menu)
+        if (type != GameState.Menu)
         {
-            if (gameManager.turnBalls1 < 0)
+            if (GameManager.turnBalls1 < 0)
             {
                 if (GameManager.unlockRegister == 0)
                 {
-                    gameManager.turnBalls1 = gameManager.chooseBalls.Length - 1;
+                    GameManager.turnBalls1 = gameManager.chooseBalls.Length - 1;
                 }
                 else if (GameManager.unlockRegister == 1)
                 {
-                    gameManager.turnBalls1 = 4;
+                    GameManager.turnBalls1 = 4;
                 }
             }
-            else if (gameManager.turnBalls2 < 0)
+            else if (GameManager.turnBalls2 < 0)
             {
                 if (GameManager.unlockRegister == 0)
                 {
-                    gameManager.turnBalls2 = gameManager.chooseBalls.Length - 1;
+                    GameManager.turnBalls2 = gameManager.chooseBalls.Length - 1;
                 }
                 else if (GameManager.unlockRegister == 1)
                 {
-                    gameManager.turnBalls2 = 4;
+                    GameManager.turnBalls2 = 4;
                 }
             }
-            else if (gameManager.turnBalls3 < 0)
+            else if (GameManager.turnBalls3 < 0)
             {
                 if (GameManager.unlockRegister == 0)
                 {
-                    gameManager.turnBalls3 = gameManager.chooseBalls.Length - 1;
+                    GameManager.turnBalls3 = gameManager.chooseBalls.Length - 1;
                 }
                 else if (GameManager.unlockRegister == 1)
                 {
-                    gameManager.turnBalls3 = 4;
+                    GameManager.turnBalls3 = 4;
                 }
             }
-            else if (gameManager.turnBalls4 < 0)
+            else if (GameManager.turnBalls4 < 0)
             {
                 if (GameManager.unlockRegister == 0)
                 {
-                    gameManager.turnBalls4 = gameManager.chooseBalls.Length - 1;
+                    GameManager.turnBalls4 = gameManager.chooseBalls.Length - 1;
                 }
                 else if (GameManager.unlockRegister == 1)
                 {
-                    gameManager.turnBalls4 = 4;
+                    GameManager.turnBalls4 = 4;
                 }
             }
             for (int i = 0; i < gameManager.chooseBalls.Length; i++)
             {
-                if (playerTurn == 0 && GameManager.unlockRegister == 0 && gameManager.chooseBalls[gameManager.turnBalls1].isLock == 1)
+                if (playerTurn == 0 && GameManager.unlockRegister == 0 && gameManager.chooseBalls[GameManager.turnBalls1].isLock == 1)
                 {
-                    gameManager.turnBalls1 -= gameManager.chooseBalls[i].isLock;
+                    GameManager.turnBalls1 -= gameManager.chooseBalls[i].isLock;
                 }
-                else if (playerTurn == 1 && GameManager.unlockRegister == 0 && gameManager.chooseBalls[gameManager.turnBalls2].isLock == 1)
+                else if (playerTurn == 1 && GameManager.unlockRegister == 0 && gameManager.chooseBalls[GameManager.turnBalls2].isLock == 1)
                 {
-                    gameManager.turnBalls2 -= gameManager.chooseBalls[i].isLock;
+                    GameManager.turnBalls2 -= gameManager.chooseBalls[i].isLock;
                 }
-                else if (playerTurn == 2 && GameManager.unlockRegister == 0 && gameManager.chooseBalls[gameManager.turnBalls3].isLock == 1)
+                else if (playerTurn == 2 && GameManager.unlockRegister == 0 && gameManager.chooseBalls[GameManager.turnBalls3].isLock == 1)
                 {
-                    gameManager.turnBalls3 -= gameManager.chooseBalls[i].isLock;
+                    GameManager.turnBalls3 -= gameManager.chooseBalls[i].isLock;
                 }
-                else if (playerTurn == 3 && GameManager.unlockRegister == 0 && gameManager.chooseBalls[gameManager.turnBalls4].isLock == 1)
+                else if (playerTurn == 3 && GameManager.unlockRegister == 0 && gameManager.chooseBalls[GameManager.turnBalls4].isLock == 1)
                 {
-                    gameManager.turnBalls4 -= gameManager.chooseBalls[i].isLock;
+                    GameManager.turnBalls4 -= gameManager.chooseBalls[i].isLock;
                 }
             }
             for (int i = 0; i < 5; i++)
             {
-                if (playerTurn == 0 && GameManager.unlockRegister == 1 && gameManager.chooseBalls[gameManager.turnBalls1].isLock == 1)
+                if (playerTurn == 0 && GameManager.unlockRegister == 1 && gameManager.chooseBalls[GameManager.turnBalls1].isLock == 1)
                 {
-                    gameManager.turnBalls1 -= gameManager.chooseBalls[i].isLock;
+                    GameManager.turnBalls1 -= gameManager.chooseBalls[i].isLock;
                 }
-                else if (playerTurn == 1 && GameManager.unlockRegister == 1 && gameManager.chooseBalls[gameManager.turnBalls2].isLock == 1)
+                else if (playerTurn == 1 && GameManager.unlockRegister == 1 && gameManager.chooseBalls[GameManager.turnBalls2].isLock == 1)
                 {
-                    gameManager.turnBalls2 -= gameManager.chooseBalls[i].isLock;
+                    GameManager.turnBalls2 -= gameManager.chooseBalls[i].isLock;
                 }
-                else if (playerTurn == 2 && GameManager.unlockRegister == 1 && gameManager.chooseBalls[gameManager.turnBalls3].isLock == 1)
+                else if (playerTurn == 2 && GameManager.unlockRegister == 1 && gameManager.chooseBalls[GameManager.turnBalls3].isLock == 1)
                 {
-                    gameManager.turnBalls3 -= gameManager.chooseBalls[i].isLock;
+                    GameManager.turnBalls3 -= gameManager.chooseBalls[i].isLock;
                 }
-                else if (playerTurn == 3 && GameManager.unlockRegister == 1 && gameManager.chooseBalls[gameManager.turnBalls4].isLock == 1)
+                else if (playerTurn == 3 && GameManager.unlockRegister == 1 && gameManager.chooseBalls[GameManager.turnBalls4].isLock == 1)
                 {
-                    gameManager.turnBalls4 -= gameManager.chooseBalls[i].isLock;
+                    GameManager.turnBalls4 -= gameManager.chooseBalls[i].isLock;
                 }
             }
         }
         else
         {
-            if (gameManager.turnBalls1 < 0)
+            if (GameManager.turnBalls1 < 0)
             {
-                gameManager.turnBalls1 = gameManager.chooseBalls.Length - 1;
+                GameManager.turnBalls1 = gameManager.chooseBalls.Length - 1;
             }
-            else if (gameManager.turnBalls2 < 0)
+            else if (GameManager.turnBalls2 < 0)
             {
-                gameManager.turnBalls2 = gameManager.chooseBalls.Length - 1;
+                GameManager.turnBalls2 = gameManager.chooseBalls.Length - 1;
             }
-            else if (gameManager.turnBalls3 < 0)
+            else if (GameManager.turnBalls3 < 0)
             {
-                gameManager.turnBalls3 = gameManager.chooseBalls.Length - 1;
+                GameManager.turnBalls3 = gameManager.chooseBalls.Length - 1;
             }
-            else if (gameManager.turnBalls4 < 0)
+            else if (GameManager.turnBalls4 < 0)
             {
-                gameManager.turnBalls4 = gameManager.chooseBalls.Length - 1;
+                GameManager.turnBalls4 = gameManager.chooseBalls.Length - 1;
             }
-            else if (gameManager.turnBallsCPU < 0)
+            else if (GameManager.turnBallsCPU < 0)
             {
-                gameManager.turnBallsCPU = gameManager.compuObj.Length - 1;
+                GameManager.turnBallsCPU = gameManager.compuObj.Length - 1;
             }
         }
     }
@@ -5596,99 +4722,99 @@ public class Game : MonoBehaviour
     {
         if (playerTurn == 0)
         {
-            gameManager.turnBalls1++;
+            GameManager.turnBalls1++;
         }
         else if (playerTurn == 1)
         {
-            gameManager.turnBalls2++;
+            GameManager.turnBalls2++;
         }
         else if (playerTurn == 2)
         {
-            gameManager.turnBalls3++;
+            GameManager.turnBalls3++;
         }
         else if (playerTurn == 3)
         {
-            gameManager.turnBalls4++;
+            GameManager.turnBalls4++;
         }
         else if (playerTurn == 4)
         {
-            gameManager.turnBallsCPU++;
+            GameManager.turnBallsCPU++;
         }
-        if (GameManager.type != GameManager.GameState.Menu)
+        if (type != GameState.Menu)
         {
-            if (gameManager.turnBalls1 >= gameManager.chooseBalls.Length || gameManager.turnBalls1 >= 5 && GameManager.unlockRegister == 1)
+            if (GameManager.turnBalls1 >= gameManager.chooseBalls.Length || GameManager.turnBalls1 >= 5 && GameManager.unlockRegister == 1)
             {
-                gameManager.turnBalls1 = 0;
+                GameManager.turnBalls1 = 0;
             }
-            else if (gameManager.turnBalls2 >= gameManager.chooseBalls.Length || gameManager.turnBalls2 >= 5 && GameManager.unlockRegister == 1)
+            else if (GameManager.turnBalls2 >= gameManager.chooseBalls.Length || GameManager.turnBalls2 >= 5 && GameManager.unlockRegister == 1)
             {
-                gameManager.turnBalls2 = 0;
+                GameManager.turnBalls2 = 0;
             }
-            else if (gameManager.turnBalls3 >= gameManager.chooseBalls.Length || gameManager.turnBalls3 >= 5 && GameManager.unlockRegister == 1)
+            else if (GameManager.turnBalls3 >= gameManager.chooseBalls.Length || GameManager.turnBalls3 >= 5 && GameManager.unlockRegister == 1)
             {
-                gameManager.turnBalls3 = 0;
+                GameManager.turnBalls3 = 0;
             }
-            else if (gameManager.turnBalls4 >= gameManager.chooseBalls.Length || gameManager.turnBalls4 >= 5 && GameManager.unlockRegister == 1)
+            else if (GameManager.turnBalls4 >= gameManager.chooseBalls.Length || GameManager.turnBalls4 >= 5 && GameManager.unlockRegister == 1)
             {
-                gameManager.turnBalls4 = 0;
+                GameManager.turnBalls4 = 0;
             }
             for (int i = 0; i < gameManager.chooseBalls.Length; i++)
             {
-                if (playerTurn == 0 && gameManager.chooseBalls[gameManager.turnBalls1].isLock == 1)
+                if (playerTurn == 0 && gameManager.chooseBalls[GameManager.turnBalls1].isLock == 1)
                 {
-                    gameManager.turnBalls1 += gameManager.chooseBalls[i].isLock;
+                    GameManager.turnBalls1 += gameManager.chooseBalls[i].isLock;
                 }
-                else if (playerTurn == 1 && gameManager.chooseBalls[gameManager.turnBalls2].isLock == 1)
+                else if (playerTurn == 1 && gameManager.chooseBalls[GameManager.turnBalls2].isLock == 1)
                 {
-                    gameManager.turnBalls2 += gameManager.chooseBalls[i].isLock;
+                    GameManager.turnBalls2 += gameManager.chooseBalls[i].isLock;
                 }
-                else if (playerTurn == 2 && gameManager.chooseBalls[gameManager.turnBalls3].isLock == 1)
+                else if (playerTurn == 2 && gameManager.chooseBalls[GameManager.turnBalls3].isLock == 1)
                 {
-                    gameManager.turnBalls3 += gameManager.chooseBalls[i].isLock;
+                    GameManager.turnBalls3 += gameManager.chooseBalls[i].isLock;
                 }
-                else if (playerTurn == 3 && gameManager.chooseBalls[gameManager.turnBalls4].isLock == 1)
+                else if (playerTurn == 3 && gameManager.chooseBalls[GameManager.turnBalls4].isLock == 1)
                 {
-                    gameManager.turnBalls4 += gameManager.chooseBalls[i].isLock;
+                    GameManager.turnBalls4 += gameManager.chooseBalls[i].isLock;
                 }
-                if (gameManager.turnBalls1 >= gameManager.chooseBalls.Length || gameManager.turnBalls1 >= 5 && GameManager.unlockRegister == 1)
+                if (GameManager.turnBalls1 >= gameManager.chooseBalls.Length || GameManager.turnBalls1 >= 5 && GameManager.unlockRegister == 1)
                 {
-                    gameManager.turnBalls1 = 0;
+                    GameManager.turnBalls1 = 0;
                 }
-                else if (gameManager.turnBalls2 >= gameManager.chooseBalls.Length || gameManager.turnBalls2 >= 5 && GameManager.unlockRegister == 1)
+                else if (GameManager.turnBalls2 >= gameManager.chooseBalls.Length || GameManager.turnBalls2 >= 5 && GameManager.unlockRegister == 1)
                 {
-                    gameManager.turnBalls2 = 0;
+                    GameManager.turnBalls2 = 0;
                 }
-                else if (gameManager.turnBalls3 >= gameManager.chooseBalls.Length || gameManager.turnBalls3 >= 5 && GameManager.unlockRegister == 1)
+                else if (GameManager.turnBalls3 >= gameManager.chooseBalls.Length || GameManager.turnBalls3 >= 5 && GameManager.unlockRegister == 1)
                 {
-                    gameManager.turnBalls3 = 0;
+                    GameManager.turnBalls3 = 0;
                 }
-                else if (gameManager.turnBalls4 >= gameManager.chooseBalls.Length || gameManager.turnBalls4 >= 5 && GameManager.unlockRegister == 1)
+                else if (GameManager.turnBalls4 >= gameManager.chooseBalls.Length || GameManager.turnBalls4 >= 5 && GameManager.unlockRegister == 1)
                 {
-                    gameManager.turnBalls4 = 0;
+                    GameManager.turnBalls4 = 0;
                 }
             }
         }
         else
         {
-            if (gameManager.turnBalls1 >= gameManager.chooseBalls.Length)
+            if (GameManager.turnBalls1 >= gameManager.chooseBalls.Length)
             {
-                gameManager.turnBalls1 = 0;
+                GameManager.turnBalls1 = 0;
             }
-            else if (gameManager.turnBalls2 >= gameManager.chooseBalls.Length)
+            else if (GameManager.turnBalls2 >= gameManager.chooseBalls.Length)
             {
-                gameManager.turnBalls2 = 0;
+                GameManager.turnBalls2 = 0;
             }
-            else if (gameManager.turnBalls3 >= gameManager.chooseBalls.Length)
+            else if (GameManager.turnBalls3 >= gameManager.chooseBalls.Length)
             {
-                gameManager.turnBalls3 = 0;
+                GameManager.turnBalls3 = 0;
             }
-            else if (gameManager.turnBalls4 >= gameManager.chooseBalls.Length)
+            else if (GameManager.turnBalls4 >= gameManager.chooseBalls.Length)
             {
-                gameManager.turnBalls4 = 0;
+                GameManager.turnBalls4 = 0;
             }
-            else if (gameManager.turnBallsCPU >= gameManager.compuObj.Length)
+            else if (GameManager.turnBallsCPU >= gameManager.compuObj.Length)
             {
-                gameManager.turnBallsCPU = 0;
+                GameManager.turnBallsCPU = 0;
             }
         }
     }
@@ -5783,7 +4909,14 @@ public class Game : MonoBehaviour
 
     public void PlaySong()
     {
-        Application.OpenURL("https://archive.org/download/Jxqryv9-068/Jxqryv9-068.mp4");
+        if (Application.platform == RuntimePlatform.WindowsPlayer)
+        {
+            Process.Start("song.mp4");
+        }
+        else
+        {
+            Application.OpenURL("https://archive.org/download/Jxqryv9-068/Jxqryv9-068.mp4");
+        }
     }
 
     public void WebURL()
@@ -5863,31 +4996,31 @@ public class Game : MonoBehaviour
     public void PlayerOne()
     {
         playerTurn = 0;
-        GameManager.allPlayers = GameManager.Players.OnePlayer;
+        allPlayers = Players.OnePlayer;
     }
 
     public void PlayerTwo()
     {
         playerTurn = 0;
-        GameManager.allPlayers = GameManager.Players.TwoPlayer;
+        allPlayers = Players.TwoPlayer;
     }
 
     public void PlayerThree()
     {
         playerTurn = 0;
-        GameManager.allPlayers = GameManager.Players.ThreePlayer;
+        allPlayers = Players.ThreePlayer;
     }
 
     public void PlayerFour()
     {
         playerTurn = 0;
-        GameManager.allPlayers = GameManager.Players.FourPlayer;
+        allPlayers = Players.FourPlayer;
     }
 
     public void PlayerComputer()
     {
         playerTurn = 0;
-        GameManager.allPlayers = GameManager.Players.Computer;
+        allPlayers = Players.Computer;
     }
 
     public void ChargeAlleys()
@@ -5895,43 +5028,43 @@ public class Game : MonoBehaviour
         switch (GameManager.chooseAlleys)
         {
             case GameManager.Alley.Retro:
-                GameManager.voices1 = GameManager.Commentators.Maria;
-                GameManager.voices2 = GameManager.Commentators.Jensen;
-                GameManager.alleyLockType = GameManager.Alley.Retro;
+                voices1 = Commentators.Maria;
+                voices2 = Commentators.Jensen;
+                alleyLockType = GameManager.Alley.Retro;
                 break;
             case GameManager.Alley.Wacky:
-                GameManager.voices1 = GameManager.Commentators.Baxter;
-                GameManager.voices2 = GameManager.Commentators.Maria;
-                GameManager.alleyLockType = GameManager.Alley.Cosmic;
+                voices1 = Commentators.Baxter;
+                voices2 = Commentators.Maria;
+                alleyLockType = GameManager.Alley.Cosmic;
                 break;
             case GameManager.Alley.Iceberg:
-                GameManager.voices1 = GameManager.Commentators.Natasha;
-                GameManager.voices2 = GameManager.Commentators.Jensen;
-                GameManager.alleyLockType = GameManager.Alley.Barnyard;
+                voices1 = Commentators.Natasha;
+                voices2 = Commentators.Jensen;
+                alleyLockType = GameManager.Alley.Barnyard;
                 break;
             case GameManager.Alley.Jungle:
-                GameManager.voices1 = GameManager.Commentators.Jensen;
-                GameManager.voices2 = GameManager.Commentators.Master;
-                GameManager.alleyLockType = GameManager.Alley.Mineshaft;
+                voices1 = Commentators.Jensen;
+                voices2 = Commentators.Master;
+                alleyLockType = GameManager.Alley.Mineshaft;
                 break;
             case GameManager.Alley.Zen:
-                GameManager.voices1 = GameManager.Commentators.Master;
-                GameManager.voices2 = GameManager.Commentators.Natasha;
-                GameManager.alleyLockType = GameManager.Alley.Retro;
+                voices1 = Commentators.Master;
+                voices2 = Commentators.Natasha;
+                alleyLockType = GameManager.Alley.Retro;
                 break;
             case GameManager.Alley.Cosmic:
-                GameManager.voices1 = GameManager.Commentators.Master;
-                GameManager.voices2 = GameManager.Commentators.Baxter;
+                voices1 = Commentators.Master;
+                voices2 = Commentators.Baxter;
                 lockAlleyText.text = "Score 200 in Wacky to Unlock";
                 break;
             case GameManager.Alley.Barnyard:
-                GameManager.voices1 = GameManager.Commentators.Jensen;
-                GameManager.voices2 = GameManager.Commentators.Natasha;
+                voices1 = Commentators.Jensen;
+                voices2 = Commentators.Natasha;
                 lockAlleyText.text = "Score 200 in Iceberg to Unlock";
                 break;
             case GameManager.Alley.Mineshaft:
-                GameManager.voices1 = GameManager.Commentators.Baxter;
-                GameManager.voices2 = GameManager.Commentators.Jensen;
+                voices1 = Commentators.Baxter;
+                voices2 = Commentators.Jensen;
                 lockAlleyText.text = "Score 200 in Jungle to Unlock";
                 break;
         }
@@ -5942,60 +5075,156 @@ public class Game : MonoBehaviour
         switch (GameManager.chooseAlleys)
         {
             case GameManager.Alley.Retro:
-                gameManager.turnBalls1 = 0;
-                gameManager.turnBalls2 = 1;
-                gameManager.turnBalls3 = 2;
-                gameManager.turnBalls4 = 3;
-                gameManager.turnBallsCPU = 0;
+                if (GameManager.startBall <= 0)
+                {
+                    GameManager.turnBalls1 = 0;
+                }
+                if (GameManager.startBall <= 1)
+                {
+                    GameManager.turnBalls2 = 1;
+                }
+                if (GameManager.startBall <= 2)
+                {
+                    GameManager.turnBalls3 = 2;
+                }
+                if (GameManager.startBall <= 3)
+                {
+                    GameManager.turnBalls4 = 3;
+                }
+                GameManager.turnBallsCPU = 0;
                 break;
             case GameManager.Alley.Wacky:
-                gameManager.turnBalls1 = 5;
-                gameManager.turnBalls2 = 6;
-                gameManager.turnBalls3 = 7;
-                gameManager.turnBalls4 = 8;
-                gameManager.turnBallsCPU = 2;
+                if (GameManager.startBall <= 0)
+                {
+                    GameManager.turnBalls1 = 5;
+                }
+                if (GameManager.startBall <= 1)
+                {
+                    GameManager.turnBalls2 = 6;
+                }
+                if (GameManager.startBall <= 2)
+                {
+                    GameManager.turnBalls3 = 7;
+                }
+                if (GameManager.startBall <= 3)
+                {
+                    GameManager.turnBalls4 = 8;
+                }
+                GameManager.turnBallsCPU = 2;
                 break;
             case GameManager.Alley.Iceberg:
-                gameManager.turnBalls1 = 10;
-                gameManager.turnBalls2 = 11;
-                gameManager.turnBalls3 = 12;
-                gameManager.turnBalls4 = 13;
-                gameManager.turnBallsCPU = 4;
+                if (GameManager.startBall <= 0)
+                {
+                    GameManager.turnBalls1 = 10;
+                }
+                if (GameManager.startBall <= 1)
+                {
+                    GameManager.turnBalls2 = 11;
+                }
+                if (GameManager.startBall <= 2)
+                {
+                    GameManager.turnBalls3 = 12;
+                }
+                if (GameManager.startBall <= 3)
+                {
+                    GameManager.turnBalls4 = 13;
+                }
+                GameManager.turnBallsCPU = 4;
                 break;
             case GameManager.Alley.Jungle:
-                gameManager.turnBalls1 = 15;
-                gameManager.turnBalls2 = 16;
-                gameManager.turnBalls3 = 17;
-                gameManager.turnBalls4 = 18;
-                gameManager.turnBallsCPU = 6;
+                if (GameManager.startBall <= 0)
+                {
+                    GameManager.turnBalls1 = 15;
+                }
+                if (GameManager.startBall <= 1)
+                {
+                    GameManager.turnBalls2 = 16;
+                }
+                if (GameManager.startBall <= 2)
+                {
+                    GameManager.turnBalls3 = 17;
+                }
+                if (GameManager.startBall <= 3)
+                {
+                    GameManager.turnBalls4 = 18;
+                }
+                GameManager.turnBallsCPU = 6;
                 break;
             case GameManager.Alley.Zen:
-                gameManager.turnBalls1 = 20;
-                gameManager.turnBalls2 = 21;
-                gameManager.turnBalls3 = 22;
-                gameManager.turnBalls4 = 23;
-                gameManager.turnBallsCPU = 8;
+                if (GameManager.startBall <= 0)
+                {
+                    GameManager.turnBalls1 = 20;
+                }
+                if (GameManager.startBall <= 1)
+                {
+                    GameManager.turnBalls2 = 21;
+                }
+                if (GameManager.startBall <= 2)
+                {
+                    GameManager.turnBalls3 = 22;
+                }
+                if (GameManager.startBall <= 3)
+                {
+                    GameManager.turnBalls4 = 23;
+                }
+                GameManager.turnBallsCPU = 8;
                 break;
             case GameManager.Alley.Cosmic:
-                gameManager.turnBalls1 = 25;
-                gameManager.turnBalls2 = 26;
-                gameManager.turnBalls3 = 27;
-                gameManager.turnBalls4 = 28;
-                gameManager.turnBallsCPU = 10;
+                if (GameManager.startBall <= 0)
+                {
+                    GameManager.turnBalls1 = 25;
+                }
+                if (GameManager.startBall <= 1)
+                {
+                    GameManager.turnBalls2 = 26;
+                }
+                if (GameManager.startBall <= 2)
+                {
+                    GameManager.turnBalls3 = 27;
+                }
+                if (GameManager.startBall <= 3)
+                {
+                    GameManager.turnBalls4 = 28;
+                }
+                GameManager.turnBallsCPU = 10;
                 break;
             case GameManager.Alley.Barnyard:
-                gameManager.turnBalls1 = 30;
-                gameManager.turnBalls2 = 31;
-                gameManager.turnBalls3 = 32;
-                gameManager.turnBalls4 = 33;
-                gameManager.turnBallsCPU = 12;
+                if (GameManager.startBall <= 0)
+                {
+                    GameManager.turnBalls1 = 30;
+                }
+                if (GameManager.startBall <= 1)
+                {
+                    GameManager.turnBalls2 = 31;
+                }
+                if (GameManager.startBall <= 2)
+                {
+                    GameManager.turnBalls3 = 32;
+                }
+                if (GameManager.startBall <= 3)
+                {
+                    GameManager.turnBalls4 = 33;
+                }
+                GameManager.turnBallsCPU = 12;
                 break;
             case GameManager.Alley.Mineshaft:
-                gameManager.turnBalls1 = 35;
-                gameManager.turnBalls2 = 36;
-                gameManager.turnBalls3 = 37;
-                gameManager.turnBalls4 = 38;
-                gameManager.turnBallsCPU = 14;
+                if (GameManager.startBall <= 0)
+                {
+                    GameManager.turnBalls1 = 35;
+                }
+                if (GameManager.startBall <= 1)
+                {
+                    GameManager.turnBalls2 = 36;
+                }
+                if (GameManager.startBall <= 2)
+                {
+                    GameManager.turnBalls3 = 37;
+                }
+                if (GameManager.startBall <= 3)
+                {
+                    GameManager.turnBalls4 = 38;
+                }
+                GameManager.turnBallsCPU = 14;
                 break;
         }
     }
@@ -6045,20 +5274,17 @@ public class Game : MonoBehaviour
 
     public void UnlockRegister()
     {
-        for (int i = 0; i < gameManager.serialKeys.Length; i++)
+        if (keyField.text != "DCQ6HT9PJYGPB8RJCCR3")
         {
-            if (keyField.text != gameManager.serialKeys[i])
-            {
-                registerComplete.SetActive(false);
-                registerFail.SetActive(true);
-            }
-            else
-            {
-                GameManager.unlockRegister = 0;
-                PlayerPrefs.SetInt("UnlockRegister", GameManager.unlockRegister);
-                registerFail.SetActive(false);
-                registerComplete.SetActive(true);
-            }
+            registerComplete.SetActive(false);
+            registerFail.SetActive(true);
+        }
+        else
+        {
+            GameManager.unlockRegister = 0;
+            PlayerPrefs.SetInt("UnlockRegister", GameManager.unlockRegister);
+            registerFail.SetActive(false);
+            registerComplete.SetActive(true);
         }
         AlleyRegister();
     }
@@ -6098,43 +5324,43 @@ public class Game : MonoBehaviour
     {
         if (playerTurn == 0)
         {
-            customBallNameField.text = PlayerPrefs.GetString("CustomBallName" + gameManager.turnBalls1, gameManager.chooseBalls[gameManager.turnBalls1].ballName);
-            customBallLbs.value = PlayerPrefs.GetInt("CustomBallLbs" + gameManager.turnBalls1, gameManager.chooseBalls[gameManager.turnBalls1].lbs);
-            customBallSpeed.value = PlayerPrefs.GetInt("CustomBallSpeed" + gameManager.turnBalls1, gameManager.chooseBalls[gameManager.turnBalls1].speed);
-            customBallSpin.value = PlayerPrefs.GetInt("CustomBallSpin" + gameManager.turnBalls1, gameManager.chooseBalls[gameManager.turnBalls1].spin);
-            customBallFileField.text = PlayerPrefs.GetString("CustomBallURL" + gameManager.turnBalls1, gameManager.chooseBalls[gameManager.turnBalls1].urlTextureBall);
+            customBallNameField.text = PlayerPrefs.GetString("CustomBallName" + GameManager.turnBalls1, gameManager.chooseBalls[GameManager.turnBalls1].ballName);
+            customBallLbs.value = PlayerPrefs.GetInt("CustomBallLbs" + GameManager.turnBalls1, gameManager.chooseBalls[GameManager.turnBalls1].lbs);
+            customBallSpeed.value = PlayerPrefs.GetInt("CustomBallSpeed" + GameManager.turnBalls1, gameManager.chooseBalls[GameManager.turnBalls1].speed);
+            customBallSpin.value = PlayerPrefs.GetInt("CustomBallSpin" + GameManager.turnBalls1, gameManager.chooseBalls[GameManager.turnBalls1].spin);
+            customBallFileField.text = PlayerPrefs.GetString("CustomBallURL" + GameManager.turnBalls1, gameManager.chooseBalls[GameManager.turnBalls1].urlTextureBall);
         }
         else if (playerTurn == 1)
         {
-            customBallNameField.text = PlayerPrefs.GetString("CustomBallName" + gameManager.turnBalls2, gameManager.chooseBalls[gameManager.turnBalls2].ballName);
-            customBallLbs.value = PlayerPrefs.GetInt("CustomBallLbs" + gameManager.turnBalls2, gameManager.chooseBalls[gameManager.turnBalls2].lbs);
-            customBallSpeed.value = PlayerPrefs.GetInt("CustomBallSpeed" + gameManager.turnBalls2, gameManager.chooseBalls[gameManager.turnBalls2].speed);
-            customBallSpin.value = PlayerPrefs.GetInt("CustomBallSpin" + gameManager.turnBalls2, gameManager.chooseBalls[gameManager.turnBalls2].spin);
-            customBallFileField.text = PlayerPrefs.GetString("CustomBallURL" + gameManager.turnBalls2, gameManager.chooseBalls[gameManager.turnBalls2].urlTextureBall);
+            customBallNameField.text = PlayerPrefs.GetString("CustomBallName" + GameManager.turnBalls2, gameManager.chooseBalls[GameManager.turnBalls2].ballName);
+            customBallLbs.value = PlayerPrefs.GetInt("CustomBallLbs" + GameManager.turnBalls2, gameManager.chooseBalls[GameManager.turnBalls2].lbs);
+            customBallSpeed.value = PlayerPrefs.GetInt("CustomBallSpeed" + GameManager.turnBalls2, gameManager.chooseBalls[GameManager.turnBalls2].speed);
+            customBallSpin.value = PlayerPrefs.GetInt("CustomBallSpin" + GameManager.turnBalls2, gameManager.chooseBalls[GameManager.turnBalls2].spin);
+            customBallFileField.text = PlayerPrefs.GetString("CustomBallURL" + GameManager.turnBalls2, gameManager.chooseBalls[GameManager.turnBalls2].urlTextureBall);
         }
         else if (playerTurn == 2)
         {
-            customBallNameField.text = PlayerPrefs.GetString("CustomBallName" + gameManager.turnBalls3, gameManager.chooseBalls[gameManager.turnBalls3].ballName);
-            customBallLbs.value = PlayerPrefs.GetInt("CustomBallLbs" + gameManager.turnBalls3, gameManager.chooseBalls[gameManager.turnBalls3].lbs);
-            customBallSpeed.value = PlayerPrefs.GetInt("CustomBallSpeed" + gameManager.turnBalls3, gameManager.chooseBalls[gameManager.turnBalls3].speed);
-            customBallSpin.value = PlayerPrefs.GetInt("CustomBallSpin" + gameManager.turnBalls3, gameManager.chooseBalls[gameManager.turnBalls3].spin);
-            customBallFileField.text = PlayerPrefs.GetString("CustomBallURL" + gameManager.turnBalls3, gameManager.chooseBalls[gameManager.turnBalls3].urlTextureBall);
+            customBallNameField.text = PlayerPrefs.GetString("CustomBallName" + GameManager.turnBalls3, gameManager.chooseBalls[GameManager.turnBalls3].ballName);
+            customBallLbs.value = PlayerPrefs.GetInt("CustomBallLbs" + GameManager.turnBalls3, gameManager.chooseBalls[GameManager.turnBalls3].lbs);
+            customBallSpeed.value = PlayerPrefs.GetInt("CustomBallSpeed" + GameManager.turnBalls3, gameManager.chooseBalls[GameManager.turnBalls3].speed);
+            customBallSpin.value = PlayerPrefs.GetInt("CustomBallSpin" + GameManager.turnBalls3, gameManager.chooseBalls[GameManager.turnBalls3].spin);
+            customBallFileField.text = PlayerPrefs.GetString("CustomBallURL" + GameManager.turnBalls3, gameManager.chooseBalls[GameManager.turnBalls3].urlTextureBall);
         }
         else if (playerTurn == 3)
         {
-            customBallNameField.text = PlayerPrefs.GetString("CustomBallName" + gameManager.turnBalls4, gameManager.chooseBalls[gameManager.turnBalls4].ballName);
-            customBallLbs.value = PlayerPrefs.GetInt("CustomBallLbs" + gameManager.turnBalls4, gameManager.chooseBalls[gameManager.turnBalls4].lbs);
-            customBallSpeed.value = PlayerPrefs.GetInt("CustomBallSpeed" + gameManager.turnBalls4, gameManager.chooseBalls[gameManager.turnBalls4].speed);
-            customBallSpin.value = PlayerPrefs.GetInt("CustomBallSpin" + gameManager.turnBalls4, gameManager.chooseBalls[gameManager.turnBalls4].spin);
-            customBallFileField.text = PlayerPrefs.GetString("CustomBallURL" + gameManager.turnBalls4, gameManager.chooseBalls[gameManager.turnBalls4].urlTextureBall);
+            customBallNameField.text = PlayerPrefs.GetString("CustomBallName" + GameManager.turnBalls4, gameManager.chooseBalls[GameManager.turnBalls4].ballName);
+            customBallLbs.value = PlayerPrefs.GetInt("CustomBallLbs" + GameManager.turnBalls4, gameManager.chooseBalls[GameManager.turnBalls4].lbs);
+            customBallSpeed.value = PlayerPrefs.GetInt("CustomBallSpeed" + GameManager.turnBalls4, gameManager.chooseBalls[GameManager.turnBalls4].speed);
+            customBallSpin.value = PlayerPrefs.GetInt("CustomBallSpin" + GameManager.turnBalls4, gameManager.chooseBalls[GameManager.turnBalls4].spin);
+            customBallFileField.text = PlayerPrefs.GetString("CustomBallURL" + GameManager.turnBalls4, gameManager.chooseBalls[GameManager.turnBalls4].urlTextureBall);
         }
         else if (playerTurn == 4)
         {
-            customBallNameField.text = PlayerPrefs.GetString("CustomBallName" + gameManager.compuObj[gameManager.turnBallsCPU].cpuIndex, gameManager.chooseBalls[gameManager.compuObj[gameManager.turnBallsCPU].cpuIndex].ballName);
-            customBallLbs.value = PlayerPrefs.GetInt("CustomBallLbs" + gameManager.compuObj[gameManager.turnBallsCPU].cpuIndex, gameManager.chooseBalls[gameManager.compuObj[gameManager.turnBallsCPU].cpuIndex].lbs);
-            customBallSpeed.value = PlayerPrefs.GetInt("CustomBallSpeed" + gameManager.compuObj[gameManager.turnBallsCPU].cpuIndex, gameManager.chooseBalls[gameManager.compuObj[gameManager.turnBallsCPU].cpuIndex].speed);
-            customBallSpin.value = PlayerPrefs.GetInt("CustomBallSpin" + gameManager.compuObj[gameManager.turnBallsCPU].cpuIndex, gameManager.chooseBalls[gameManager.compuObj[gameManager.turnBallsCPU].cpuIndex].spin);
-            customBallFileField.text = PlayerPrefs.GetString("CustomBallURL" + gameManager.compuObj[gameManager.turnBallsCPU].cpuIndex, gameManager.chooseBalls[gameManager.compuObj[gameManager.turnBallsCPU].cpuIndex].urlTextureBall);
+            customBallNameField.text = PlayerPrefs.GetString("CustomBallName" + gameManager.compuObj[GameManager.turnBallsCPU].cpuIndex, gameManager.chooseBalls[gameManager.compuObj[GameManager.turnBallsCPU].cpuIndex].ballName);
+            customBallLbs.value = PlayerPrefs.GetInt("CustomBallLbs" + gameManager.compuObj[GameManager.turnBallsCPU].cpuIndex, gameManager.chooseBalls[gameManager.compuObj[GameManager.turnBallsCPU].cpuIndex].lbs);
+            customBallSpeed.value = PlayerPrefs.GetInt("CustomBallSpeed" + gameManager.compuObj[GameManager.turnBallsCPU].cpuIndex, gameManager.chooseBalls[gameManager.compuObj[GameManager.turnBallsCPU].cpuIndex].speed);
+            customBallSpin.value = PlayerPrefs.GetInt("CustomBallSpin" + gameManager.compuObj[GameManager.turnBallsCPU].cpuIndex, gameManager.chooseBalls[gameManager.compuObj[GameManager.turnBallsCPU].cpuIndex].spin);
+            customBallFileField.text = PlayerPrefs.GetString("CustomBallURL" + gameManager.compuObj[GameManager.turnBallsCPU].cpuIndex, gameManager.chooseBalls[gameManager.compuObj[GameManager.turnBallsCPU].cpuIndex].urlTextureBall);
         }
     }
 
@@ -6142,73 +5368,73 @@ public class Game : MonoBehaviour
     {
         if (playerTurn == 0)
         {
-            gameManager.chooseBalls[gameManager.turnBalls1].ballName = customBallNameField.text;
-            gameManager.chooseBalls[gameManager.turnBalls1].lbs = (int)customBallLbs.value;
-            gameManager.chooseBalls[gameManager.turnBalls1].speed = (int)customBallSpeed.value;
-            gameManager.chooseBalls[gameManager.turnBalls1].spin = (int)customBallSpin.value;
-            gameManager.chooseBalls[gameManager.turnBalls1].urlTextureBall = customBallFileField.text;
-            PlayerPrefs.SetString("CustomBallName" + gameManager.turnBalls1, gameManager.chooseBalls[gameManager.turnBalls1].ballName);
-            PlayerPrefs.SetInt("CustomBallLbs" + gameManager.turnBalls1, gameManager.chooseBalls[gameManager.turnBalls1].lbs);
-            PlayerPrefs.SetInt("CustomBallSpeed" + gameManager.turnBalls1, gameManager.chooseBalls[gameManager.turnBalls1].speed);
-            PlayerPrefs.SetInt("CustomBallSpin" + gameManager.turnBalls1, gameManager.chooseBalls[gameManager.turnBalls1].spin);
-            PlayerPrefs.SetString("CustomBallURL" + gameManager.turnBalls1, gameManager.chooseBalls[gameManager.turnBalls1].urlTextureBall);
-            StartCoroutine(gameManager.DownloadTexture(customBallFileField.text, gameManager.chooseBalls[gameManager.turnBalls1].ballMat));
+            gameManager.chooseBalls[GameManager.turnBalls1].ballName = customBallNameField.text;
+            gameManager.chooseBalls[GameManager.turnBalls1].lbs = (int)customBallLbs.value;
+            gameManager.chooseBalls[GameManager.turnBalls1].speed = (int)customBallSpeed.value;
+            gameManager.chooseBalls[GameManager.turnBalls1].spin = (int)customBallSpin.value;
+            gameManager.chooseBalls[GameManager.turnBalls1].urlTextureBall = customBallFileField.text;
+            PlayerPrefs.SetString("CustomBallName" + GameManager.turnBalls1, gameManager.chooseBalls[GameManager.turnBalls1].ballName);
+            PlayerPrefs.SetInt("CustomBallLbs" + GameManager.turnBalls1, gameManager.chooseBalls[GameManager.turnBalls1].lbs);
+            PlayerPrefs.SetInt("CustomBallSpeed" + GameManager.turnBalls1, gameManager.chooseBalls[GameManager.turnBalls1].speed);
+            PlayerPrefs.SetInt("CustomBallSpin" + GameManager.turnBalls1, gameManager.chooseBalls[GameManager.turnBalls1].spin);
+            PlayerPrefs.SetString("CustomBallURL" + GameManager.turnBalls1, gameManager.chooseBalls[GameManager.turnBalls1].urlTextureBall);
+            StartCoroutine(gameManager.DownloadTexture(customBallFileField.text, gameManager.chooseBalls[GameManager.turnBalls1].ballMat));
         }
         else if (playerTurn == 1)
         {
-            gameManager.chooseBalls[gameManager.turnBalls2].ballName = customBallNameField.text;
-            gameManager.chooseBalls[gameManager.turnBalls2].lbs = (int)customBallLbs.value;
-            gameManager.chooseBalls[gameManager.turnBalls2].speed = (int)customBallSpeed.value;
-            gameManager.chooseBalls[gameManager.turnBalls2].spin = (int)customBallSpin.value;
-            gameManager.chooseBalls[gameManager.turnBalls2].urlTextureBall = customBallFileField.text;
-            PlayerPrefs.SetString("CustomBallName" + gameManager.turnBalls2, gameManager.chooseBalls[gameManager.turnBalls2].ballName);
-            PlayerPrefs.SetInt("CustomBallLbs" + gameManager.turnBalls2, gameManager.chooseBalls[gameManager.turnBalls2].lbs);
-            PlayerPrefs.SetInt("CustomBallSpeed" + gameManager.turnBalls2, gameManager.chooseBalls[gameManager.turnBalls2].speed);
-            PlayerPrefs.SetInt("CustomBallSpin" + gameManager.turnBalls2, gameManager.chooseBalls[gameManager.turnBalls2].spin);
-            PlayerPrefs.SetString("CustomBallURL" + gameManager.turnBalls2, gameManager.chooseBalls[gameManager.turnBalls2].urlTextureBall);
-            StartCoroutine(gameManager.DownloadTexture(customBallFileField.text, gameManager.chooseBalls[gameManager.turnBalls2].ballMat));
+            gameManager.chooseBalls[GameManager.turnBalls2].ballName = customBallNameField.text;
+            gameManager.chooseBalls[GameManager.turnBalls2].lbs = (int)customBallLbs.value;
+            gameManager.chooseBalls[GameManager.turnBalls2].speed = (int)customBallSpeed.value;
+            gameManager.chooseBalls[GameManager.turnBalls2].spin = (int)customBallSpin.value;
+            gameManager.chooseBalls[GameManager.turnBalls2].urlTextureBall = customBallFileField.text;
+            PlayerPrefs.SetString("CustomBallName" + GameManager.turnBalls2, gameManager.chooseBalls[GameManager.turnBalls2].ballName);
+            PlayerPrefs.SetInt("CustomBallLbs" + GameManager.turnBalls2, gameManager.chooseBalls[GameManager.turnBalls2].lbs);
+            PlayerPrefs.SetInt("CustomBallSpeed" + GameManager.turnBalls2, gameManager.chooseBalls[GameManager.turnBalls2].speed);
+            PlayerPrefs.SetInt("CustomBallSpin" + GameManager.turnBalls2, gameManager.chooseBalls[GameManager.turnBalls2].spin);
+            PlayerPrefs.SetString("CustomBallURL" + GameManager.turnBalls2, gameManager.chooseBalls[GameManager.turnBalls2].urlTextureBall);
+            StartCoroutine(gameManager.DownloadTexture(customBallFileField.text, gameManager.chooseBalls[GameManager.turnBalls2].ballMat));
         }
         else if (playerTurn == 2)
         {
-            gameManager.chooseBalls[gameManager.turnBalls3].ballName = customBallNameField.text;
-            gameManager.chooseBalls[gameManager.turnBalls3].lbs = (int)customBallLbs.value;
-            gameManager.chooseBalls[gameManager.turnBalls3].speed = (int)customBallSpeed.value;
-            gameManager.chooseBalls[gameManager.turnBalls3].spin = (int)customBallSpin.value;
-            gameManager.chooseBalls[gameManager.turnBalls3].urlTextureBall = customBallFileField.text;
-            PlayerPrefs.SetString("CustomBallName" + gameManager.turnBalls3, gameManager.chooseBalls[gameManager.turnBalls3].ballName);
-            PlayerPrefs.SetInt("CustomBallLbs" + gameManager.turnBalls3, gameManager.chooseBalls[gameManager.turnBalls3].lbs);
-            PlayerPrefs.SetInt("CustomBallSpeed" + gameManager.turnBalls3, gameManager.chooseBalls[gameManager.turnBalls3].speed);
-            PlayerPrefs.SetInt("CustomBallSpin" + gameManager.turnBalls3, gameManager.chooseBalls[gameManager.turnBalls3].spin);
-            PlayerPrefs.SetString("CustomBallURL" + gameManager.turnBalls3, gameManager.chooseBalls[gameManager.turnBalls3].urlTextureBall);
-            StartCoroutine(gameManager.DownloadTexture(customBallFileField.text, gameManager.chooseBalls[gameManager.turnBalls3].ballMat));
+            gameManager.chooseBalls[GameManager.turnBalls3].ballName = customBallNameField.text;
+            gameManager.chooseBalls[GameManager.turnBalls3].lbs = (int)customBallLbs.value;
+            gameManager.chooseBalls[GameManager.turnBalls3].speed = (int)customBallSpeed.value;
+            gameManager.chooseBalls[GameManager.turnBalls3].spin = (int)customBallSpin.value;
+            gameManager.chooseBalls[GameManager.turnBalls3].urlTextureBall = customBallFileField.text;
+            PlayerPrefs.SetString("CustomBallName" + GameManager.turnBalls3, gameManager.chooseBalls[GameManager.turnBalls3].ballName);
+            PlayerPrefs.SetInt("CustomBallLbs" + GameManager.turnBalls3, gameManager.chooseBalls[GameManager.turnBalls3].lbs);
+            PlayerPrefs.SetInt("CustomBallSpeed" + GameManager.turnBalls3, gameManager.chooseBalls[GameManager.turnBalls3].speed);
+            PlayerPrefs.SetInt("CustomBallSpin" + GameManager.turnBalls3, gameManager.chooseBalls[GameManager.turnBalls3].spin);
+            PlayerPrefs.SetString("CustomBallURL" + GameManager.turnBalls3, gameManager.chooseBalls[GameManager.turnBalls3].urlTextureBall);
+            StartCoroutine(gameManager.DownloadTexture(customBallFileField.text, gameManager.chooseBalls[GameManager.turnBalls3].ballMat));
         }
         else if (playerTurn == 3)
         {
-            gameManager.chooseBalls[gameManager.turnBalls4].ballName = customBallNameField.text;
-            gameManager.chooseBalls[gameManager.turnBalls4].lbs = (int)customBallLbs.value;
-            gameManager.chooseBalls[gameManager.turnBalls4].speed = (int)customBallSpeed.value;
-            gameManager.chooseBalls[gameManager.turnBalls4].spin = (int)customBallSpin.value;
-            gameManager.chooseBalls[gameManager.turnBalls4].urlTextureBall = customBallFileField.text;
-            PlayerPrefs.SetString("CustomBallName" + gameManager.turnBalls4, gameManager.chooseBalls[gameManager.turnBalls4].ballName);
-            PlayerPrefs.SetInt("CustomBallLbs" + gameManager.turnBalls4, gameManager.chooseBalls[gameManager.turnBalls4].lbs);
-            PlayerPrefs.SetInt("CustomBallSpeed" + gameManager.turnBalls4, gameManager.chooseBalls[gameManager.turnBalls4].speed);
-            PlayerPrefs.SetInt("CustomBallSpin" + gameManager.turnBalls4, gameManager.chooseBalls[gameManager.turnBalls4].spin);
-            PlayerPrefs.SetString("CustomBallURL" + gameManager.turnBalls4, gameManager.chooseBalls[gameManager.turnBalls4].urlTextureBall);
-            StartCoroutine(gameManager.DownloadTexture(customBallFileField.text, gameManager.chooseBalls[gameManager.turnBalls4].ballMat));
+            gameManager.chooseBalls[GameManager.turnBalls4].ballName = customBallNameField.text;
+            gameManager.chooseBalls[GameManager.turnBalls4].lbs = (int)customBallLbs.value;
+            gameManager.chooseBalls[GameManager.turnBalls4].speed = (int)customBallSpeed.value;
+            gameManager.chooseBalls[GameManager.turnBalls4].spin = (int)customBallSpin.value;
+            gameManager.chooseBalls[GameManager.turnBalls4].urlTextureBall = customBallFileField.text;
+            PlayerPrefs.SetString("CustomBallName" + GameManager.turnBalls4, gameManager.chooseBalls[GameManager.turnBalls4].ballName);
+            PlayerPrefs.SetInt("CustomBallLbs" + GameManager.turnBalls4, gameManager.chooseBalls[GameManager.turnBalls4].lbs);
+            PlayerPrefs.SetInt("CustomBallSpeed" + GameManager.turnBalls4, gameManager.chooseBalls[GameManager.turnBalls4].speed);
+            PlayerPrefs.SetInt("CustomBallSpin" + GameManager.turnBalls4, gameManager.chooseBalls[GameManager.turnBalls4].spin);
+            PlayerPrefs.SetString("CustomBallURL" + GameManager.turnBalls4, gameManager.chooseBalls[GameManager.turnBalls4].urlTextureBall);
+            StartCoroutine(gameManager.DownloadTexture(customBallFileField.text, gameManager.chooseBalls[GameManager.turnBalls4].ballMat));
         }
         else if (playerTurn == 4)
         {
-            gameManager.chooseBalls[gameManager.compuObj[gameManager.turnBallsCPU].cpuIndex].ballName = customBallNameField.text;
-            gameManager.chooseBalls[gameManager.compuObj[gameManager.turnBallsCPU].cpuIndex].lbs = (int)customBallLbs.value;
-            gameManager.chooseBalls[gameManager.compuObj[gameManager.turnBallsCPU].cpuIndex].speed = (int)customBallSpeed.value;
-            gameManager.chooseBalls[gameManager.compuObj[gameManager.turnBallsCPU].cpuIndex].spin = (int)customBallSpin.value;
-            gameManager.chooseBalls[gameManager.compuObj[gameManager.turnBallsCPU].cpuIndex].urlTextureBall = customBallFileField.text;
-            PlayerPrefs.SetString("CustomBallName" + gameManager.compuObj[gameManager.turnBallsCPU].cpuIndex, gameManager.chooseBalls[gameManager.compuObj[gameManager.turnBallsCPU].cpuIndex].ballName);
-            PlayerPrefs.SetInt("CustomBallLbs" + gameManager.compuObj[gameManager.turnBallsCPU].cpuIndex, gameManager.chooseBalls[gameManager.compuObj[gameManager.turnBallsCPU].cpuIndex].lbs);
-            PlayerPrefs.SetInt("CustomBallSpeed" + gameManager.compuObj[gameManager.turnBallsCPU].cpuIndex, gameManager.chooseBalls[gameManager.compuObj[gameManager.turnBallsCPU].cpuIndex].speed);
-            PlayerPrefs.SetInt("CustomBallSpin" + gameManager.compuObj[gameManager.turnBallsCPU].cpuIndex, gameManager.chooseBalls[gameManager.compuObj[gameManager.turnBallsCPU].cpuIndex].spin);
-            PlayerPrefs.SetString("CustomBallURL" + gameManager.compuObj[gameManager.turnBallsCPU].cpuIndex, gameManager.chooseBalls[gameManager.compuObj[gameManager.turnBallsCPU].cpuIndex].urlTextureBall);
-            StartCoroutine(gameManager.DownloadTexture(customBallFileField.text, gameManager.chooseBalls[gameManager.compuObj[gameManager.turnBallsCPU].cpuIndex].ballMat));
+            gameManager.chooseBalls[gameManager.compuObj[GameManager.turnBallsCPU].cpuIndex].ballName = customBallNameField.text;
+            gameManager.chooseBalls[gameManager.compuObj[GameManager.turnBallsCPU].cpuIndex].lbs = (int)customBallLbs.value;
+            gameManager.chooseBalls[gameManager.compuObj[GameManager.turnBallsCPU].cpuIndex].speed = (int)customBallSpeed.value;
+            gameManager.chooseBalls[gameManager.compuObj[GameManager.turnBallsCPU].cpuIndex].spin = (int)customBallSpin.value;
+            gameManager.chooseBalls[gameManager.compuObj[GameManager.turnBallsCPU].cpuIndex].urlTextureBall = customBallFileField.text;
+            PlayerPrefs.SetString("CustomBallName" + gameManager.compuObj[GameManager.turnBallsCPU].cpuIndex, gameManager.chooseBalls[gameManager.compuObj[GameManager.turnBallsCPU].cpuIndex].ballName);
+            PlayerPrefs.SetInt("CustomBallLbs" + gameManager.compuObj[GameManager.turnBallsCPU].cpuIndex, gameManager.chooseBalls[gameManager.compuObj[GameManager.turnBallsCPU].cpuIndex].lbs);
+            PlayerPrefs.SetInt("CustomBallSpeed" + gameManager.compuObj[GameManager.turnBallsCPU].cpuIndex, gameManager.chooseBalls[gameManager.compuObj[GameManager.turnBallsCPU].cpuIndex].speed);
+            PlayerPrefs.SetInt("CustomBallSpin" + gameManager.compuObj[GameManager.turnBallsCPU].cpuIndex, gameManager.chooseBalls[gameManager.compuObj[GameManager.turnBallsCPU].cpuIndex].spin);
+            PlayerPrefs.SetString("CustomBallURL" + gameManager.compuObj[GameManager.turnBallsCPU].cpuIndex, gameManager.chooseBalls[gameManager.compuObj[GameManager.turnBallsCPU].cpuIndex].urlTextureBall);
+            StartCoroutine(gameManager.DownloadTexture(customBallFileField.text, gameManager.chooseBalls[gameManager.compuObj[GameManager.turnBallsCPU].cpuIndex].ballMat));
         }
     }
 
@@ -6225,6 +5451,48 @@ public class Game : MonoBehaviour
         }
         infoFileField.text = "";
         FileData.SaveToSAV<string>(gameManager.urlInfoScreen, "InfoURL");
+    }
+
+    public void BuyBomb()
+    {
+        if (GameManager.moneys >= 1000)
+        {
+            GameManager.bombBalls++;
+            GameManager.moneys -= 1000;
+            PlayClip("buy_powerups");
+        }
+        else
+        {
+            PlayClip("not_powerups");
+        }
+    }
+
+    public void BuyHyper()
+    {
+        if (GameManager.moneys >= 500)
+        {
+            GameManager.hyperBalls++;
+            GameManager.moneys -= 500;
+            PlayClip("buy_powerups");
+        }
+        else
+        {
+            PlayClip("not_powerups");
+        }
+    }
+
+    public void BuyLightning()
+    {
+        if (GameManager.moneys >= 250)
+        {
+            GameManager.lightningBalls++;
+            GameManager.moneys -= 250;
+            PlayClip("buy_powerups");
+        }
+        else
+        {
+            PlayClip("not_powerups");
+        }
     }
 
     public void ClickAudio()
@@ -6245,13 +5513,13 @@ public class Game : MonoBehaviour
 
     IEnumerator FireworksPop()
     {
-        yield return new WaitForSeconds(Random.Range(0.1f, 0.75f));
+        yield return new WaitForSeconds(Random.Range(0.3f, 3f));
         while (true)
         {
             GameObject pop = Instantiate(fireworks, new Vector3(Random.Range(-512, 512), Random.Range(-256, 256), 5000), Quaternion.identity) as GameObject;
             var main = pop.GetComponent<ParticleSystem>().main;
             main.startColor = pop.GetComponent<Fireworks>().colorFireworks[Random.Range(0, pop.GetComponent<Fireworks>().colorFireworks.Length)];
-            yield return new WaitForSeconds(Random.Range(0.1f, 0.75f));
+            yield return new WaitForSeconds(Random.Range(0.3f, 3f));
         }
     }
 }

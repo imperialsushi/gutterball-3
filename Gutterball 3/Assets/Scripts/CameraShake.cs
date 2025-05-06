@@ -19,7 +19,7 @@ public class CameraShake : MonoBehaviour
     {
         if (shakeHit > 0)
         {
-            shakeHit -= Time.deltaTime * 15;
+            shakeHit -= Time.deltaTime * 10;
         }
         else if (shakeHit < 0)
         {
@@ -32,7 +32,7 @@ public class CameraShake : MonoBehaviour
     {
         if (GameManager.isShake)
         {
-            shakeHit += setShake * 0.5f;
+            shakeHit += setShake;
         }
     }
 }

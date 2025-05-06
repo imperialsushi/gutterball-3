@@ -49,11 +49,11 @@ public class ObjectAnimation : MonoBehaviour
     private Vector3 movePosition;
     private Vector3 fall;
     private bool isFall;
-    private CameraFollow cam;
+    private Game game;
 
     void Start()
     {
-        cam = GameObject.FindObjectOfType<CameraFollow>();
+        game = GameObject.FindObjectOfType<Game>();
         if (objectTarget != null)
         {
             startPosition = objectTarget.position;
@@ -69,17 +69,17 @@ public class ObjectAnimation : MonoBehaviour
         }
         if (objectMoves.Length >= 1 && nextIndex < objectMoves.Length && isTime)
         {
-            time += 30 * Time.deltaTime;
+            time += 10 * Time.deltaTime;
         }
         if (objectMoves.Length >= 1 && nextIndex < objectMoves.Length && isMove)
         {
             if (objectTarget != null)
             {
-                objectTarget.Translate(fall.x * 30 * Time.deltaTime, fall.y * 30 * Time.deltaTime, objectMoves[nextIndex].move.z * 30 * Time.deltaTime, Space.World);
+                objectTarget.Translate(fall.x * 10 * Time.deltaTime, fall.y * 10 * Time.deltaTime, objectMoves[nextIndex].move.z * 10 * Time.deltaTime, Space.World);
             }
-            if (camTarget != null && cam.type == CameraFollow.CameraType.Anim)
+            if (camTarget != null && game.camType == Game.CameraType.Anim)
             {
-                camTarget.Translate(fall.x * 30 * Time.deltaTime, fall.y * 30 * Time.deltaTime, objectMoves[nextIndex].move.z * 30 * Time.deltaTime, Space.World);
+                camTarget.Translate(fall.x * 10 * Time.deltaTime, fall.y * 10 * Time.deltaTime, objectMoves[nextIndex].move.z * 10 * Time.deltaTime, Space.World);
             }
         }
 
@@ -95,7 +95,7 @@ public class ObjectAnimation : MonoBehaviour
                 {
                     objectTarget.position = movePosition;
                 }
-                if (camTarget != null && cam.type == CameraFollow.CameraType.Anim)
+                if (camTarget != null && game.camType == Game.CameraType.Anim)
                 {
                     camTarget.position = movePosition;
                 }
@@ -148,7 +148,7 @@ public class ObjectAnimation : MonoBehaviour
                 {
                     movePosition = objectTarget.position + objectMoves[nextIndex].move * objectMoves[nextIndex].waitTime;
                 }
-                if (camTarget != null && cam.type == CameraFollow.CameraType.Anim)
+                if (camTarget != null && game.camType == Game.CameraType.Anim)
                 {
                     movePosition = camTarget.position + objectMoves[nextIndex].move * objectMoves[nextIndex].waitTime;
                 }

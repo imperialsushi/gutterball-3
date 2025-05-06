@@ -29,7 +29,7 @@ public class TriggerSound : MonoBehaviour
         shake.y = Random.Range(-shakeTime, shakeTime);
         if (shakeTime > 0)
         {
-            shakeTime -= Time.deltaTime;
+            shakeTime -= Time.deltaTime * 0.5f;
         }
         if (shakeTime <= 0)
         {
@@ -45,7 +45,7 @@ public class TriggerSound : MonoBehaviour
     {
         if (collision.gameObject.tag == "Ball" && !isBounce)
         {
-            if (audioSource != null && GameManager.isSound && GameManager.type != GameManager.GameState.Menu)
+            if (audioSource != null && GameManager.isSound && Game.type != Game.GameState.Menu)
             {
                 audioSource.PlayOneShot(Resources.Load<AudioClip>("Sound/" + clipName));
             }
@@ -63,7 +63,7 @@ public class TriggerSound : MonoBehaviour
                 Instantiate(hitParticles, splashPosition, Quaternion.Euler(0, 180, 0));
             }
             shakeTime = maxShake;
-            if (audioSource != null && GameManager.isSound && GameManager.type != GameManager.GameState.Menu)
+            if (audioSource != null && GameManager.isSound && Game.type != Game.GameState.Menu)
             {
                 audioSource.PlayOneShot(Resources.Load<AudioClip>("Sound/" + clipName));
             }

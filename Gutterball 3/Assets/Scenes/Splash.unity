@@ -258,7 +258,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
-  m_Color: {r: 0, g: 0, b: 0, a: 1}
+  m_Color: {r: 0, g: 0, b: 0, a: 0}
   m_RaycastTarget: 1
   m_OnCullStateChanged:
     m_PersistentCalls:
@@ -355,6 +355,88 @@ CanvasRenderer:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 63518714}
+  m_CullTransparentMesh: 0
+--- !u!1 &74090064
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 74090065}
+  - component: {fileID: 74090067}
+  - component: {fileID: 74090066}
+  m_Layer: 5
+  m_Name: LogoText1
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!224 &74090065
+RectTransform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 74090064}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children: []
+  m_Father: {fileID: 1885016506}
+  m_RootOrder: 1
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_AnchorMin: {x: 0.5, y: 0.5}
+  m_AnchorMax: {x: 0.5, y: 0.5}
+  m_AnchoredPosition: {x: 0, y: 0}
+  m_SizeDelta: {x: 1024, y: 512}
+  m_Pivot: {x: 0.5, y: 0.5}
+--- !u!114 &74090066
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 74090064}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 708705254, guid: f70555f144d8491a825f0804e09c671c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_Material: {fileID: 0}
+  m_Color: {r: 1, g: 1, b: 1, a: 1}
+  m_RaycastTarget: 1
+  m_OnCullStateChanged:
+    m_PersistentCalls:
+      m_Calls: []
+    m_TypeName: UnityEngine.UI.MaskableGraphic+CullStateChangedEvent, UnityEngine.UI,
+      Version=1.0.0.0, Culture=neutral, PublicKeyToken=null
+  m_FontData:
+    m_Font: {fileID: 10102, guid: 0000000000000000e000000000000000, type: 0}
+    m_FontSize: 80
+    m_FontStyle: 1
+    m_BestFit: 0
+    m_MinSize: 10
+    m_MaxSize: 101
+    m_Alignment: 4
+    m_AlignByGeometry: 0
+    m_RichText: 1
+    m_HorizontalOverflow: 0
+    m_VerticalOverflow: 0
+    m_LineSpacing: 1
+  m_Text: 'Ronkat
+
+
+    Funklectic'
+--- !u!222 &74090067
+CanvasRenderer:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 74090064}
   m_CullTransparentMesh: 0
 --- !u!1 &137229675
 GameObject:
@@ -1015,7 +1097,7 @@ RectTransform:
   - {fileID: 209047975}
   - {fileID: 63518715}
   m_Father: {fileID: 965564858}
-  m_RootOrder: 3
+  m_RootOrder: 4
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 1}
@@ -1380,7 +1462,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 0, y: 280}
+  m_AnchoredPosition: {x: 0, y: 288}
   m_SizeDelta: {x: 1024, y: 256}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &844373544
@@ -1665,6 +1747,7 @@ RectTransform:
   m_Children:
   - {fileID: 1422511447}
   - {fileID: 137229676}
+  - {fileID: 1885016506}
   - {fileID: 1406529717}
   - {fileID: 389186138}
   m_Father: {fileID: 0}
@@ -1827,6 +1910,97 @@ CanvasRenderer:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1009446199}
+  m_CullTransparentMesh: 0
+--- !u!1 &1138693644
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1138693645}
+  - component: {fileID: 1138693648}
+  - component: {fileID: 1138693647}
+  - component: {fileID: 1138693646}
+  m_Layer: 5
+  m_Name: FadeScreen
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!224 &1138693645
+RectTransform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1138693644}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children: []
+  m_Father: {fileID: 1885016506}
+  m_RootOrder: 3
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_AnchorMin: {x: 0, y: 0}
+  m_AnchorMax: {x: 1, y: 1}
+  m_AnchoredPosition: {x: 0, y: 0}
+  m_SizeDelta: {x: 0, y: 0}
+  m_Pivot: {x: 0.5, y: 0.5}
+--- !u!111 &1138693646
+Animation:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1138693644}
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Animation: {fileID: 7400000, guid: e7b414d00e4cbb242aad4dd751527c10, type: 2}
+  m_Animations:
+  - {fileID: 7400000, guid: e7b414d00e4cbb242aad4dd751527c10, type: 2}
+  m_WrapMode: 0
+  m_PlayAutomatically: 1
+  m_AnimatePhysics: 0
+  m_CullingType: 0
+--- !u!114 &1138693647
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1138693644}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: -765806418, guid: f70555f144d8491a825f0804e09c671c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_Material: {fileID: 0}
+  m_Color: {r: 0, g: 0, b: 0, a: 0}
+  m_RaycastTarget: 1
+  m_OnCullStateChanged:
+    m_PersistentCalls:
+      m_Calls: []
+    m_TypeName: UnityEngine.UI.MaskableGraphic+CullStateChangedEvent, UnityEngine.UI,
+      Version=1.0.0.0, Culture=neutral, PublicKeyToken=null
+  m_Sprite: {fileID: 0}
+  m_Type: 1
+  m_PreserveAspect: 0
+  m_FillCenter: 1
+  m_FillMethod: 4
+  m_FillAmount: 1
+  m_FillClockwise: 1
+  m_FillOrigin: 0
+  m_UseSpriteMesh: 0
+--- !u!222 &1138693648
+CanvasRenderer:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1138693644}
   m_CullTransparentMesh: 0
 --- !u!1 &1139343982
 GameObject:
@@ -2031,6 +2205,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   splashScreen: {fileID: 1422511446}
   activisionScreen: {fileID: 137229675}
+  ronkatScreen: {fileID: 1885016505}
   warningScreen: {fileID: 1406529716}
   loadScreen: {fileID: 389186137}
 --- !u!1 &1147172728
@@ -2518,7 +2693,7 @@ RectTransform:
   - {fileID: 438448678}
   - {fileID: 60109701}
   m_Father: {fileID: 965564858}
-  m_RootOrder: 2
+  m_RootOrder: 3
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
@@ -2691,7 +2866,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
-  m_Color: {r: 0, g: 0, b: 0, a: 1}
+  m_Color: {r: 0, g: 0, b: 0, a: 0}
   m_RaycastTarget: 1
   m_OnCullStateChanged:
     m_PersistentCalls:
@@ -3127,6 +3302,85 @@ AudioSource:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 0
+--- !u!1 &1541206701
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1541206702}
+  - component: {fileID: 1541206704}
+  - component: {fileID: 1541206703}
+  m_Layer: 5
+  m_Name: LogoText2
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!224 &1541206702
+RectTransform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1541206701}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children: []
+  m_Father: {fileID: 1885016506}
+  m_RootOrder: 2
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_AnchorMin: {x: 0.5, y: 0.5}
+  m_AnchorMax: {x: 0.5, y: 0.5}
+  m_AnchoredPosition: {x: 0, y: 0}
+  m_SizeDelta: {x: 1024, y: 512}
+  m_Pivot: {x: 0.5, y: 0.5}
+--- !u!114 &1541206703
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1541206701}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 708705254, guid: f70555f144d8491a825f0804e09c671c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_Material: {fileID: 0}
+  m_Color: {r: 0.01886791, g: 0.01886791, b: 0.01886791, a: 1}
+  m_RaycastTarget: 1
+  m_OnCullStateChanged:
+    m_PersistentCalls:
+      m_Calls: []
+    m_TypeName: UnityEngine.UI.MaskableGraphic+CullStateChangedEvent, UnityEngine.UI,
+      Version=1.0.0.0, Culture=neutral, PublicKeyToken=null
+  m_FontData:
+    m_Font: {fileID: 10102, guid: 0000000000000000e000000000000000, type: 0}
+    m_FontSize: 80
+    m_FontStyle: 0
+    m_BestFit: 0
+    m_MinSize: 10
+    m_MaxSize: 101
+    m_Alignment: 4
+    m_AlignByGeometry: 0
+    m_RichText: 1
+    m_HorizontalOverflow: 0
+    m_VerticalOverflow: 0
+    m_LineSpacing: 1
+  m_Text: the
+--- !u!222 &1541206704
+CanvasRenderer:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1541206701}
+  m_CullTransparentMesh: 0
 --- !u!1 &1542231581
 GameObject:
   m_ObjectHideFlags: 0
@@ -3549,6 +3803,80 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1802350995}
   m_CullTransparentMesh: 0
+--- !u!1 &1809899044
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1809899045}
+  - component: {fileID: 1809899047}
+  - component: {fileID: 1809899046}
+  m_Layer: 5
+  m_Name: LogoImage
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!224 &1809899045
+RectTransform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1809899044}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children: []
+  m_Father: {fileID: 1885016506}
+  m_RootOrder: 0
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_AnchorMin: {x: 0.5, y: 0.5}
+  m_AnchorMax: {x: 0.5, y: 0.5}
+  m_AnchoredPosition: {x: 0, y: 0}
+  m_SizeDelta: {x: 464, y: 72}
+  m_Pivot: {x: 0.5, y: 0.5}
+--- !u!114 &1809899046
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1809899044}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: -765806418, guid: f70555f144d8491a825f0804e09c671c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_Material: {fileID: 0}
+  m_Color: {r: 1, g: 1, b: 1, a: 1}
+  m_RaycastTarget: 1
+  m_OnCullStateChanged:
+    m_PersistentCalls:
+      m_Calls: []
+    m_TypeName: UnityEngine.UI.MaskableGraphic+CullStateChangedEvent, UnityEngine.UI,
+      Version=1.0.0.0, Culture=neutral, PublicKeyToken=null
+  m_Sprite: {fileID: 0}
+  m_Type: 0
+  m_PreserveAspect: 0
+  m_FillCenter: 1
+  m_FillMethod: 4
+  m_FillAmount: 1
+  m_FillClockwise: 1
+  m_FillOrigin: 0
+  m_UseSpriteMesh: 0
+--- !u!222 &1809899047
+CanvasRenderer:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1809899044}
+  m_CullTransparentMesh: 0
 --- !u!1 &1815062816
 GameObject:
   m_ObjectHideFlags: 0
@@ -3707,6 +4035,45 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1848660362}
   m_CullTransparentMesh: 0
+--- !u!1 &1885016505
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1885016506}
+  m_Layer: 5
+  m_Name: Ronkat
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 0
+--- !u!224 &1885016506
+RectTransform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1885016505}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children:
+  - {fileID: 1809899045}
+  - {fileID: 74090065}
+  - {fileID: 1541206702}
+  - {fileID: 1138693645}
+  m_Father: {fileID: 965564858}
+  m_RootOrder: 2
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_AnchorMin: {x: 0.5, y: 0.5}
+  m_AnchorMax: {x: 0.5, y: 0.5}
+  m_AnchoredPosition: {x: 0, y: 0}
+  m_SizeDelta: {x: 1024, y: 1024}
+  m_Pivot: {x: 0.5, y: 0.5}
 --- !u!1 &1898682775
 GameObject:
   m_ObjectHideFlags: 0
@@ -4756,6 +5123,256 @@ MonoBehaviour:
     spin: 50
     isLock: 0
     urlTextureBall: 
+  - ballName: Custom 16
+    lockType: 5
+    totalLock: 0
+    CPUName: Custom CPU
+    ballMat: {fileID: 2100000, guid: 01d520ea82869b547bc5d97faa55c3f8, type: 2}
+    lbs: 12
+    speed: 50
+    spin: 50
+    isLock: 0
+    urlTextureBall: 
+  - ballName: Custom 17
+    lockType: 5
+    totalLock: 0
+    CPUName: Custom CPU
+    ballMat: {fileID: 2100000, guid: 1813ba9050186f644a6bbcfbd166b33d, type: 2}
+    lbs: 12
+    speed: 50
+    spin: 50
+    isLock: 0
+    urlTextureBall: 
+  - ballName: Custom 18
+    lockType: 5
+    totalLock: 0
+    CPUName: Custom CPU
+    ballMat: {fileID: 2100000, guid: 81ef48e658a283540820642f7e8e7f94, type: 2}
+    lbs: 12
+    speed: 50
+    spin: 50
+    isLock: 0
+    urlTextureBall: 
+  - ballName: Custom 19
+    lockType: 5
+    totalLock: 0
+    CPUName: Custom CPU
+    ballMat: {fileID: 2100000, guid: 5ac364e1170dbcf41bee878617022a7f, type: 2}
+    lbs: 12
+    speed: 50
+    spin: 50
+    isLock: 0
+    urlTextureBall: 
+  - ballName: Custom 20
+    lockType: 5
+    totalLock: 0
+    CPUName: Custom CPU
+    ballMat: {fileID: 2100000, guid: 3f95963ac9c164b4981cf1252d326924, type: 2}
+    lbs: 12
+    speed: 50
+    spin: 50
+    isLock: 0
+    urlTextureBall: 
+  - ballName: Custom 21
+    lockType: 5
+    totalLock: 0
+    CPUName: Custom CPU
+    ballMat: {fileID: 2100000, guid: 8af6639dfbdda134998e2f93f5e9c0fa, type: 2}
+    lbs: 12
+    speed: 50
+    spin: 50
+    isLock: 0
+    urlTextureBall: 
+  - ballName: Custom 22
+    lockType: 5
+    totalLock: 0
+    CPUName: Custom CPU
+    ballMat: {fileID: 2100000, guid: a22f94d115fe2bf4382dfea0298c2c63, type: 2}
+    lbs: 12
+    speed: 50
+    spin: 50
+    isLock: 0
+    urlTextureBall: 
+  - ballName: Custom 23
+    lockType: 5
+    totalLock: 0
+    CPUName: Custom CPU
+    ballMat: {fileID: 2100000, guid: 08339fcd125a00e499670346a3f434c2, type: 2}
+    lbs: 12
+    speed: 50
+    spin: 50
+    isLock: 0
+    urlTextureBall: 
+  - ballName: Custom 24
+    lockType: 5
+    totalLock: 0
+    CPUName: Custom CPU
+    ballMat: {fileID: 2100000, guid: 652c247cfbd471f41a7c365dd20d5e37, type: 2}
+    lbs: 12
+    speed: 50
+    spin: 50
+    isLock: 0
+    urlTextureBall: 
+  - ballName: Custom 25
+    lockType: 5
+    totalLock: 0
+    CPUName: Custom CPU
+    ballMat: {fileID: 2100000, guid: a0ff91d6697292d48ac58585ca0b93ed, type: 2}
+    lbs: 12
+    speed: 50
+    spin: 50
+    isLock: 0
+    urlTextureBall: 
+  - ballName: Custom 26
+    lockType: 5
+    totalLock: 0
+    CPUName: Custom CPU
+    ballMat: {fileID: 2100000, guid: a0b10d3b35608c4419f68a0c5e15c1ae, type: 2}
+    lbs: 12
+    speed: 50
+    spin: 50
+    isLock: 0
+    urlTextureBall: 
+  - ballName: Custom 27
+    lockType: 5
+    totalLock: 0
+    CPUName: Custom CPU
+    ballMat: {fileID: 2100000, guid: 13678696de9abc742a3f171c888e7a16, type: 2}
+    lbs: 12
+    speed: 50
+    spin: 50
+    isLock: 0
+    urlTextureBall: 
+  - ballName: Custom 28
+    lockType: 5
+    totalLock: 0
+    CPUName: Custom CPU
+    ballMat: {fileID: 2100000, guid: 40626049ff1da4946afc305b86bd8327, type: 2}
+    lbs: 12
+    speed: 50
+    spin: 50
+    isLock: 0
+    urlTextureBall: 
+  - ballName: Custom 29
+    lockType: 5
+    totalLock: 0
+    CPUName: Custom CPU
+    ballMat: {fileID: 2100000, guid: 659a80ec247cd4040ae8babb82a6d5d7, type: 2}
+    lbs: 12
+    speed: 50
+    spin: 50
+    isLock: 0
+    urlTextureBall: 
+  - ballName: Custom 30
+    lockType: 5
+    totalLock: 0
+    CPUName: Custom CPU
+    ballMat: {fileID: 2100000, guid: 08354f03416b63945a72365ba3eaee75, type: 2}
+    lbs: 12
+    speed: 50
+    spin: 50
+    isLock: 0
+    urlTextureBall: 
+  - ballName: Custom 31
+    lockType: 5
+    totalLock: 0
+    CPUName: Custom CPU
+    ballMat: {fileID: 2100000, guid: 075d5412c47d8164cb18326493736b66, type: 2}
+    lbs: 12
+    speed: 50
+    spin: 50
+    isLock: 0
+    urlTextureBall: 
+  - ballName: Custom 32
+    lockType: 5
+    totalLock: 0
+    CPUName: Custom CPU
+    ballMat: {fileID: 2100000, guid: e5f399fca045ca6419377059eda7018d, type: 2}
+    lbs: 12
+    speed: 50
+    spin: 50
+    isLock: 0
+    urlTextureBall: 
+  - ballName: Custom 33
+    lockType: 5
+    totalLock: 0
+    CPUName: Custom CPU
+    ballMat: {fileID: 2100000, guid: 4f63458aa954e0540bbfacdbafe76fee, type: 2}
+    lbs: 12
+    speed: 50
+    spin: 50
+    isLock: 0
+    urlTextureBall: 
+  - ballName: Custom 34
+    lockType: 5
+    totalLock: 0
+    CPUName: Custom CPU
+    ballMat: {fileID: 2100000, guid: c2c9ca66ba2fac6418020534745b0b2a, type: 2}
+    lbs: 12
+    speed: 50
+    spin: 50
+    isLock: 0
+    urlTextureBall: 
+  - ballName: Custom 35
+    lockType: 5
+    totalLock: 0
+    CPUName: Custom CPU
+    ballMat: {fileID: 2100000, guid: b3827d0f19f6c9d40900670f2369fb89, type: 2}
+    lbs: 12
+    speed: 50
+    spin: 50
+    isLock: 0
+    urlTextureBall: 
+  - ballName: Custom 36
+    lockType: 5
+    totalLock: 0
+    CPUName: Custom CPU
+    ballMat: {fileID: 2100000, guid: c6d71eafc742e5e4e90860d5d2a977d8, type: 2}
+    lbs: 12
+    speed: 50
+    spin: 50
+    isLock: 0
+    urlTextureBall: 
+  - ballName: Custom 37
+    lockType: 5
+    totalLock: 0
+    CPUName: Custom CPU
+    ballMat: {fileID: 2100000, guid: e0451dc63ad4bb147a5b4790431543f3, type: 2}
+    lbs: 12
+    speed: 50
+    spin: 50
+    isLock: 0
+    urlTextureBall: 
+  - ballName: Custom 38
+    lockType: 5
+    totalLock: 0
+    CPUName: Custom CPU
+    ballMat: {fileID: 2100000, guid: fcba19680babcb64d96a0f89bc9c77ba, type: 2}
+    lbs: 12
+    speed: 50
+    spin: 50
+    isLock: 0
+    urlTextureBall: 
+  - ballName: Custom 39
+    lockType: 5
+    totalLock: 0
+    CPUName: Custom CPU
+    ballMat: {fileID: 2100000, guid: d0ce44374f4775747a1ce62e92d1f805, type: 2}
+    lbs: 12
+    speed: 50
+    spin: 50
+    isLock: 0
+    urlTextureBall: 
+  - ballName: Custom 40
+    lockType: 5
+    totalLock: 0
+    CPUName: Custom CPU
+    ballMat: {fileID: 2100000, guid: 73949bf3c2685e44c943bb024d36962d, type: 2}
+    lbs: 12
+    speed: 50
+    spin: 50
+    isLock: 0
+    urlTextureBall: 
   compuObj:
   - cpuIndex: 3
     money: 0
@@ -4988,8 +5605,181 @@ MonoBehaviour:
     strikes: 0
     spares: 0
     gutters: 0
-  qualityIndex: 0
-  resolutionIndex: 0
+  - cpuIndex: 100
+    money: 0
+    win: 0
+    loss: 0
+    strikes: 0
+    spares: 0
+    gutters: 0
+  - cpuIndex: 101
+    money: 0
+    win: 0
+    loss: 0
+    strikes: 0
+    spares: 0
+    gutters: 0
+  - cpuIndex: 102
+    money: 0
+    win: 0
+    loss: 0
+    strikes: 0
+    spares: 0
+    gutters: 0
+  - cpuIndex: 103
+    money: 0
+    win: 0
+    loss: 0
+    strikes: 0
+    spares: 0
+    gutters: 0
+  - cpuIndex: 104
+    money: 0
+    win: 0
+    loss: 0
+    strikes: 0
+    spares: 0
+    gutters: 0
+  - cpuIndex: 105
+    money: 0
+    win: 0
+    loss: 0
+    strikes: 0
+    spares: 0
+    gutters: 0
+  - cpuIndex: 106
+    money: 0
+    win: 0
+    loss: 0
+    strikes: 0
+    spares: 0
+    gutters: 0
+  - cpuIndex: 107
+    money: 0
+    win: 0
+    loss: 0
+    strikes: 0
+    spares: 0
+    gutters: 0
+  - cpuIndex: 108
+    money: 0
+    win: 0
+    loss: 0
+    strikes: 0
+    spares: 0
+    gutters: 0
+  - cpuIndex: 109
+    money: 0
+    win: 0
+    loss: 0
+    strikes: 0
+    spares: 0
+    gutters: 0
+  - cpuIndex: 110
+    money: 0
+    win: 0
+    loss: 0
+    strikes: 0
+    spares: 0
+    gutters: 0
+  - cpuIndex: 111
+    money: 0
+    win: 0
+    loss: 0
+    strikes: 0
+    spares: 0
+    gutters: 0
+  - cpuIndex: 112
+    money: 0
+    win: 0
+    loss: 0
+    strikes: 0
+    spares: 0
+    gutters: 0
+  - cpuIndex: 113
+    money: 0
+    win: 0
+    loss: 0
+    strikes: 0
+    spares: 0
+    gutters: 0
+  - cpuIndex: 114
+    money: 0
+    win: 0
+    loss: 0
+    strikes: 0
+    spares: 0
+    gutters: 0
+  - cpuIndex: 115
+    money: 0
+    win: 0
+    loss: 0
+    strikes: 0
+    spares: 0
+    gutters: 0
+  - cpuIndex: 116
+    money: 0
+    win: 0
+    loss: 0
+    strikes: 0
+    spares: 0
+    gutters: 0
+  - cpuIndex: 117
+    money: 0
+    win: 0
+    loss: 0
+    strikes: 0
+    spares: 0
+    gutters: 0
+  - cpuIndex: 118
+    money: 0
+    win: 0
+    loss: 0
+    strikes: 0
+    spares: 0
+    gutters: 0
+  - cpuIndex: 119
+    money: 0
+    win: 0
+    loss: 0
+    strikes: 0
+    spares: 0
+    gutters: 0
+  - cpuIndex: 120
+    money: 0
+    win: 0
+    loss: 0
+    strikes: 0
+    spares: 0
+    gutters: 0
+  - cpuIndex: 121
+    money: 0
+    win: 0
+    loss: 0
+    strikes: 0
+    spares: 0
+    gutters: 0
+  - cpuIndex: 122
+    money: 0
+    win: 0
+    loss: 0
+    strikes: 0
+    spares: 0
+    gutters: 0
+  - cpuIndex: 123
+    money: 0
+    win: 0
+    loss: 0
+    strikes: 0
+    spares: 0
+    gutters: 0
+  - cpuIndex: 124
+    money: 0
+    win: 0
+    loss: 0
+    strikes: 0
+    spares: 0
+    gutters: 0
   lockRegistered: 1
   urlInfoScreen:
   - https://cdn.ghstatic.com/images/deluxe/300x150/200392.jpg
@@ -5013,39 +5803,16 @@ MonoBehaviour:
   - https://cdn.ghstatic.com/images/deluxe/300x150/200942.jpg
   - https://cdn.ghstatic.com/images/deluxe/300x150/200950.jpg
   - https://cdn.ghstatic.com/images/deluxe/300x150/201410.jpg
+  - https://cdn.ghstatic.com/images/deluxe/300x150/2769.jpg
+  - https://cdn.ghstatic.com/images/deluxe/300x150/248.jpg
   - https://cdn.ghstatic.com/images/deluxe/300x150/200068.jpg
   - https://cdn.ghstatic.com/images/deluxe/300x150/200066.jpg
   - https://cdn.ghstatic.com/images/deluxe/300x150/200251.jpg
   - https://cdn.ghstatic.com/images/deluxe/300x150/200210.jpg
   - https://cdn.ghstatic.com/images/deluxe/300x150/200211.jpg
-  chooseBallIndex: 0
-  turnBalls1: 0
-  turnBalls2: 0
-  turnBalls3: 0
-  turnBalls4: 0
-  turnBallsCPU: 0
-  turnNameIndex1: 0
-  turnNameIndex2: 0
-  turnNameIndex3: 0
-  turnNameIndex4: 0
+  - https://cdn.ghstatic.com/images/deluxe/300x150/200982.jpg
+  - https://cdn.ghstatic.com/images/deluxe/300x150/200208.jpg
   lockBallMat: {fileID: 2100000, guid: 7995fe228353e6c4f92b8a1c95feee1f, type: 2}
-  serialKeys:
-  - 1190-1871-7730-5353-2399-8860
-  - 1190-1163-1601-7407-6653-5595
-  - 1190-1877-6733-4577-5445-7604
-  - 1190-1938-8064-9497-6165-2892
-  - 1190-1053-8816-1217-0269-4857
-  - 1190-1057-9253-9421-6751-4829
-  - 1190-1879-1455-6086-1347-9568
-  - 1190-1241-7911-0997-9863-6088
-  - 1190-1458-4325-3338-8670-6344
-  - 1190-1873-3397-4707-7986-8358
-  - 1190-1595-5747-6487-0439-7756
-  - 1190-1108-2038-1699-1683-9229
-  - 1190-1643-8998-8804-1455-4850
-  unlockBallEarn: 0
-  unlockBallScore: 0
-  unlockBallSpare: 0
   bowler: []
   r_hs: []
   w_hs: []

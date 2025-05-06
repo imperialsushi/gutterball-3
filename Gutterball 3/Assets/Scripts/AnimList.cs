@@ -19,7 +19,6 @@ public class AnimList : MonoBehaviour
 
     private SpriteRenderer[] renderers;
 	private float stompTime;
-	private float animTime;
 	private int animIndex;
 	private int spriteIndex = 1;
     private bool isStompAnim;
@@ -32,15 +31,10 @@ public class AnimList : MonoBehaviour
 	
 	void Update ()
 	{
-        animTime += Time.deltaTime * 2;
-        if (animTime > 0.03f)
-        {
-            animTime = 0;
-            spriteIndex++;
-        }
+        spriteIndex++;
         if (isStompAnim)
         {
-            stompTime -= 30 * Time.deltaTime;
+            stompTime -= 15 * Time.deltaTime;
         }
         if (stompTime < 0 && isStompAnim)
         {
@@ -73,7 +67,6 @@ public class AnimList : MonoBehaviour
 
     public void PlayAnim(int playIndex, float fallGravity)
     {
-        animTime = 0;
         animIndex = playIndex;
         stompTime = fallGravity * 0.25f;
         spriteIndex = 1;

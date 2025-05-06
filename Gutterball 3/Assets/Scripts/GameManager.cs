@@ -8,23 +8,15 @@ using UnityEngine.UI;
 //Skunk Studios by Upload to Github
 public class GameManager : MonoBehaviour
 {
-    public enum PinMode { Tenpin, Spare, Duckpin, Candlepin }
+    public enum PinMode { Tenpin, Spare }
     public static PinMode pinMode;
     public enum Alley { Retro, Zen, Jungle, Iceberg, Wacky, Mineshaft, Barnyard, Cosmic }
     public static Alley chooseAlleys;
-    public static Alley alleyLockType;
     public int[] isLockAlleys = new int[8];
     public string[] nameAlleys = new string[8];
     public Sprite[] spriteAlleys = new Sprite[8];
     public string[] AlleyNames { get { return nameAlleys; } }
 
-    public enum Players { OnePlayer, TwoPlayer, ThreePlayer, FourPlayer, Computer }
-    public static Players allPlayers;
-    public enum GameState { Menu, Intro, Game, Replay, EndGame }
-    public static GameState type;
-    public enum Commentators { Baxter, Maria, Natasha, Jensen, Master }
-    public static Commentators voices1;
-    public static Commentators voices2;
     public ChooseBall[] chooseBalls;
     public CompuObj[] compuObj = new CompuObj[17];
     public static bool isMusic = true;
@@ -37,28 +29,28 @@ public class GameManager : MonoBehaviour
     public static bool isWeather = true;
     public static bool isShake = true;
     public static bool isHighScore = false;
-    public int qualityIndex;
-    public int resolutionIndex;
+    public static int qualityIndex;
+    public static int resolutionIndex;
     public int lockRegistered;
     public List<string> urlInfoScreen = new List<string>();
     public static bool isOpening = true;
-    public int chooseBallIndex = 0;
-    public int turnBalls1 = 0;
-    public int turnBalls2 = 0;
-    public int turnBalls3 = 0;
-    public int turnBalls4 = 0;
-    public int turnBallsCPU = 0;
-    public int turnNameIndex1;
-    public int turnNameIndex2;
-    public int turnNameIndex3;
-    public int turnNameIndex4;
+    public static int startBall = 0;
+    public static int chooseBallIndex = 0;
+    public static int turnBalls1 = 0;
+    public static int turnBalls2 = 0;
+    public static int turnBalls3 = 0;
+    public static int turnBalls4 = 0;
+    public static int turnBallsCPU = 0;
+    public static int turnNameIndex1;
+    public static int turnNameIndex2;
+    public static int turnNameIndex3;
+    public static int turnNameIndex4;
     public static Resolution[] resolutions;
     public Material lockBallMat;
-    public string[] serialKeys = new string[13];
     public static int unlockRegister;
-    public int unlockBallEarn;
-    public int unlockBallScore;
-    public int unlockBallSpare;
+    public static int unlockBallEarn;
+    public static int unlockBallScore;
+    public static int unlockBallSpare;
     public List<PlayerObj> bowler = new List<PlayerObj>();
     public List<ScoreBowler> r_hs = new List<ScoreBowler>();
     public List<ScoreBowler> w_hs = new List<ScoreBowler>();
@@ -68,6 +60,10 @@ public class GameManager : MonoBehaviour
     public List<ScoreBowler> c_hs = new List<ScoreBowler>();
     public List<ScoreBowler> b_hs = new List<ScoreBowler>();
     public List<ScoreBowler> m_hs = new List<ScoreBowler>();
+    public static int moneys;
+    public static int bombBalls;
+    public static int hyperBalls;
+    public static int lightningBalls;
 
     private static GameManager instance;
 
@@ -153,6 +149,10 @@ public class GameManager : MonoBehaviour
         }
         chooseAlleys = (Alley)PlayerPrefs.GetInt("ChooseAlleys");
         pinMode = (PinMode)PlayerPrefs.GetInt("PinModes");
+        moneys = PlayerPrefs.GetInt("SaveMoney", 5000);
+        bombBalls = PlayerPrefs.GetInt("SaveBomb", 3);
+        hyperBalls = PlayerPrefs.GetInt("SaveHyper", 3);
+        lightningBalls = PlayerPrefs.GetInt("SaveLightning", 3);
     }
 
     public IEnumerator DownloadTexture(string MediaUrl, Material ballMat)

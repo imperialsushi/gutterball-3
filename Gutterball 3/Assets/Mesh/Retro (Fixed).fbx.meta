@@ -1,9 +1,7 @@
 fileFormatVersion: 2
 guid: f374b23d66187944cbda3da517665ae7
-timeCreated: 1720166789
-licenseType: Pro
 ModelImporter:
-  serializedVersion: 22
+  serializedVersion: 23
   fileIDToRecycleName:
     100000: ALLEYframe2Ceiling
     100002: ALLEYframe2Ceiling_001
@@ -60,6 +58,7 @@ ModelImporter:
     100104: //RootNode
     100106: returnchannelr
     100108: scooper_001
+    100110: pin01
     400000: ALLEYframe2Ceiling
     400002: ALLEYframe2Ceiling_001
     400004: ALLEYframe2Ceiling_002
@@ -115,6 +114,7 @@ ModelImporter:
     400104: //RootNode
     400106: returnchannelr
     400108: scooper_001
+    400110: pin01
     2100000: No Name
     2100002: GutterBallLogoSign_001
     2100004: wallNEW
@@ -177,6 +177,7 @@ ModelImporter:
     2300102: pinlightsretroholder
     2300104: returnchannelr
     2300106: scooper_001
+    2300108: pin01
     3300000: ALLEYframe2Ceiling
     3300002: ALLEYframe2Ceiling_001
     3300004: ALLEYframe2Ceiling_002
@@ -231,6 +232,7 @@ ModelImporter:
     3300102: pinlightsretroholder
     3300104: returnchannelr
     3300106: scooper_001
+    3300108: pin01
     4300000: ALLEYframe2Ceiling
     4300002: ALLEYframe2Ceiling_001
     4300004: ALLEYframe2Ceiling_002
@@ -285,6 +287,7 @@ ModelImporter:
     4300102: pinlightsretroholder
     4300104: returnchannelr
     4300106: scooper_001
+    4300108: pin01
   externalObjects: {}
   materials:
     importMaterials: 1
@@ -304,6 +307,7 @@ ModelImporter:
     animationRetargetingWarnings: 
     animationDoRetargetingWarnings: 0
     importAnimatedCustomProperties: 0
+    importConstraints: 0
     animationCompression: 1
     animationRotationError: 0.5
     animationPositionError: 0.5
@@ -318,6 +322,7 @@ ModelImporter:
     globalScale: 1
     meshCompression: 0
     addColliders: 0
+    useSRGBMaterialColor: 1
     importVisibility: 1
     importBlendShapes: 1
     importCameras: 1
@@ -335,11 +340,16 @@ ModelImporter:
     secondaryUVHardAngle: 88
     secondaryUVPackMargin: 4
     useFileScale: 1
+    previousCalculatedGlobalScale: 1
+    hasPreviousCalculatedGlobalScale: 0
   tangentSpace:
     normalSmoothAngle: 60
     normalImportMode: 0
     tangentImportMode: 3
     normalCalculationMode: 4
+    legacyComputeAllNormalsFromSmoothingGroupsWhenMeshHasBlendShapes: 1
+    blendShapeNormalImportMode: 1
+    normalSmoothingSource: 0
   importAnimation: 1
   copyAvatar: 0
   humanDescription:
@@ -354,7 +364,6 @@ ModelImporter:
     legStretch: 0.05
     feetSpacing: 0
     rootMotionBoneName: 
-    rootMotionBoneRotation: {x: 0, y: 0, z: 0, w: 1}
     hasTranslationDoF: 0
     hasExtraRoot: 0
     skeletonHasParents: 1

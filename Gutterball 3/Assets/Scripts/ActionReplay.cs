@@ -27,7 +27,10 @@ public class ActionReplay : MonoBehaviour
 
     public void RigidBodyCollider(bool isCollider)
     {
-        GetComponent<Collider>().enabled = isCollider;
+        foreach (Collider collider in GetComponents<Collider>())
+        {
+            collider.enabled = isCollider;
+        }
     }
 
     public void RigidBodyFreeze(bool isFreeze)

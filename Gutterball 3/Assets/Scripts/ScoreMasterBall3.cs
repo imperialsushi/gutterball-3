@@ -30,9 +30,9 @@ public static class ScoreMasterBall3
         {
             if (frames.Count == 10) { break; }              // Prevents 11th frame score
 
-            if (rolls[i - 1] + rolls[i] + rolls[i + 1] < 10)
+            if (rolls[i - 1] + rolls[i] < 10)
             {               // Normal "OPEN" frame
-                frames.Add(rolls[i - 1] + rolls[i] + rolls[i + 1]);
+                frames.Add(rolls[i - 1] + rolls[i]);
             }
 
             if (rolls.Count - i <= 1) { break; }                // Ensure at least 1 look-ahead available

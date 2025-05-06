@@ -33,8 +33,8 @@ public class Monkey : MonoBehaviour
         monkeyBall.transform.localScale = ball.localScale;
         if (isJump)
         {
-            transform.Translate(fall.x * Time.deltaTime, fall.y * 30 * Time.deltaTime, 0, Space.World);
-            fall.y -= 120 * Time.deltaTime;
+            transform.Translate(fall.x * Time.deltaTime, fall.y * 10 * Time.deltaTime, 0, Space.World);
+            fall.y -= 40 * Time.deltaTime;
         }
         if (isJump && transform.position.y < position.y)
         {
@@ -70,7 +70,7 @@ public class Monkey : MonoBehaviour
         }
         if (isJumpOut && transform.position.z <= -3000)
         {
-            JumpOut(45);
+            JumpOut(50);
         }
     }
 
@@ -80,8 +80,7 @@ public class Monkey : MonoBehaviour
         monkeyBall.SetActive(false);
         transform.position = new Vector3(ball.position.x, ball.position.y + 40, ball.position.z);
         animList.PlayAnim(6, jump);
-        fall.x = Random.Range(-600, 600);
-        fall.y = jump;
+        fall = new Vector3(Random.Range(-300, 300), jump, 50);
         isJump = true;
         isJumpOut = false;
     }
@@ -94,8 +93,7 @@ public class Monkey : MonoBehaviour
             {
                 animList.PlayAnim(6, jump);
             }
-            fall.x = 0;
-            fall.y = jump;
+            fall = new Vector3(0, jump, 0);
             isJump = true;
         }
     }
@@ -168,7 +166,7 @@ public class Monkey : MonoBehaviour
     {
         if (other.CompareTag("Ball"))
         {
-            if (ball.GetComponent<Rigidbody>().velocity.sqrMagnitude > 900000)
+            if (ball.GetComponent<Rigidbody>().velocity.sqrMagnitude > 320000)
             {
                 isRoll = true;
             }
@@ -202,14 +200,14 @@ public class Monkey : MonoBehaviour
     public IEnumerator MonkeyAnimTime()
     {
         isAnim = true;
-        yield return new WaitForSeconds(Random.Range(1, 10));
+        yield return new WaitForSeconds(Random.Range(3, 30));
         while (true)
         {
             if (!isJump && !isJumpOut && isAnim)
             {
                 RandomMonkey();
             }
-            yield return new WaitForSeconds(Random.Range(1, 10));
+            yield return new WaitForSeconds(Random.Range(3, 30));
         }
     }
 }
