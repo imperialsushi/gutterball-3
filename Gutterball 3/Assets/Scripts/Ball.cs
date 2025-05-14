@@ -590,7 +590,7 @@ public class Ball : MonoBehaviour
         }
         else if (speed > 60)
         {
-            rigidBody.AddForce(Vector3.forward * -speed * 12000);
+            rigidBody.AddForce(Vector3.forward * -speed * 10000);
         }
         if (transform.position.x < GameObject.FindObjectOfType<PinSetter>().ballPos.x)
         {

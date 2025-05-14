@@ -2596,6 +2596,7 @@ public class Game : MonoBehaviour
             if (pinCounts == 5 && PinCounter.pinCount > 0 && type == GameState.Replay || pinCounts == 6 && PinCounter.pinCount > 0 && type == GameState.Replay || pinCounts == 7 && PinCounter.pinCount > 0 && type == GameState.Replay || pinCounts == 8 && PinCounter.pinCount > 0 && type == GameState.Replay || pinCounts == 9 && PinCounter.pinCount > 0 && type == GameState.Replay || pinCounts == 10 && PinCounter.pinCount > 0 && type == GameState.Replay)
             {
                 VoiceMost();
+                crowdAudio.Stop();
                 if (pinCounts == 5 || pinCounts == 6)
                 {
                     if (GameManager.isVoice || crowdType > Crowds.NoCrowd)
@@ -2743,7 +2744,6 @@ public class Game : MonoBehaviour
         if (GameManager.isVoice && type != GameState.Menu && maxBalls != 1)
         {
             commentator.Most(commentatorAudio);
-            crowdAudio.Stop();
             commentatorIndex = 1;
             commentatorAudio.Play();
         }
@@ -3349,7 +3349,7 @@ public class Game : MonoBehaviour
                     gameManager.bowler[GameManager.turnNameIndex3].playerWin++;
                     gameManager.bowler[GameManager.turnNameIndex4].playerLoss++;
                 }
-                else if (score1 < score4 && score4 < score2 && score4 < score3)
+                else if (score1 < score4 && score2 < score4 && score3 < score4)
                 {
                     winGameBalls[3].SetActive(true);
                     wins = 4;
@@ -3392,7 +3392,7 @@ public class Game : MonoBehaviour
                     gameManager.bowler[GameManager.turnNameIndex3].playerLoss++;
                     gameManager.bowler[GameManager.turnNameIndex4].playerWin++;
                 }
-                else if (score1 < score2 && score2 == score3 && score1 < score2)
+                else if (score1 < score2 && score2 == score3 && score4 < score2)
                 {
                     winGameBalls[9].SetActive(true);
                     wins = 2;
