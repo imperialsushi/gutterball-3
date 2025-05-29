@@ -75,6 +75,7 @@ public class Game : MonoBehaviour
     private int wins = 1;
     private int stage = 1;
     private int spareBalls = 5;
+    private int spareCombos = 1;
 
     public GameObject[] alleys = new GameObject[8];
     public GameObject[] alleyScores = new GameObject[8];
@@ -434,7 +435,7 @@ public class Game : MonoBehaviour
             StartChargeBalls();
             opening.Play();
         }
-        if (!music.isPlaying && !GameManager.isOpening && type == GameState.Menu)
+        if (!music.isPlaying && GameManager.isMusic && !GameManager.isOpening && type == GameState.Menu)
         {
             music.clip = Resources.Load<AudioClip>("Music/menu");
             music.Play();
@@ -618,7 +619,7 @@ public class Game : MonoBehaviour
         winBallRender4.material = gameManager.chooseBalls[GameManager.turnBalls4].ballMat;
         winBallRenderCPU.material = gameManager.chooseBalls[gameManager.compuObj[GameManager.turnBallsCPU].cpuIndex].ballMat;
         AlleyRegister();
-        if (GameManager.isOpening && opening.time >= 14)
+        if (GameManager.isMusic && GameManager.isOpening && opening.time >= 14)
         {
             music.Play();
             GameManager.isOpening = false;
@@ -1236,8 +1237,11 @@ public class Game : MonoBehaviour
             }
             if (crowdType == Crowds.Firework)
             {
-                winCrowd.Play();
-                fireworksMulti.Play();
+                if (GameManager.isCrowd)
+                {
+                    winCrowd.Play();
+                    fireworksMulti.Play();
+                }
             }
             commentatorIndex = 0;
         }
@@ -1792,11 +1796,31 @@ public class Game : MonoBehaviour
             {
                 CrowdCrap();
                 spareBalls--;
+                if (spareCombos == 1)
+                {
+                    hintCount++;
+                }
+                spareCombos = 1;
+                if (hintCount == 2 || hintCount == 3 || hintCount == 5)
+                {
+                    gutterHintUI.SetActive(true);
+                    foreach (GameObject scoreCardUI in falseScoreCardsUI)
+                    {
+                        scoreCardUI.SetActive(false);
+                    }
+                }
+                else if (hintCount == 6)
+                {
+                    hintCount = 4;
+                }
             }
             else
             {
                 CheerMed();
                 stage++;
+                addCash += 10 * spareCombos;
+                spareCombos++;
+                hintCount = 0;
             }
             if (spareBalls < 0)
             {
@@ -2477,28 +2501,28 @@ public class Game : MonoBehaviour
                     }
                 }
             }
-        }
-        if (pinFall == 0 && !isComputer)
-        {
-            hintCount++;
-            if (hintCount == 2 || hintCount == 3 || hintCount == 5)
+            if (pinFall == 0 && !isComputer)
             {
-                gutterHintUI.SetActive(true);
-                foreach (GameObject scoreCardUI in falseScoreCardsUI)
+                hintCount++;
+                if (hintCount == 2 || hintCount == 3 || hintCount == 5)
                 {
-                    scoreCardUI.SetActive(false);
+                    gutterHintUI.SetActive(true);
+                    foreach (GameObject scoreCardUI in falseScoreCardsUI)
+                    {
+                        scoreCardUI.SetActive(false);
+                    }
+                }
+                else if (hintCount == 6)
+                {
+                    hintCount = 4;
                 }
             }
-            else if (hintCount == 6)
+            else if (pinFall != 0)
             {
-                hintCount = 4;
+                hintCount = 0;
             }
+            pinCounts = pinFall;
         }
-        else if (pinFall != 0)
-        {
-            hintCount = 0;
-        }
-        pinCounts = pinFall;
         if (throwBall == 1)
         {
             if (isSplit)
@@ -4934,7 +4958,10 @@ public class Game : MonoBehaviour
         if (GameManager.isOpening)
         {
             opening.Stop();
-            music.Play();
+            if (GameManager.isMusic)
+            {
+                music.Play();
+            }
             GameManager.isOpening = false;
         }
     }

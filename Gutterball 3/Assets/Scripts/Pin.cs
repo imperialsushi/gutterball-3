@@ -23,10 +23,6 @@ public class Pin : MonoBehaviour
     void Start ()
 	{
         pinStartPos = transform.position;
-        transform.position = pinStartPos;
-        transform.rotation = Quaternion.identity;
-        GetComponent<Rigidbody>().velocity = Vector3.zero;
-        GetComponent<Rigidbody>().angularVelocity = Vector3.zero;
         GetComponent<Rigidbody>().Sleep();
         ball = GameObject.FindObjectOfType<Ball>();
         isSplash = GameObject.FindObjectOfType<PinSetter>().isSplash;
